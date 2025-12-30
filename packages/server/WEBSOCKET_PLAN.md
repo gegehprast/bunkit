@@ -1,0 +1,680 @@
+# WebSocket Implementation Plan
+
+## Overview
+
+Add type-safe WebSocket support to `@bunkit/server` with automatic message validation, connection management, and integration with existing authentication/middleware systems.
+
+## Core Principles
+
+1. **Type Safety** - Full TypeScript inference for messages and handlers
+2. **Zod Validation** - Message schemas validated with Zod
+3. **Builder Pattern** - Consistent with HTTP route API
+4. **Bun Native** - Use `Bun.serve` WebSocket capabilities
+5. **Integration** - Share auth/middleware with HTTP routes
+
+## Design Decisions
+
+### 1. Route Definition API
+
+**Decision: Separate WebSocket Routes** ✅
+
+WebSocket routes are completely separate from HTTP routes for clearer separation and simpler understanding.
+
+```typescript
+createWebSocketRoute("/api/chat")
+  .authenticate(authMiddleware)
+  .onConnect((ws, ctx) => {})
+  .on("message", MessageSchema, (ws, data, ctx) => {})
+  .onClose((ws, code, reason) => {})
+```
+
+### 2. Message Handling
+
+**Decision: Multiple Typed Handlers** ✅
+
+Each message type has its own handler with dedicated schema and type inference.
+
+```typescript
+const PingSchema = z.object({ timestamp: z.number() })
+const ChatSchema = z.object({ text: z.string() })
+
+createWebSocketRoute("/api/chat")
+  .on("ping", PingSchema, (ws, data, ctx) => {
+    // data is typed as { timestamp: number }
+    ws.send({ type: "pong", timestamp: Date.now() })
+  })
+  .on("chat", ChatSchema, (ws, data, ctx) => {
+    // data is typed as { text: string }
+    ws.publish("room:general", { type: "message", text: data.text })
+  })
+```
+
+### 3. Connection State Management
+
+**Per-Connection State:**
+```typescript
+interface WebSocketContext<TUser = unknown> {
+  connectionId: string
+  connectedAt: Date
+  user?: TUser  // From auth middleware
+  data: Map<string, unknown>  // Custom state
+}
+
+createWebSocketRoute("/api/chat")
+  .authenticate(authMiddleware)  // Sets ctx.user
+  .onConnect((ws, ctx) => {
+    ctx.data.set("room", "general")
+  })
+```
+
+### 4. Room/Channel Management
+
+**Decision: Use Bun's Native Pub/Sub** ✅
+
+No built-in room manager. Use Bun's native `subscribe`/`publish` for topics.
+
+```typescript
+createWebSocketRoute("/api/chat")
+  .onConnect((ws, ctx) => {
+    // Subscribe to topics using Bun's native pub/sub
+    ws.subscribe("room:general")
+    ws.subscribe(`user:${ctx.user.id}`)
+  })
+  .on("message", MessageSchema, (ws, data, ctx) => {
+    // Publish to all subscribers of a topic
+    ws.publish("room:general", {
+      type: "message",
+      text: data.text,
+      user: ctx.user.name,
+    })
+  })
+```
+
+Users can build their own room managers on top if needed.
+
+### 5. Authentication
+
+**Decision: Reuse HTTP Middleware** ✅
+
+Authentication works the same as HTTP routes.
+
+**Bearer Token Example:**
+```typescript
+createWebSocketRoute("/api/chat")
+  .authenticate(authMiddleware)  // Checks token on upgrade
+  .onConnect((ws, ctx) => {
+    console.log("User connected:", ctx.user)
+  })
+```
+
+**Query Parameter Token:**
+```typescript
+createWebSocketRoute("/api/chat")
+  .authenticate((req, ctx) => {
+    const token = new URL(req.url).searchParams.get("token")
+    // Validate token, set ctx.user
+  })
+```
+
+### 6. Error Handling
+
+**Decision: Validation + Handler Errors** ✅
+
+```typescript
+createWebSocketRoute("/api/chat")
+  .on("chat", ChatSchema, (ws, data, ctx) => {
+    // Validated message - schema already checked
+  })
+  .onError((ws, error, ctx) => {
+    // Handle validation and handler errors
+    ws.send({ type: "error", message: error.message })
+  })
+```
+
+**Error Handling Strategy:**
+- Invalid upgrade request → Reject with HTTP error (before WebSocket upgrade)
+- Validation failure → Send error message via `onError`, optionally close
+- Handler exception → Log, send error via `onError`, close connection
+
+## Proposed API
+
+### Basic Example
+
+```typescript
+import { createWebSocketRoute } from "@bunkit/server"
+import { z } from "zod"
+
+// Define message schemas
+const ChatMessageSchema = z.object({
+  text: z.string().min(1).max(500),
+  room: z.string().optional(),
+})
+
+const PingSchema = z.object({
+  timestamp: z.number(),
+})
+
+// Create WebSocket route
+createWebSocketRoute("/api/chat")
+  .authenticate(authMiddleware)
+  .onConnect(async (ws, ctx) => {
+    console.log(`User ${ctx.user.id} connected`)
+    ws.data.room = "general"
+  })
+  .on("chat", ChatMessageSchema, async (ws, data, ctx) => {
+    // Type-safe: data is inferred as { text: string, room?: string }
+    const room = data.room ?? ws.data.room
+    await saveMessage(ctx.user.id, data.text, room)
+    
+    // Broadcast to all connections
+    ws.publish(room, {
+      type: "message",
+      user: ctx.user.name,
+      text: data.text,
+    })
+  })
+  .on("ping", PingSchema, (ws, data, ctx) => {
+    ws.send({ type: "pong", timestamp: Date.now() })
+  })
+  .onClose((ws, code, reason, ctx) => {
+    console.log(`User ${ctx.user.id} disconnected`)
+  })
+  .onError((ws, error, ctx) => {
+    console.error("WebSocket error:", error)
+  })
+```
+
+### Binary Messages
+
+```typescript
+import { z } from "zod"
+
+createWebSocketRoute("/stream")
+  .onConnect((ws, ctx) => {
+    console.log("Stream connection established")
+  })
+  // Handle JSON messages
+  .on("command", CommandSchema, (ws, data, ctx) => {
+    console.log("Received command:", data.type)
+  })
+  // Handle binary data
+  .onBinary((ws, buffer, ctx) => {
+    console.log(`Received ${buffer.byteLength} bytes`)
+    // Process binary data (images, video, etc.)
+    processBuffer(buffer)
+  })
+```
+
+### Backpressure Handling
+
+```typescript
+import { z } from "zod"
+
+const UpdateSchema = z.object({ value: z.number() })
+
+createWebSocketRoute("/live-data")
+  .on("subscribe", SubscribeSchema, async (ws, data, ctx) => {
+    // Check backpressure before sending large amounts of data
+    const sendUpdate = (update: unknown) => {
+      const buffered = ws.getBufferedAmount()
+      
+      // Skip update if buffer is too full (drop strategy)
+      if (buffered > 1024 * 1024) { // 1MB threshold
+        console.warn(`Skipping update, buffer: ${buffered} bytes`)
+        return
+      }
+      
+      ws.send({ type: "update", data: update })
+    }
+    
+    // Use in interval/stream
+    const interval = setInterval(() => {
+      const update = getLatestData()
+      sendUpdate(update)
+    }, 100)
+    
+    ctx.data.set("interval", interval)
+  })
+  .onClose((ws, code, reason, ctx) => {
+    const interval = ctx.data.get("interval") as NodeJS.Timeout
+    clearInterval(interval)
+  })
+```
+
+### Advanced: Typed Messages (Both Directions)
+
+```typescript
+// Client -> Server messages
+type ClientMessage = 
+  | { type: "chat", text: string }
+  | { type: "ping", timestamp: number }
+  | { type: "join", room: string }
+
+// Server -> Client messages
+type ServerMessage =
+  | { type: "message", user: string, text: string }
+  | { type: "pong", timestamp: number }
+  | { type: "joined", room: string }
+  | { type: "error", message: string }
+
+createWebSocketRoute("/api/chat")
+  .clientMessages<ClientMessage>()
+  .serverMessages<ServerMessage>()
+  .on("chat", ChatSchema, (ws, data) => {
+    ws.send({ type: "message", user: "John", text: data.text }) // ✅ Type-safe
+    ws.send({ type: "invalid", foo: "bar" }) // ❌ Type error
+  })
+```
+
+## Implementation Structure
+
+```
+src/
+├── websocket.ts                    # Main WebSocket exports
+├── websocket-route-builder.ts     # WebSocket route builder
+├── websocket-registry.ts           # WebSocket route registry
+├── websocket-handler.ts            # Connection/message handling
+├── websocket-context.ts            # Connection context type
+└── types/
+    └── websocket.ts                # WebSocket types
+```
+
+## Type System
+
+```typescript
+// Core WebSocket context
+interface WebSocketContext<TUser = unknown> {
+  connectionId: string
+  connectedAt: Date
+  user?: TUser
+  data: Map<string, unknown>
+}
+
+// Enhanced WebSocket with context
+interface TypedWebSocket<TServerMsg = unknown> extends ServerWebSocket {
+  data: WebSocketContext
+  send(message: TServerMsg): void
+  publish(topic: string, message: TServerMsg): void
+}
+
+// Message handler type
+type MessageHandler<TData, TUser = unknown, TServerMsg = unknown> = (
+  ws: TypedWebSocket<TServerMsg>,
+  data: TData,
+  ctx: WebSocketContext<TUser>,
+) => Promise<void> | void
+
+// Lifecycle handlers
+type ConnectHandler<TUser = unknown> = (
+  ws: TypedWebSocket,
+  ctx: WebSocketContext<TUser>,
+) => Promise<void> | void
+
+type CloseHandler<TUser = unknown> = (
+  ws: TypedWebSocket,
+  code: number,
+  reason: string,
+  ctx: WebSocketContext<TUser>,
+) => Promise<void> | void
+```
+
+## Integration with HTTP Server
+
+**Server Options:**
+```typescript
+interface ServerOptions {
+  // ... existing HTTP options
+  websocket?: {
+    maxPayloadLength?: number      // Default: 16MB
+    idleTimeout?: number            // Default: 120s
+    compression?: boolean           // Default: true (perMessageDeflate)
+    backpressureLimit?: number      // Default: 16MB
+  }
+}
+
+const server = createServer({
+  port: 3000,
+  websocket: {
+    maxPayloadLength: 1024 * 1024,  // 1MB
+    idleTimeout: 120,                // 2 minutes
+    compression: true,               // Enable compression (default)
+  }
+})
+```
+
+**Route Registration:**
+```typescript
+// HTTP routes
+import './routes/api.routes'
+
+// WebSocket routes
+import './routes/chat.websocket'
+
+// Server automatically handles both
+await server.start()
+```
+
+## Message Protocol
+
+**Standardized Message Format:**
+```typescript
+// Client -> Server
+{
+  type: string,      // Message type/event name
+  data: unknown,     // Payload (validated by schema)
+  id?: string,       // Optional request ID for RPC pattern
+}
+
+// Server -> Client
+{
+  type: string,
+  data: unknown,
+  id?: string,       // Echo request ID for responses
+  error?: string,    // Error message if validation failed
+}
+```
+
+**Example:**
+```typescript
+// Client sends
+{ type: "chat", data: { text: "Hello!" } }
+
+// Server validates, processes, broadcasts
+{ type: "message", data: { user: "John", text: "Hello!" } }
+
+// Validation error
+{ type: "error", error: "Invalid message: text is required" }
+```
+
+## Implementation Phases
+
+### Phase 1: Core Infrastructure (MVP)
+- WebSocket route builder with `.on()` pattern
+- Route registry for WebSocket
+- Basic connection handling (connect, message, close, error)
+- Message dispatch system
+
+### Phase 2: Validation & Type Safety (MVP)
+- Zod schema validation for messages
+- Type inference for handlers
+- Error handling for validation failures
+- Standardized error messages
+
+### Phase 3: Authentication & Context (MVP)
+- Auth middleware support (reuse HTTP middleware)
+- Connection context management
+- User identification
+- Path parameter extraction (like `/chat/:room`)
+
+### Phase 4: External Broadcasting
+- Server.publish() for topic-based messaging
+- WebSocketRegistry for connection iteration/filtering
+- Examples of background task integration
+
+### Phase 5: Advanced Features (Post-MVP)
+- Binary message support with `.onBinary(handler)`
+- Compression configuration (enabled by default)
+- Rate limiting per connection
+- Heartbeat/ping-pong automatic
+- Backpressure utilities and documentation
+
+### Phase 6: Multi-Server Support (Future)
+- Redis pub/sub adapter for horizontal scaling
+- Shared state across server instances
+
+## Broadcasting from Outside Routes
+
+**Use Case:** Background jobs, scheduled tasks, or services that need to push updates to connected clients.
+
+### Option A: Server-Level Publish
+
+```typescript
+// main.ts
+const server = createServer({
+  port: 3000,
+})
+
+// WebSocket route subscribes to topics
+createWebSocketRoute("/notifications")
+  .authenticate(authMiddleware)
+  .onConnect((ws, ctx) => {
+    ws.subscribe(`user:${ctx.user.id}`)
+  })
+
+await server.start()
+
+// Later, from a background service
+import { server } from './main'
+
+// Background job
+setInterval(async () => {
+  const notifications = await checkNewNotifications()
+  
+  for (const notif of notifications) {
+    // Publish to specific user's topic
+    server.publish(`user:${notif.userId}`, {
+      type: "notification",
+      data: notif,
+    })
+  }
+}, 5000)
+```
+
+### Option B: Global WebSocket Registry
+
+```typescript
+// Background service can access all connections
+import { webSocketRegistry } from "@bunkit/server"
+
+setInterval(async () => {
+  const systemStatus = await getSystemStatus()
+  
+  // Broadcast to all connections
+  webSocketRegistry.broadcast({
+    type: "system_status",
+    data: systemStatus,
+  })
+  
+  // Or filter connections
+  const adminConnections = webSocketRegistry.filter(
+    (ws) => ws.data.user?.role === "admin"
+  )
+  
+  for (const ws of adminConnections) {
+    ws.send({
+      type: "admin_alert",
+      data: { message: "System maintenance in 5 minutes" },
+    })
+  }
+}, 10000)
+```
+
+### Option C: Event Emitter Pattern
+
+```typescript
+// Create a global event bus
+import { EventEmitter } from "events"
+export const wsEvents = new EventEmitter()
+
+// WebSocket route listens to events
+createWebSocketRoute("/updates")
+  .onConnect((ws, ctx) => {
+    const handler = (data: unknown) => {
+      ws.send({ type: "update", data })
+    }
+    
+    wsEvents.on(`user:${ctx.user.id}`, handler)
+    
+    ws.onClose(() => {
+      wsEvents.off(`user:${ctx.user.id}`, handler)
+    })
+  })
+
+// Background service emits events
+import { wsEvents } from './events'
+
+setInterval(() => {
+  const data = { temperature: 25 }
+  wsEvents.emit(`user:123`, data) // Send to specific user
+}, 1000)
+```
+
+**Recommendation: Option A (Server Publish) + Option B (Registry for filtering)**
+
+This gives flexibility:
+- Use `server.publish(topic, data)` for pub/sub (most common)
+- Use `webSocketRegistry` when you need to filter/iterate connections
+
+### Implementation
+
+```typescript
+// Server exposes publish method
+interface Server {
+  // ... existing methods
+  publish(topic: string, message: unknown): void
+  publishBinary(topic: string, data: Buffer): void
+}
+
+// WebSocket registry for advanced use cases
+interface WebSocketRegistry {
+  getAll(): ServerWebSocket[]
+  filter(predicate: (ws: ServerWebSocket) => boolean): ServerWebSocket[]
+  broadcast(message: unknown): void
+  broadcastBinary(data: Buffer): void
+}
+
+// Usage in background service
+import { server, webSocketRegistry } from '@/server-instance'
+
+async function backgroundTask() {
+  const updates = await fetchUpdates()
+  
+  // Pub/sub approach (recommended)
+  for (const update of updates) {
+    server.publish(`topic:${update.category}`, {
+      type: "update",
+      data: update,
+    })
+  }
+  
+  // Direct approach when you need filtering
+  const premiumUsers = webSocketRegistry.filter(
+    ws => ws.data.user?.isPremium
+  )
+  
+  for (const ws of premiumUsers) {
+    ws.send({ type: "premium_feature", data: someData })
+  }
+}
+```
+
+## Decisions
+
+### 1. State Management
+**Decision:** Leave it to users to implement.
+- Framework won't include built-in Redis/multi-server support
+- Users can implement their own pub/sub adapters if needed
+- Keeps the core simple and flexible
+
+### 2. Compression
+**Decision:** Enable by default, make it configurable.
+- `perMessageDeflate: true` by default in Bun.serve
+- Users can disable via server options: `compression: false`
+- Reduces bandwidth for text-heavy messages
+
+### 3. Binary Messages
+**Decision:** Support Buffer messages with different handlers.
+- `.on(type, schema, handler)` for JSON/text messages
+- `.onBinary(handler)` for raw Buffer messages
+- Both can coexist in the same route
+
+### 4. Backpressure Handling
+**Decision:** Expose tools, let users handle it.
+- Expose `ws.getBufferedAmount()` for checking queue size
+- Document backpressure patterns in examples
+- No automatic buffering/dropping - users decide the strategy
+
+## Example Use Cases
+
+### Real-time Chat
+```typescript
+createWebSocketRoute("/chat/:room")
+  .authenticate(authMiddleware)
+  .onConnect((ws, ctx) => {
+    ws.subscribe(`room:${ctx.params.room}`)
+  })
+  .on("message", MessageSchema, (ws, data, ctx) => {
+    ws.publish(`room:${ctx.params.room}`, {
+      type: "message",
+      user: ctx.user.name,
+      text: data.text,
+    })
+  })
+```
+
+### Live Updates/Notifications
+```typescript
+createWebSocketRoute("/notifications")
+  .authenticate(authMiddleware)
+  .onConnect((ws, ctx) => {
+    ws.subscribe(`user:${ctx.user.id}`)
+  })
+  .on("markRead", MarkReadSchema, async (ws, data, ctx) => {
+    await markNotificationRead(data.id)
+  })
+```
+
+### Collaborative Editing
+```typescript
+createWebSocketRoute("/document/:docId")
+  .authenticate(authMiddleware)
+  .onConnect(async (ws, ctx) => {
+    const doc = await getDocument(ctx.params.docId)
+    ws.send({ type: "init", content: doc.content })
+    ws.subscribe(`doc:${ctx.params.docId}`)
+  })
+  .on("edit", EditSchema, (ws, data, ctx) => {
+    ws.publish(`doc:${ctx.params.docId}`, {
+      type: "edit",
+      userId: ctx.user.id,
+      changes: data.changes,
+    })
+  })
+```
+
+## Migration Path
+
+1. **Non-breaking Addition** - WebSocket routes are completely separate
+2. **Opt-in** - Users don't need to use WebSocket if they don't need it
+3. **Gradual Adoption** - Can add WebSocket routes alongside existing HTTP routes
+4. **Shared Infrastructure** - Reuse auth, middleware, error handling patterns
+
+## Next Steps
+
+1. Review and discuss this plan
+2. Decide on API design choices (Option A vs B for each decision point)
+3. Start with Phase 1 implementation
+4. Create examples and tests
+5. Document best practices
+
+## Design Decisions Summary
+
+1. **Message Handling:** Multiple Typed Handlers (`.on(type, schema, handler)`) ✅
+2. **Rooms/Channels:** External utility, use Bun's native subscribe/publish ✅
+3. **Broadcasting from Services:** `server.publish()` + `webSocketRegistry` ✅
+4. **State Management:** Users implement their own (no built-in Redis) ✅
+5. **Compression:** Enabled by default, configurable ✅
+6. **Binary Messages:** Support with separate `.onBinary(handler)` ✅
+7. **Backpressure:** Expose `getBufferedAmount()`, document patterns ✅
+8. **AsyncAPI Generation:** Skip for now ✅
+
+## Next Steps
+
+1. ✅ **Plan Complete** - All design decisions made
+2. 🚀 **Ready to Implement** - Start with Phase 1 (Core Infrastructure)
+3. 📝 **Implementation Order:**
+   - Phase 1-3: MVP (Core + Validation + Auth)
+   - Phase 4: External Broadcasting
+   - Phase 5: Advanced Features
+4. 🧪 **Create tests** alongside each phase
+5. 📚 **Document patterns** (especially backpressure handling)
