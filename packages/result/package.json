@@ -1,0 +1,10 @@
+{
+    "name": "@bunkit/result",
+    "version": "1.0.0",
+    "module": "./src/index.ts",
+    "type": "module",
+    "exports": "./src/index.ts",
+    "engines": {
+        "bun": ">=1.3.3"
+    }
+}
