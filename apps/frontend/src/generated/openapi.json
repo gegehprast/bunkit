@@ -15,11 +15,17 @@
           "General"
         ],
         "responses": {
-          "200": {
-            "description": "Success",
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
             "content": {
               "application/json": {
-                "schema": {}
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
               }
             }
           }
@@ -45,11 +51,17 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Success",
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
             "content": {
               "application/json": {
-                "schema": {}
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
               }
             }
           }
@@ -74,6 +86,20 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -87,11 +113,17 @@
           "Documentation"
         ],
         "responses": {
-          "200": {
-            "description": "Success",
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
             "content": {
               "application/json": {
-                "schema": {}
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
               }
             }
           }
@@ -107,11 +139,17 @@
           "Documentation"
         ],
         "responses": {
-          "200": {
-            "description": "Success",
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
             "content": {
               "application/json": {
-                "schema": {}
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
               }
             }
           }
@@ -142,6 +180,20 @@
                     "message"
                   ],
                   "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -200,6 +252,20 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -233,6 +299,28 @@
               }
             }
           },
+          "400": {
+            "description": "Bad Request - Invalid input or validation failed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Validation failed",
+                  "code": "BAD_REQUEST",
+                  "details": [
+                    {
+                      "path": [
+                        "email"
+                      ],
+                      "message": "Invalid email format"
+                    }
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Invalid credentials",
             "content": {
@@ -252,6 +340,20 @@
                     "code"
                   ],
                   "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -302,6 +404,20 @@
                     "code"
                   ],
                   "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -357,6 +473,56 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation failed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Validation failed",
+                  "code": "BAD_REQUEST",
+                  "details": [
+                    {
+                      "path": [
+                        "email"
+                      ],
+                      "message": "Invalid email format"
+                    }
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required or failed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Authentication required",
+                  "code": "UNAUTHORIZED"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -389,6 +555,56 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Todo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation failed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Validation failed",
+                  "code": "BAD_REQUEST",
+                  "details": [
+                    {
+                      "path": [
+                        "email"
+                      ],
+                      "message": "Invalid email format"
+                    }
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required or failed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Authentication required",
+                  "code": "UNAUTHORIZED"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -426,6 +642,34 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Todo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required or failed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Authentication required",
+                  "code": "UNAUTHORIZED"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -474,6 +718,56 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or validation failed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Validation failed",
+                  "code": "BAD_REQUEST",
+                  "details": [
+                    {
+                      "path": [
+                        "email"
+                      ],
+                      "message": "Invalid email format"
+                    }
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required or failed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Authentication required",
+                  "code": "UNAUTHORIZED"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -515,6 +809,34 @@
                     "message"
                   ],
                   "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Authentication required or failed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Authentication required",
+                  "code": "UNAUTHORIZED"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -634,7 +956,7 @@
             "const": "ok"
           },
           "timestamp": {
-            "example": "2025-12-30T15:47:56.110Z",
+            "example": "2025-12-30T16:44:16.607Z",
             "type": "string"
           },
           "uptime": {
@@ -757,11 +1079,11 @@
             "type": "boolean"
           },
           "createdAt": {
-            "example": "2025-12-30T15:47:56.137Z",
+            "example": "2025-12-30T16:44:16.639Z",
             "type": "string"
           },
           "updatedAt": {
-            "example": "2025-12-30T15:47:56.137Z",
+            "example": "2025-12-30T16:44:16.639Z",
             "type": "string"
           }
         },
@@ -773,6 +1095,27 @@
           "completed",
           "createdAt",
           "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "code": {
+            "description": "Error code",
+            "type": "string"
+          },
+          "details": {
+            "description": "Additional error details"
+          }
+        },
+        "required": [
+          "message",
+          "code"
         ],
         "additionalProperties": false
       }
