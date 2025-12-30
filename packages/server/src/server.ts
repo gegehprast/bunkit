@@ -29,7 +29,7 @@ export function createServer(options: ServerOptions = {}): Server {
 
   if (cors) {
     const corsMiddleware = createCorsMiddleware(cors)
-    middlewares.push(corsMiddleware as unknown as MiddlewareFn)
+    middlewares.push(corsMiddleware)
   }
 
   middlewares.push(...globalMiddlewares)

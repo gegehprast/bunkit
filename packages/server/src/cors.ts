@@ -1,13 +1,11 @@
 import type { CorsOptions } from "./types/cors"
+import type { MiddlewareFn } from "./types/middleware"
 
 /**
  * Create CORS middleware
  */
-export function createCorsMiddleware(options: CorsOptions) {
-  return async (context: {
-    req: Request
-    next: () => Promise<Response | undefined>
-  }): Promise<Response | undefined> => {
+export function createCorsMiddleware(options: CorsOptions): MiddlewareFn {
+  return async (context) => {
     const { req } = context
     const origin = req.headers.get("origin")
 
