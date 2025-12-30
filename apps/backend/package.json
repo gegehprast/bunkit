@@ -1,0 +1,33 @@
+{
+    "name": "@apps/backend",
+    "version": "0.0.1",
+    "module": "src/main.ts",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "bun --env-file=.env.local --hot src/main.ts",
+        "build": "bun run ./scripts/build.ts",
+        "start": "bun --env-file=.env src/main.ts",
+        "start:bundled": "bun --env-file=.env ./out/main.js",
+        "typecheck": "tsc --noEmit",
+        "db:generate": "drizzle-kit generate",
+        "db:migrate": "bun run ./scripts/migrate.ts",
+        "db:studio": "drizzle-kit studio",
+        "openapi:generate": "LOG_LEVEL=error bun run ./scripts/generate-openapi.ts"
+    },
+    "dependencies": {
+        "@bunkit/result": "workspace:*",
+        "drizzle-orm": "catalog:",
+        "zod": "catalog:",
+        "zod-openapi": "catalog:",
+        "jose": "catalog:"
+    },
+    "devDependencies": {
+        "@types/bun": "catalog:",
+        "drizzle-kit": "catalog:",
+        "postgres": "catalog:"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    }
+}

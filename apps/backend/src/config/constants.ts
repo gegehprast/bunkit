@@ -1,0 +1,125 @@
+/**
+ * Application-wide constants
+ */
+
+/**
+ * HTTP Status Codes
+ */
+export const HTTP_STATUS = {
+  // Success
+  OK: 200,
+  CREATED: 201,
+  ACCEPTED: 202,
+  NO_CONTENT: 204,
+
+  // Redirect
+  MOVED_PERMANENTLY: 301,
+  FOUND: 302,
+  NOT_MODIFIED: 304,
+
+  // Client Errors
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  METHOD_NOT_ALLOWED: 405,
+  CONFLICT: 409,
+  UNPROCESSABLE_ENTITY: 422,
+  TOO_MANY_REQUESTS: 429,
+
+  // Server Errors
+  INTERNAL_SERVER_ERROR: 500,
+  NOT_IMPLEMENTED: 501,
+  BAD_GATEWAY: 502,
+  SERVICE_UNAVAILABLE: 503,
+  GATEWAY_TIMEOUT: 504,
+} as const
+
+/**
+ * HTTP Methods
+ */
+export const HTTP_METHODS = {
+  GET: "GET",
+  POST: "POST",
+  PUT: "PUT",
+  DELETE: "DELETE",
+  PATCH: "PATCH",
+  OPTIONS: "OPTIONS",
+  HEAD: "HEAD",
+} as const
+
+export type HttpMethod = (typeof HTTP_METHODS)[keyof typeof HTTP_METHODS]
+
+/**
+ * Error Codes
+ */
+export const ERROR_CODES = {
+  // Authentication & Authorization
+  AUTH_REQUIRED: "AUTH_REQUIRED",
+  AUTH_INVALID: "AUTH_INVALID",
+  INVALID_CREDENTIALS: "INVALID_CREDENTIALS",
+  TOKEN_EXPIRED: "TOKEN_EXPIRED",
+  TOKEN_INVALID: "TOKEN_INVALID",
+  INSUFFICIENT_PERMISSIONS: "INSUFFICIENT_PERMISSIONS",
+  ACCOUNT_DISABLED: "ACCOUNT_DISABLED",
+  UNAUTHENTICATED: "UNAUTHENTICATED",
+  UNAUTHORIZED: "UNAUTHORIZED",
+  FORBIDDEN: "FORBIDDEN",
+
+  // Validation
+  BAD_REQUEST: "BAD_REQUEST",
+  VALIDATION_ERROR: "VALIDATION_ERROR",
+  INVALID_INPUT: "INVALID_INPUT",
+  MISSING_REQUIRED_FIELD: "MISSING_REQUIRED_FIELD",
+
+  // Resources
+  NOT_FOUND: "NOT_FOUND",
+  CONFLICT: "CONFLICT",
+  RESOURCE_NOT_FOUND: "RESOURCE_NOT_FOUND",
+  RESOURCE_ALREADY_EXISTS: "RESOURCE_ALREADY_EXISTS",
+  RESOURCE_CONFLICT: "RESOURCE_CONFLICT",
+
+  // Rate Limiting
+  RATE_LIMIT_EXCEEDED: "RATE_LIMIT_EXCEEDED",
+
+  // Server
+  INTERNAL_ERROR: "INTERNAL_ERROR",
+  SERVICE_UNAVAILABLE: "SERVICE_UNAVAILABLE",
+  DATABASE_ERROR: "DATABASE_ERROR",
+
+  // WebSocket
+  WS_MESSAGE_INVALID: "WS_MESSAGE_INVALID",
+  WS_HANDLER_NOT_FOUND: "WS_HANDLER_NOT_FOUND",
+  WS_RATE_LIMIT_EXCEEDED: "WS_RATE_LIMIT_EXCEEDED",
+
+  // Testing
+  TEST_ERROR: "TEST_ERROR",
+} as const
+
+export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES] & string
+
+/**
+ * API Response Headers
+ */
+export const HEADERS = {
+  CONTENT_TYPE: "Content-Type",
+  AUTHORIZATION: "Authorization",
+  X_REQUEST_ID: "X-Request-ID",
+  X_REQUESTED_WITH: "X-Requested-With",
+  X_RATE_LIMIT_LIMIT: "X-RateLimit-Limit",
+  X_RATE_LIMIT_REMAINING: "X-RateLimit-Remaining",
+  X_RATE_LIMIT_RESET: "X-RateLimit-Reset",
+  X_RESPONSE_TIME: "X-Response-Time",
+} as const
+
+/**
+ * Content Types
+ */
+export const CONTENT_TYPES = {
+  JSON: "application/json",
+  TEXT: "text/plain",
+  HTML: "text/html",
+  XML: "application/xml",
+  FORM: "application/x-www-form-urlencoded",
+  MULTIPART: "multipart/form-data",
+} as const

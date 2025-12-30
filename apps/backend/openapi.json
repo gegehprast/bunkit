@@ -1,0 +1,906 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "BunKit API",
+        "version": "0.0.1",
+        "description": "API documentation for BunKit - A modern HTTP and WebSocket backend built with Bun",
+        "contact": {
+            "name": "API Support"
+        },
+        "license": {
+            "name": "MIT"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3001",
+            "description": "Development server"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Static"
+        },
+        {
+            "name": "Documentation"
+        },
+        {
+            "name": "Health"
+        },
+        {
+            "name": "Authentication"
+        },
+        {
+            "name": "Todos"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "operationId": "getRoot",
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/public/{filename}": {
+            "get": {
+                "operationId": "getStaticFile",
+                "summary": "Get static file",
+                "tags": ["Static"],
+                "parameters": [
+                    {
+                        "name": "filename",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/openapi.json": {
+            "get": {
+                "operationId": "getOpenAPISpec",
+                "summary": "Get OpenAPI Specification",
+                "description": "Returns the complete OpenAPI 3.1.0 specification for this API",
+                "tags": ["Documentation"],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/docs": {
+            "get": {
+                "operationId": "getSwaggerUI",
+                "summary": "API Documentation UI",
+                "description": "Interactive Swagger UI for exploring and testing the API",
+                "tags": ["Documentation"],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/openapi/refresh": {
+            "post": {
+                "operationId": "refreshOpenAPISpec",
+                "summary": "Refresh OpenAPI Specification",
+                "description": "Clears the cache and regenerates the OpenAPI specification",
+                "tags": ["Documentation"],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/demo/users/{id}": {
+            "get": {
+                "operationId": "getDemoUsers",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/DemoUser"
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "timestamp": {
+                                                    "description": "Response timestamp in ISO 8601 format",
+                                                    "type": "string"
+                                                },
+                                                "requestId": {
+                                                    "description": "Unique request identifier for tracking",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": ["timestamp"],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": ["data"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "operationId": "healthCheck",
+                "summary": "Health check",
+                "description": "Check if the service is running",
+                "tags": ["Health"],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/ready": {
+            "get": {
+                "operationId": "readinessCheck",
+                "summary": "Readiness check",
+                "description": "Check if the service is ready to accept traffic",
+                "tags": ["Health"],
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "summary": "Register a new user",
+                "description": "Creates a new user account with email and password. Returns user info and JWT token.",
+                "tags": ["Authentication"],
+                "operationId": "postAuthRegister",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/AuthResponse"
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "timestamp": {
+                                                    "description": "Response timestamp in ISO 8601 format",
+                                                    "type": "string"
+                                                },
+                                                "requestId": {
+                                                    "description": "Unique request identifier for tracking",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": ["timestamp"],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": ["data"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "summary": "Login user",
+                "description": "Authenticates user with email and password. Returns user info and JWT token.",
+                "tags": ["Authentication"],
+                "operationId": "postAuthLogin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/AuthResponse"
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "timestamp": {
+                                                    "description": "Response timestamp in ISO 8601 format",
+                                                    "type": "string"
+                                                },
+                                                "requestId": {
+                                                    "description": "Unique request identifier for tracking",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": ["timestamp"],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": ["data"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "summary": "Get current user",
+                "description": "Returns information about the currently authenticated user. Requires valid JWT token.",
+                "tags": ["Authentication"],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "operationId": "getAuthMe",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UserResponse"
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "timestamp": {
+                                                    "description": "Response timestamp in ISO 8601 format",
+                                                    "type": "string"
+                                                },
+                                                "requestId": {
+                                                    "description": "Unique request identifier for tracking",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": ["timestamp"],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": ["data"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/todos": {
+            "get": {
+                "operationId": "listTodos",
+                "summary": "List todos",
+                "description": "Get all todos for the authenticated user",
+                "tags": ["Todos"],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "completed",
+                        "schema": {
+                            "description": "Filter todos by completion status",
+                            "example": "true",
+                            "type": "string",
+                            "enum": ["true", "false"]
+                        },
+                        "description": "Filter todos by completion status"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Todo"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "timestamp": {
+                                                    "description": "Response timestamp in ISO 8601 format",
+                                                    "type": "string"
+                                                },
+                                                "requestId": {
+                                                    "description": "Unique request identifier for tracking",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": ["timestamp"],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": ["data"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "createTodo",
+                "summary": "Create todo",
+                "description": "Create a new todo item",
+                "tags": ["Todos"],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateTodoInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Todo"
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "timestamp": {
+                                                    "description": "Response timestamp in ISO 8601 format",
+                                                    "type": "string"
+                                                },
+                                                "requestId": {
+                                                    "description": "Unique request identifier for tracking",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": ["timestamp"],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": ["data"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/todos/{id}": {
+            "get": {
+                "operationId": "getTodo",
+                "summary": "Get todo by ID",
+                "description": "Retrieve a specific todo item",
+                "tags": ["Todos"],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Todo"
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "timestamp": {
+                                                    "description": "Response timestamp in ISO 8601 format",
+                                                    "type": "string"
+                                                },
+                                                "requestId": {
+                                                    "description": "Unique request identifier for tracking",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": ["timestamp"],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": ["data"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "operationId": "updateTodo",
+                "summary": "Update todo",
+                "description": "Update an existing todo item",
+                "tags": ["Todos"],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateTodoInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Todo"
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "timestamp": {
+                                                    "description": "Response timestamp in ISO 8601 format",
+                                                    "type": "string"
+                                                },
+                                                "requestId": {
+                                                    "description": "Unique request identifier for tracking",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": ["timestamp"],
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": ["data"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "deleteTodo",
+                "summary": "Delete todo",
+                "description": "Delete a todo item",
+                "tags": ["Todos"],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Todo deleted successfully"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "properties": {
+                            "message": {
+                                "type": "string",
+                                "description": "Error message"
+                            },
+                            "code": {
+                                "type": "string",
+                                "description": "Error code"
+                            },
+                            "details": {
+                                "type": "object",
+                                "description": "Additional error details"
+                            }
+                        },
+                        "required": ["message"]
+                    },
+                    "meta": {
+                        "type": "object",
+                        "properties": {
+                            "timestamp": {
+                                "type": "string",
+                                "format": "date-time",
+                                "description": "Error timestamp"
+                            },
+                            "requestId": {
+                                "type": "string",
+                                "description": "Request ID for tracking"
+                            }
+                        }
+                    }
+                },
+                "required": ["error"]
+            },
+            "ValidationError": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "properties": {
+                            "message": {
+                                "type": "string",
+                                "description": "Validation error message"
+                            },
+                            "code": {
+                                "type": "string",
+                                "description": "Error code"
+                            },
+                            "issues": {
+                                "type": "array",
+                                "description": "Validation issues",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "path": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "required": ["message"]
+                    },
+                    "meta": {
+                        "type": "object",
+                        "properties": {
+                            "timestamp": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "requestId": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "required": ["error"]
+            },
+            "RegisterInput": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "description": "User email address",
+                        "example": "john@example.com",
+                        "type": "string",
+                        "format": "email",
+                        "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                    },
+                    "password": {
+                        "description": "User password (min 8 characters)",
+                        "example": "SecurePassword123!",
+                        "type": "string",
+                        "minLength": 8,
+                        "maxLength": 100
+                    },
+                    "name": {
+                        "description": "User's full name",
+                        "example": "John Doe",
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                    }
+                },
+                "required": ["email", "password"]
+            },
+            "LoginInput": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "description": "User email address",
+                        "example": "john@example.com",
+                        "type": "string",
+                        "format": "email",
+                        "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                    },
+                    "password": {
+                        "description": "User password",
+                        "example": "SecurePassword123!",
+                        "type": "string"
+                    }
+                },
+                "required": ["email", "password"]
+            },
+            "CreateTodoInput": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "description": "Todo title",
+                        "example": "Buy groceries",
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                    },
+                    "description": {
+                        "description": "Todo description",
+                        "example": "Get milk, eggs, and bread from the store",
+                        "type": "string",
+                        "maxLength": 2000
+                    },
+                    "completed": {
+                        "description": "Whether the todo is completed",
+                        "example": false,
+                        "default": false,
+                        "type": "boolean"
+                    }
+                },
+                "required": ["title"]
+            },
+            "DemoUser": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": ["id", "email", "name"],
+                "additionalProperties": false
+            },
+            "AuthResponse": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "description": "Authenticated user information",
+                        "$ref": "#/components/schemas/User"
+                    },
+                    "token": {
+                        "description": "JWT authentication token",
+                        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "type": "string"
+                    }
+                },
+                "required": ["user", "token"],
+                "additionalProperties": false
+            },
+            "User": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "User ID",
+                        "example": "123e4567-...",
+                        "type": "string"
+                    },
+                    "email": {
+                        "description": "User email",
+                        "example": "john@example.com",
+                        "type": "string"
+                    },
+                    "name": {
+                        "description": "User name",
+                        "example": "John Doe",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": ["id", "email", "name"],
+                "additionalProperties": false
+            },
+            "UserResponse": {
+                "description": "Current authenticated user information",
+                "$ref": "#/components/schemas/User"
+            },
+            "Todo": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "Unique todo identifier",
+                        "example": "123e4567-e89b-12d3-a456-426614174000",
+                        "type": "string"
+                    },
+                    "userId": {
+                        "description": "User ID who owns this todo",
+                        "example": "123e4567-e89b-12d3-a456-426614174001",
+                        "type": "string"
+                    },
+                    "title": {
+                        "description": "Todo title",
+                        "example": "Buy groceries",
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Todo description",
+                        "example": "Get milk, eggs, and bread",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "completed": {
+                        "description": "Whether the todo is completed",
+                        "example": false,
+                        "type": "boolean"
+                    },
+                    "createdAt": {
+                        "description": "ISO 8601 timestamp of creation",
+                        "example": "2024-01-15T10:30:00Z",
+                        "type": "string"
+                    },
+                    "updatedAt": {
+                        "description": "ISO 8601 timestamp of last update",
+                        "example": "2024-01-15T10:30:00Z",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "userId",
+                    "title",
+                    "description",
+                    "completed",
+                    "createdAt",
+                    "updatedAt"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "JWT Bearer token authentication"
+            }
+        }
+    }
+}
