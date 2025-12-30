@@ -41,7 +41,7 @@ const configSchema = z.object({
 
   // Logging
   LOG_LEVEL: z
-    .enum(["error", "warn", "info", "debug", "trace"])
+    .enum(["none", "error", "warn", "info", "debug", "trace"])
     .default("info"),
 
   // Shutdown

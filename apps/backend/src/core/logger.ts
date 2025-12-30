@@ -4,6 +4,7 @@ import { config, isDevelopment } from "@/config"
  * Log levels
  */
 export enum LogLevel {
+  NONE = -1,
   ERROR = 0,
   WARN = 1,
   INFO = 2,
@@ -12,6 +13,7 @@ export enum LogLevel {
 }
 
 const LOG_LEVEL_NAMES: Record<LogLevel, string> = {
+  [LogLevel.NONE]: "NONE",
   [LogLevel.ERROR]: "ERROR",
   [LogLevel.WARN]: "WARN",
   [LogLevel.INFO]: "INFO",
@@ -20,6 +22,7 @@ const LOG_LEVEL_NAMES: Record<LogLevel, string> = {
 }
 
 const LOG_LEVEL_COLORS: Record<LogLevel, string> = {
+  [LogLevel.NONE]: "\x1b[0m", // Reset/None
   [LogLevel.ERROR]: "\x1b[31m", // Red
   [LogLevel.WARN]: "\x1b[33m", // Yellow
   [LogLevel.INFO]: "\x1b[36m", // Cyan
@@ -61,6 +64,8 @@ export interface ILogger {
  */
 function parseLogLevel(level: string): LogLevel {
   switch (level.toLowerCase()) {
+    case "none":
+      return LogLevel.NONE
     case "error":
       return LogLevel.ERROR
     case "warn":
