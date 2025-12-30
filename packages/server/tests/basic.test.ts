@@ -132,9 +132,11 @@ describe("@bunkit/server - Basic functionality", () => {
     const server = createServer()
     const spec = await server.getOpenApiSpec()
 
-    expect(spec.openapi).toBe("3.1.0")
-    expect(spec.paths).toBeDefined()
-    expect(spec.paths["/api/todos/:id"]).toBeDefined()
+    expect(spec.isOk()).toBe(true)
+    const specValue = spec.unwrap()
+    expect(specValue.openapi).toBe("3.1.0")
+    expect(specValue.paths).toBeDefined()
+    expect(specValue.paths["/api/todos/:id"]).toBeDefined()
   })
 
   test("should handle multiple response schemas using .responses()", () => {
