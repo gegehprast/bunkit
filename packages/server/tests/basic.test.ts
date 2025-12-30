@@ -111,7 +111,7 @@ describe("@bunkit/server - Basic functionality", () => {
     expect(server.exportOpenApiSpec).toBeDefined()
   })
 
-  test("should generate OpenAPI spec", () => {
+  test("should generate OpenAPI spec", async () => {
     routeRegistry.clear()
 
     const TodoSchema = z
@@ -130,7 +130,7 @@ describe("@bunkit/server - Basic functionality", () => {
       })
 
     const server = createServer()
-    const spec = server.getOpenApiSpec()
+    const spec = await server.getOpenApiSpec()
 
     expect(spec.openapi).toBe("3.1.0")
     expect(spec.paths).toBeDefined()

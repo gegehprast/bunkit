@@ -11,8 +11,22 @@ import { authMiddleware } from "@/middlewares/auth.middleware"
 // Schemas
 const RegisterBodySchema = z
   .object({
-    email: z.string().email().meta({ example: "user@example.com" }),
-    password: z.string().min(8).meta({ example: "password123" }),
+    email: z.email().meta({ example: "john@doe.com" }),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(128, "Password must be less than 128 characters")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      // .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number")
+      // .regex(
+      //   /[^a-zA-Z0-9]/,
+      //   "Password must contain at least one special character",
+      // )
+      .describe(
+        "User password (min 12 characters, must include uppercase, lowercase, number, and special character)",
+      )
+      .meta({ example: "qwer1234" }),
     name: z.string().optional().meta({ example: "John Doe" }),
   })
   .meta({
@@ -23,8 +37,8 @@ const RegisterBodySchema = z
 
 const LoginBodySchema = z
   .object({
-    email: z.string().email().meta({ example: "user@example.com" }),
-    password: z.string().meta({ example: "password123" }),
+    email: z.email().meta({ example: "john@doe.com" }),
+    password: z.string().meta({ example: "qwer1234" }),
   })
   .meta({
     id: "LoginBody",

@@ -1,5 +1,9 @@
-import { createRoute, createServer, routeRegistry } from "@bunkit/server"
+import { createRoute, type OpenApiSpec } from "@bunkit/server"
 import { z } from "zod"
+import { config } from "@/config"
+import { server } from "@/core/server"
+
+let spec: OpenApiSpec | null = null
 
 /**
  * GET /openapi.json - Returns the OpenAPI specification
@@ -11,9 +15,10 @@ createRoute("GET", "/openapi.json")
     description: "Returns the OpenAPI 3.1 specification for this API",
     tags: ["Documentation"],
   })
-  .handler(({ res }) => {
-    const server = createServer()
-    const spec = server.getOpenApiSpec()
+  .handler(async ({ res }) => {
+    if (!spec) {
+      spec = await server.getOpenApiSpec()
+    }
     return res.ok(spec)
   })
 
@@ -34,7 +39,7 @@ createRoute("GET", "/docs")
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BunStart API Documentation</title>
+  <title>${config.APP_NAME} API Documentation</title>
   <link rel="icon" type="image/x-icon" href="/public/favicon.ico">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
   <style>
@@ -86,15 +91,9 @@ createRoute("POST", "/openapi/refresh")
   .response(
     z.object({
       message: z.string(),
-      routeCount: z.number(),
     }),
   )
   .handler(({ res }) => {
-    // In a production environment, you might want to restrict this endpoint
-    const routes = routeRegistry.getAll()
-
-    return res.ok({
-      message: "OpenAPI cache refreshed",
-      routeCount: routes.length,
-    })
+    spec = null
+    return res.ok({ message: "OpenAPI specification cache cleared" })
   })

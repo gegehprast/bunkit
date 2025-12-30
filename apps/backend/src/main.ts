@@ -1,8 +1,8 @@
-import { createServer, SecuritySchemes } from "@bunkit/server"
 import z from "zod"
 import { config } from "@/config"
 import { logger } from "@/core/logger"
 import { shutdownManager } from "@/core/shutdown-manager"
+import { server } from "./core/server"
 import { closeDatabase, initDatabase } from "./db/client"
 
 // Clear z.globalRegistry to avoid duplicate schema IDs on hot reload
@@ -33,19 +33,6 @@ async function main() {
     // Setup graceful shutdown handlers
     shutdownManager.setupSignalHandlers()
     shutdownManager.setupErrorHandlers()
-
-    const server = createServer({
-      port: config.PORT,
-      host: config.HOST,
-      openapi: {
-        title: "BunKit API",
-        version: "1.0.0",
-        description: "Production-ready HTTP API built with BunKit",
-        securitySchemes: {
-          bearerAuth: SecuritySchemes.bearerAuth(),
-        },
-      },
-    })
 
     // Register cleanup handlers
     shutdownManager.onShutdown("main-cleanup", async () => {

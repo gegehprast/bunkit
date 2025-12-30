@@ -9,6 +9,7 @@ const DEFAULT_JWT_REFRESH_SECRET = "supersecretdevelopmentkey"
  */
 const configSchema = z.object({
   // Application
+  APP_NAME: z.string().default("Bunkit"),
   VERSION: z.string(),
 
   // Server

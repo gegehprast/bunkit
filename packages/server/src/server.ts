@@ -1,5 +1,6 @@
 import { err, ok, type Result } from "@bunkit/result"
 import { createCorsMiddleware } from "./cors"
+import { generateOpenApiSpec } from "./openapi/generator"
 import { handleRequest } from "./request-handler"
 import type { MiddlewareFn } from "./types/middleware"
 import type {
@@ -88,8 +89,7 @@ export function createServer(options: ServerOptions = {}): Server {
       }
     },
 
-    getOpenApiSpec(): OpenApiSpec {
-      const { generateOpenApiSpec } = require("./openapi/generator")
+    async getOpenApiSpec(): Promise<OpenApiSpec> {
       return generateOpenApiSpec({
         title: openapi.title ?? "API",
         version: openapi.version ?? "1.0.0",
@@ -100,7 +100,7 @@ export function createServer(options: ServerOptions = {}): Server {
 
     async exportOpenApiSpec(path: string): Promise<Result<void, Error>> {
       try {
-        const spec = this.getOpenApiSpec()
+        const spec = await this.getOpenApiSpec()
         await Bun.write(path, JSON.stringify(spec, null, 2))
         return ok(undefined)
       } catch (error) {
