@@ -6,8 +6,7 @@ import { server } from "./core/server"
 import { closeDatabase, initDatabase } from "./db/client"
 
 // Clear z.globalRegistry to avoid duplicate schema IDs on hot reload
-// There must be a better way to handle this, but I just got no idea how to prevent
-// re-registering duplicate schemas ID. See the createSchema function in schema-helpers.ts
+// There must be a better way to handle this.
 z.globalRegistry.clear()
 
 async function main() {
