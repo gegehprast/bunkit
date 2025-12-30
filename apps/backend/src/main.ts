@@ -1,4 +1,4 @@
-import { ok, type Result } from "@bunkit/result"
+import { createServer } from "@bunkit/server"
 import z from "zod"
 import { config } from "@/config"
 import { logger } from "@/core/logger"
@@ -10,33 +10,15 @@ import { closeDatabase, initDatabase } from "./db/client"
 // re-registering duplicate schemas ID. See the createSchema function in schema-helpers.ts
 z.globalRegistry.clear()
 
-/**
- * Import auto-generated file (created during build)
- * This file contains imports for all discovered routes and handlers
- */
-try {
-  // biome-ignore lint/suspicious/noTsIgnore: Using @ts-expect-error won't work when the file is present
-  // @ts-ignore: Only available at build time
-  await import("@/.autoloads.gen")
-} catch (error) {
-  console.error(error)
-}
-
-// Mock createServer function for demonstration purposes
-function createServer() {
-  return {
-    async start(): Promise<Result<void, Error>> {
-      logger.info("Server started")
-      return ok(void 0)
-    },
-    async stop(): Promise<Result<void, Error>> {
-      logger.info("Server stopped")
-      return ok(void 0)
-    },
-  }
-}
-
 async function main() {
+  // Import routes to register them with the route registry
+  await import("@/routes/home.routes")
+  await import("@/routes/static.routes")
+  await import("@/routes/health.routes")
+  await import("@/routes/docs.routes")
+  await import("@/routes/auth.routes")
+  await import("@/routes/todos.routes")
+
   try {
     logger.info("🚀 Starting BunKit Backend...")
     logger.debug("Environment configuration", {
@@ -52,7 +34,15 @@ async function main() {
     shutdownManager.setupSignalHandlers()
     shutdownManager.setupErrorHandlers()
 
-    const server = createServer()
+    const server = createServer({
+      port: config.PORT,
+      host: config.HOST,
+      openapi: {
+        title: "BunKit API",
+        version: "1.0.0",
+        description: "Production-ready HTTP API built with BunKit",
+      },
+    })
 
     // Register cleanup handlers
     shutdownManager.onShutdown("main-cleanup", async () => {
@@ -81,7 +71,7 @@ async function main() {
       throw serverStartResult.error
     }
 
-    logger.info(`✅ App ready!`)
+    logger.info(`✅ App ready at http://${config.HOST}:${config.PORT}`)
   } catch (error) {
     logger.error("Failed to start application", { error })
     await shutdownManager.shutdown("ERROR")

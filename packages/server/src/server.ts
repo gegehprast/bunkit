@@ -20,6 +20,7 @@ export function createServer(options: ServerOptions = {}): Server {
     development = false,
     cors,
     globalMiddlewares = [],
+    openapi = {},
   } = options
 
   let server: ReturnType<typeof Bun.serve> | null = null
@@ -59,7 +60,6 @@ export function createServer(options: ServerOptions = {}): Server {
           },
         })
 
-        console.log(`Server started on http://${host}:${port}`)
         return ok(undefined)
       } catch (error) {
         return err({
@@ -76,7 +76,6 @@ export function createServer(options: ServerOptions = {}): Server {
         if (server) {
           server.stop()
           server = null
-          console.log("Server stopped")
         }
         return ok(undefined)
       } catch (error) {
@@ -91,14 +90,17 @@ export function createServer(options: ServerOptions = {}): Server {
 
     getOpenApiSpec(): OpenApiSpec {
       const { generateOpenApiSpec } = require("./openapi/generator")
-      return generateOpenApiSpec()
+      return generateOpenApiSpec({
+        title: openapi.title ?? "API",
+        version: openapi.version ?? "1.0.0",
+        description: openapi.description,
+      })
     },
 
     async exportOpenApiSpec(path: string): Promise<Result<void, Error>> {
       try {
         const spec = this.getOpenApiSpec()
         await Bun.write(path, JSON.stringify(spec, null, 2))
-        console.log(`OpenAPI spec exported to ${path}`)
         return ok(undefined)
       } catch (error) {
         return err(

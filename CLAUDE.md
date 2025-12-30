@@ -96,6 +96,11 @@ class UserService {
 }
 ```
 
+## Scripts (MANDATORY)
+**Most scripts can be run via `bun run <script>` from the root directory:**
+
+Check the root `package.json` for available scripts. Always run scripts from the root as much as possible.
+
 ## Testing (MANDATORY)
 
 ### Writing Tests

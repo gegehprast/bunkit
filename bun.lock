@@ -16,6 +16,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@bunkit/result": "workspace:*",
+        "@bunkit/server": "workspace:*",
         "drizzle-orm": "catalog:",
         "jose": "catalog:",
         "zod": "catalog:",

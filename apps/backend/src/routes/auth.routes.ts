@@ -1,121 +1,275 @@
 import { createRoute } from "@bunkit/server"
-import { err, ok } from "@bunstart/result"
 import { z } from "zod"
+import {
+  generateToken,
+  hashPassword,
+  verifyPassword,
+} from "@/auth/auth.service"
+import { getUserRepository } from "@/db/repositories/user-repository"
 import { authMiddleware } from "@/middlewares/auth.middleware"
 
-// These schemas will be registered as part of OpenAPI documentation
-// as a reusable component schemas
-const CreateTodoBodySchema = z
+// Schemas
+const RegisterBodySchema = z
   .object({
-    title: z.string().min(1).max(100).meta({ example: "Buy groceries" }),
-    description: z.string().optional().meta({ example: "Milk, Bread, Eggs" }),
-    completed: z.boolean().optional().meta({ example: false }),
+    email: z.string().email().meta({ example: "user@example.com" }),
+    password: z.string().min(8).meta({ example: "password123" }),
+    name: z.string().optional().meta({ example: "John Doe" }),
   })
   .meta({
-    id: "CreateTodoBody", // This ID will be used as ref
-    title: "Create Todo Body",
-    description: "Schema for creating a new todo item",
+    id: "RegisterBody",
+    title: "Register Request",
+    description: "User registration data",
   })
 
-const ListTodosQuerySchema = z
+const LoginBodySchema = z
   .object({
-    completed: z.string().optional().meta({
-      example: "true",
-      description: "Filter todos by completion status",
+    email: z.string().email().meta({ example: "user@example.com" }),
+    password: z.string().meta({ example: "password123" }),
+  })
+  .meta({
+    id: "LoginBody",
+    title: "Login Request",
+    description: "User login credentials",
+  })
+
+const AuthResponseSchema = z
+  .object({
+    user: z.object({
+      id: z.string(),
+      email: z.string(),
+      name: z.string().nullable(),
     }),
+    token: z.string(),
   })
   .meta({
-    id: "ListTodosQuery", // This ID will be used as ref
-    title: "List Todos Query",
-    description: "Schema for listing todos with optional completion filter",
+    id: "AuthResponse",
+    title: "Auth Response",
+    description: "Authentication response with user data and JWT token",
   })
 
-const TodoSchema = z
+const UserResponseSchema = z
   .object({
-    id: z.string().meta({ example: "1" }),
-    title: z.string().meta({ example: "Buy groceries" }),
-    description: z.string().optional().meta({ example: "Milk, Bread, Eggs" }),
-    completed: z.boolean().meta({ example: false }),
-    createdAt: z.string().meta({ example: new Date().toISOString() }),
+    id: z.string(),
+    email: z.string(),
+    name: z.string().nullable(),
+    createdAt: z.string(),
   })
   .meta({
-    id: "Todo", // This ID will be used as ref
-    title: "Todo Item",
-    description: "Schema representing a todo item",
+    id: "UserResponse",
+    title: "User Response",
+    description: "User profile data",
   })
 
-const todos = new Map<string, z.infer<typeof TodoSchema>>()
-
-// Get specific todo by ID
-createRoute("GET", "/api/todos/:id")
+/**
+ * POST /auth/register - Register a new user
+ */
+createRoute("POST", "/auth/register")
   .openapi({
-    operationId: "getTodo",
-    summary: "Get a todo by ID",
-    description: "Retrieves a todo item by its unique ID",
-    tags: ["Todos"],
+    operationId: "register",
+    summary: "Register new user",
+    description: "Create a new user account with email and password",
+    tags: ["Authentication"],
   })
-  .response(TodoSchema) // This method will register any schema for the OpenAPI docs
-  .handler(async ({ req, res, params, query, body, ctx }) => {
-    const todo = todos.get(params.id)
-    if (!todo) {
-      return res.notFound("Todo not found")
-    }
-    return res.ok(todo)
-  })
-
-// List todos by completion status
-createRoute("GET", "/api/todos")
-  .openapi({
-    operationId: "listTodos",
-    summary: "List todos",
-    description:
-      "Lists all todo items, optionally filtered by completion status",
-    tags: ["Todos"],
-  })
-  .query(ListTodosQuerySchema) // This method will register any schema for the OpenAPI docs
-  .response(z.array(TodoSchema)) // This method will register any schema for the OpenAPI docs
-  .handler(async ({ req, res, params, query, body, ctx }) => {
-    let result = Array.from(todos.values())
-    if (query.completed !== undefined) {
-      const isCompleted = query.completed === "true"
-      result = result.filter((todo) => todo.completed === isCompleted)
-    }
-    return res.ok(result)
-  })
-
-// create an in-memory store for todos
-createRoute("POST", "/api/todos")
-  .openapi({
-    operationId: "createTodo",
-    summary: "Create a new todo",
-    description: "Creates a new todo with the provided data",
-    tags: ["Todos"],
-  })
-  .middlewares(
-    authMiddleware({
-      validate: ({ req }) => {
-        const bearer = req.headers.get("authorization")?.split(" ")[1]
-        if (bearer === "valid-token") {
-          return ok(void 0)
-        }
-        return err(new Error("Invalid token"))
+  .body(RegisterBodySchema)
+  .response(AuthResponseSchema)
+  .errorResponses({
+    400: {
+      description: "Invalid input or email already exists",
+      content: {
+        "application/json": {
+          schema: z.object({
+            message: z.string(),
+            code: z.string(),
+          }),
+        },
       },
-    }),
-  )
-  .body(CreateTodoBodySchema)
-  .response(TodoSchema)
-  .handler(async ({ req, res, params, query, body, ctx }) => {
-    const id = String(todos.size + 1)
-    const newTodo: z.infer<typeof TodoSchema> = {
-      id,
-      title: body.title,
-      description: body.description,
-      completed: body.completed ?? false,
-      createdAt: new Date().toISOString(),
+    },
+  })
+  .handler(async ({ body, res }) => {
+    const userRepo = getUserRepository()
+
+    // Check if user already exists
+    const existingUserResult = await userRepo.findByEmail(body.email)
+    if (existingUserResult.isErr()) {
+      return res.internalError({
+        message: "Database error",
+        code: "DATABASE_ERROR",
+      })
     }
 
-    // save to in-memory store
-    todos.set(id, newTodo)
+    if (existingUserResult.value) {
+      return res.badRequest({
+        message: "Email already registered",
+        code: "EMAIL_EXISTS",
+      })
+    }
 
-    return res.ok(newTodo)
+    // Hash password
+    const passwordHash = await hashPassword(body.password)
+
+    // Create user
+    const createResult = await userRepo.create({
+      email: body.email,
+      passwordHash,
+      name: body.name,
+    })
+
+    if (createResult.isErr()) {
+      return res.internalError({
+        message: "Failed to create user",
+        code: "USER_CREATION_FAILED",
+      })
+    }
+
+    const user = createResult.value
+
+    // Generate token
+    const tokenResult = await generateToken(user.id, user.email)
+    if (tokenResult.isErr()) {
+      return res.internalError({
+        message: "Failed to generate token",
+        code: "TOKEN_GENERATION_FAILED",
+      })
+    }
+
+    return res.created({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+      token: tokenResult.value,
+    })
+  })
+
+/**
+ * POST /auth/login - Login user
+ */
+createRoute("POST", "/auth/login")
+  .openapi({
+    operationId: "login",
+    summary: "Login user",
+    description: "Authenticate user with email and password",
+    tags: ["Authentication"],
+  })
+  .body(LoginBodySchema)
+  .response(AuthResponseSchema)
+  .errorResponses({
+    401: {
+      description: "Invalid credentials",
+      content: {
+        "application/json": {
+          schema: z.object({
+            message: z.string(),
+            code: z.string(),
+          }),
+        },
+      },
+    },
+  })
+  .handler(async ({ body, res }) => {
+    const userRepo = getUserRepository()
+
+    // Find user by email
+    const userResult = await userRepo.findByEmail(body.email)
+    if (userResult.isErr()) {
+      return res.internalError({
+        message: "Database error",
+        code: "DATABASE_ERROR",
+      })
+    }
+
+    if (!userResult.value) {
+      return res.unauthorized({
+        message: "Invalid credentials",
+        code: "INVALID_CREDENTIALS",
+      })
+    }
+
+    const user = userResult.value
+
+    // Verify password
+    const isValidPassword = await verifyPassword(
+      body.password,
+      user.passwordHash,
+    )
+    if (!isValidPassword) {
+      return res.unauthorized({
+        message: "Invalid credentials",
+        code: "INVALID_CREDENTIALS",
+      })
+    }
+
+    // Generate token
+    const tokenResult = await generateToken(user.id, user.email)
+    if (tokenResult.isErr()) {
+      return res.internalError({
+        message: "Failed to generate token",
+        code: "TOKEN_GENERATION_FAILED",
+      })
+    }
+
+    return res.ok({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+      token: tokenResult.value,
+    })
+  })
+
+/**
+ * GET /auth/me - Get current user
+ */
+createRoute("GET", "/auth/me")
+  .openapi({
+    operationId: "getCurrentUser",
+    summary: "Get current user",
+    description: "Get the authenticated user's profile (requires Bearer token)",
+    tags: ["Authentication"],
+  })
+  .middlewares(authMiddleware())
+  .response(UserResponseSchema)
+  .errorResponses({
+    401: {
+      description: "Unauthorized - Invalid or missing token",
+      content: {
+        "application/json": {
+          schema: z.object({
+            message: z.string(),
+            code: z.string(),
+          }),
+        },
+      },
+    },
+  })
+  .handler(async ({ ctx, res }) => {
+    const userRepo = getUserRepository()
+
+    // Get user ID from context (set by auth middleware)
+    const userId = ctx.userId as string
+
+    const userResult = await userRepo.findById(userId)
+    if (userResult.isErr()) {
+      return res.internalError({
+        message: "Database error",
+        code: "DATABASE_ERROR",
+      })
+    }
+
+    if (!userResult.value) {
+      return res.notFound({
+        message: "User not found",
+        code: "USER_NOT_FOUND",
+      })
+    }
+
+    const user = userResult.value
+    return res.ok({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      createdAt: user.createdAt.toISOString(),
+    })
   })

@@ -12,6 +12,11 @@ export interface ServerOptions {
   cors?: CorsOptions
   static?: Record<string, string>
   globalMiddlewares?: MiddlewareFn[]
+  openapi?: {
+    title?: string
+    version?: string
+    description?: string
+  }
 }
 
 /**
