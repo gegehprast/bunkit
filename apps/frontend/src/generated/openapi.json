@@ -1,0 +1,794 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "BunKit API",
+    "version": "1.0.0",
+    "description": "Production-ready HTTP API built with BunKit"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "home",
+        "summary": "Home page",
+        "description": "Welcome page for the API",
+        "tags": [
+          "General"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/{filename}": {
+      "get": {
+        "operationId": "getStaticFile",
+        "summary": "Get static file",
+        "description": "Serves static files from the public directory",
+        "tags": [
+          "Static"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "filename",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "healthCheck",
+        "summary": "Health check",
+        "description": "Returns the health status of the API",
+        "tags": [
+          "System"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "operationId": "getOpenApiSpec",
+        "summary": "Get OpenAPI specification",
+        "description": "Returns the OpenAPI 3.1 specification for this API",
+        "tags": [
+          "Documentation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docs": {
+      "get": {
+        "operationId": "getApiDocs",
+        "summary": "API documentation",
+        "description": "Interactive API documentation using Swagger UI",
+        "tags": [
+          "Documentation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi/refresh": {
+      "post": {
+        "operationId": "refreshOpenApiSpec",
+        "summary": "Refresh OpenAPI cache",
+        "description": "Clears the OpenAPI spec cache and regenerates it (development only)",
+        "tags": [
+          "Documentation"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "register",
+        "summary": "Register new user",
+        "description": "Create a new user account with email and password",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or email already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "summary": "Login user",
+        "description": "Authenticate user with email and password",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "getCurrentUser",
+        "summary": "Get current user",
+        "description": "Get the authenticated user's profile (requires Bearer token)",
+        "tags": [
+          "Authentication"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "code"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/todos": {
+      "get": {
+        "operationId": "listTodos",
+        "summary": "List todos",
+        "description": "Lists all todo items for the authenticated user (requires Bearer token)",
+        "tags": [
+          "Todos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "completed",
+            "schema": {
+              "example": "true",
+              "description": "Filter todos by completion status",
+              "type": "string"
+            },
+            "description": "Filter todos by completion status"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "example": "10",
+              "description": "Maximum number of todos to return",
+              "type": "string"
+            },
+            "description": "Maximum number of todos to return"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Todo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createTodo",
+        "summary": "Create a new todo",
+        "description": "Creates a new todo for the authenticated user (requires Bearer token)",
+        "tags": [
+          "Todos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTodoBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Todo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/todos/{id}": {
+      "get": {
+        "operationId": "getTodo",
+        "summary": "Get a todo by ID",
+        "description": "Retrieves a specific todo item by its ID (requires Bearer token)",
+        "tags": [
+          "Todos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Todo"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateTodo",
+        "summary": "Update a todo",
+        "description": "Updates a todo item by its ID (requires Bearer token)",
+        "tags": [
+          "Todos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTodoBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Todo"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTodo",
+        "summary": "Delete a todo",
+        "description": "Deletes a todo item by its ID (requires Bearer token)",
+        "tags": [
+          "Todos"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegisterBody": {
+        "title": "Register Request",
+        "description": "User registration data",
+        "type": "object",
+        "properties": {
+          "email": {
+            "example": "john@doe.com",
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": {
+            "description": "User password (min 12 characters, must include uppercase, lowercase, number, and special character)",
+            "example": "qwer1234",
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128,
+            "allOf": [
+              {
+                "pattern": "[a-z]"
+              },
+              {
+                "pattern": "[0-9]"
+              }
+            ]
+          },
+          "name": {
+            "example": "John Doe",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "LoginBody": {
+        "title": "Login Request",
+        "description": "User login credentials",
+        "type": "object",
+        "properties": {
+          "email": {
+            "example": "john@doe.com",
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "password": {
+            "example": "qwer1234",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "CreateTodoBody": {
+        "title": "Create Todo Body",
+        "description": "Schema for creating a new todo item",
+        "type": "object",
+        "properties": {
+          "title": {
+            "example": "Buy groceries",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "example": "Milk, Bread, Eggs",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "UpdateTodoBody": {
+        "title": "Update Todo Body",
+        "description": "Schema for updating a todo item",
+        "type": "object",
+        "properties": {
+          "title": {
+            "example": "Buy groceries",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "example": "Milk, Bread, Eggs",
+            "type": "string"
+          },
+          "completed": {
+            "example": false,
+            "type": "boolean"
+          }
+        }
+      },
+      "HealthResponse": {
+        "title": "Health Check Response",
+        "description": "Health check response indicating service status",
+        "type": "object",
+        "properties": {
+          "status": {
+            "example": "ok",
+            "type": "string",
+            "const": "ok"
+          },
+          "timestamp": {
+            "example": "2025-12-30T15:47:56.110Z",
+            "type": "string"
+          },
+          "uptime": {
+            "example": 123.456,
+            "type": "number"
+          }
+        },
+        "required": [
+          "status",
+          "timestamp",
+          "uptime"
+        ],
+        "additionalProperties": false
+      },
+      "AuthResponse": {
+        "title": "Auth Response",
+        "description": "Authentication response with user data and JWT token",
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "email",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "user",
+          "token"
+        ],
+        "additionalProperties": false
+      },
+      "UserResponse": {
+        "title": "User Response",
+        "description": "User profile data",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "Todo": {
+        "title": "Todo Item",
+        "description": "Schema representing a todo item",
+        "type": "object",
+        "properties": {
+          "id": {
+            "example": "1",
+            "type": "string"
+          },
+          "userId": {
+            "example": "user-123",
+            "type": "string"
+          },
+          "title": {
+            "example": "Buy groceries",
+            "type": "string"
+          },
+          "description": {
+            "example": "Milk, Bread, Eggs",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "completed": {
+            "example": false,
+            "type": "boolean"
+          },
+          "createdAt": {
+            "example": "2025-12-30T15:47:56.137Z",
+            "type": "string"
+          },
+          "updatedAt": {
+            "example": "2025-12-30T15:47:56.137Z",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "title",
+          "description",
+          "completed",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT authorization token"
+      },
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic",
+        "description": "HTTP Basic authentication"
+      }
+    }
+  }
+}
