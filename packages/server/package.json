@@ -4,6 +4,11 @@
   "module": "./src/index.ts",
   "type": "module",
   "exports": "./src/index.ts",
+  "dependencies": {
+    "@bunkit/result": "workspace:*",
+    "zod": "catalog:",
+    "zod-openapi": "catalog:"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

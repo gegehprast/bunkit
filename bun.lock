@@ -36,6 +36,12 @@
     },
     "packages/server": {
       "name": "@bunkit/server",
+      "version": "0.0.1",
+      "dependencies": {
+        "@bunkit/result": "workspace:*",
+        "zod": "catalog:",
+        "zod-openapi": "catalog:",
+      },
       "devDependencies": {
         "@types/bun": "latest",
       },
