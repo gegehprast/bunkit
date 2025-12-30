@@ -40,7 +40,7 @@ export interface OpenApiSpec {
 export interface Server {
   start(): Promise<Result<void, ServerError>>
   stop(): Promise<Result<void, ServerError>>
-  getOpenApiSpec(): Promise<OpenApiSpec>
+  getOpenApiSpec(): Promise<Result<OpenApiSpec, Error>>
   exportOpenApiSpec(path: string): Promise<Result<void, Error>>
 }
 

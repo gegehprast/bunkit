@@ -4,6 +4,7 @@ import { logger } from "@/core/logger"
 import { shutdownManager } from "@/core/shutdown-manager"
 import { server } from "./core/server"
 import { closeDatabase, initDatabase } from "./db/client"
+import { loadRoutes } from "./routes"
 
 // Clear z.globalRegistry to avoid duplicate schema IDs on hot reload
 // There must be a better way to handle this.
@@ -11,12 +12,7 @@ z.globalRegistry.clear()
 
 async function main() {
   // Import routes to register them with the route registry
-  await import("@/routes/home.routes")
-  await import("@/routes/static.routes")
-  await import("@/routes/health.routes")
-  await import("@/routes/docs.routes")
-  await import("@/routes/auth.routes")
-  await import("@/routes/todos.routes")
+  await loadRoutes()
 
   try {
     logger.info("🚀 Starting BunKit Backend...")

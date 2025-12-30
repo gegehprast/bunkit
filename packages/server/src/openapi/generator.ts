@@ -1,3 +1,4 @@
+import { ok, type Result } from "@bunkit/result"
 import { z } from "zod"
 import { createDocument } from "zod-openapi"
 import { routeRegistry } from "../route-registry"
@@ -32,7 +33,7 @@ export function generateOpenApiSpec(
     title: "API",
     version: "1.0.0",
   },
-): OpenApiSpec {
+): Result<OpenApiSpec, Error> {
   const routes = routeRegistry.getAll()
   const paths: Record<string, Record<string, unknown>> = {}
 
@@ -72,7 +73,7 @@ export function generateOpenApiSpec(
       : undefined,
   })
 
-  return document as OpenApiSpec
+  return ok(document as OpenApiSpec)
 }
 
 /**

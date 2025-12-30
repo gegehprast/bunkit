@@ -89,7 +89,7 @@ export function createServer(options: ServerOptions = {}): Server {
       }
     },
 
-    async getOpenApiSpec(): Promise<OpenApiSpec> {
+    async getOpenApiSpec(): Promise<Result<OpenApiSpec, Error>> {
       return generateOpenApiSpec({
         title: openapi.title ?? "API",
         version: openapi.version ?? "1.0.0",

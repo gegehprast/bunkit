@@ -17,7 +17,11 @@ createRoute("GET", "/openapi.json")
   })
   .handler(async ({ res }) => {
     if (!spec) {
-      spec = await server.getOpenApiSpec()
+      const result = await server.getOpenApiSpec()
+      if (result.isErr()) {
+        return res.internalError("Failed to generate OpenAPI specification")
+      }
+      spec = result.value
     }
     return res.ok(spec)
   })
