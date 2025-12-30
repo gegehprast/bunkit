@@ -154,8 +154,15 @@ const PingSchema = z.object({
   timestamp: z.number(),
 })
 
+// Define server messages for type safety
+type ServerMessage =
+  | { type: "message", user: string, text: string }
+  | { type: "pong", timestamp: number }
+  | { type: "error", message: string }
+
 // Create WebSocket route
 createWebSocketRoute("/api/chat")
+  .serverMessages<ServerMessage>()  // ✅ Enforce type safety on send/publish
   .authenticate(authMiddleware)
   .onConnect(async (ws, ctx) => {
     console.log(`User ${ctx.user.id} connected`)
@@ -241,30 +248,196 @@ createWebSocketRoute("/live-data")
   })
 ```
 
-### Advanced: Typed Messages (Both Directions)
+### Advanced: Full Type Safety (Send + Receive)
 
 ```typescript
-// Client -> Server messages
-type ClientMessage = 
-  | { type: "chat", text: string }
-  | { type: "ping", timestamp: number }
-  | { type: "join", room: string }
+import { z } from "zod"
 
-// Server -> Client messages
+// Define schemas for incoming messages
+const ChatSchema = z.object({ text: z.string(), room: z.string().optional() })
+const PingSchema = z.object({ timestamp: z.number() })
+const JoinSchema = z.object({ room: z.string() })
+
+// Define all possible server -> client messages
 type ServerMessage =
-  | { type: "message", user: string, text: string }
+  | { type: "message", user: string, text: string, room: string }
   | { type: "pong", timestamp: number }
-  | { type: "joined", room: string }
-  | { type: "error", message: string }
+  | { type: "joined", room: string, userCount: number }
+  | { type: "error", message: string, code?: string }
 
 createWebSocketRoute("/api/chat")
-  .clientMessages<ClientMessage>()
-  .serverMessages<ServerMessage>()
-  .on("chat", ChatSchema, (ws, data) => {
-    ws.send({ type: "message", user: "John", text: data.text }) // ✅ Type-safe
-    ws.send({ type: "invalid", foo: "bar" }) // ❌ Type error
+  .serverMessages<ServerMessage>()  // ✅ Type-safe outgoing messages
+  .authenticate(authMiddleware)
+  .on("chat", ChatSchema, (ws, data, ctx) => {
+    const room = data.room ?? "general"
+    
+    // ✅ Type-safe - matches ServerMessage
+    ws.publish(`room:${room}`, {
+      type: "message",
+      user: ctx.user.name,
+      text: data.text,
+      room,
+    })
+    
+    // ❌ TypeScript error - "invalid" not in ServerMessage union
+    ws.send({ type: "invalid", foo: "bar" })
+    
+    // ❌ TypeScript error - missing required field "room"
+    ws.send({ type: "message", user: ctx.user.name, text: data.text })
+  })
+  .on("ping", PingSchema, (ws, data) => {
+    // ✅ Type-safe
+    ws.send({ type: "pong", timestamp: Date.now() })
+  })
+  .on("join", JoinSchema, (ws, data, ctx) => {
+    ws.subscribe(`room:${data.room}`)
+    
+    // ✅ Type-safe
+    ws.send({
+      type: "joined",
+      room: data.room,
+      userCount: getRoomUserCount(data.room),
+    })
   })
 ```
+
+## Client Type Generation
+
+**Auto-generate TypeScript types for client applications.**
+
+### Generate Types Command
+
+```typescript
+// Server setup
+import { createServer } from "@bunkit/server"
+import "./routes/chat.websocket"  // Register routes
+
+const server = createServer({ port: 3000 })
+
+// Generate types for clients
+await server.generateWebSocketTypes({
+  outputPath: "./client/websocket-types.ts",
+  // Optional: only generate for specific routes
+  routes: ["/api/chat", "/api/notifications"],
+})
+
+await server.start()
+```
+
+### Generated Output
+
+```typescript
+// client/websocket-types.ts (auto-generated)
+
+/**
+ * WebSocket route: /api/chat
+ * Generated from: routes/chat.websocket.ts
+ */
+export namespace ChatWebSocket {
+  // Client -> Server messages
+  export type ClientMessage =
+    | { type: "chat", data: { text: string, room?: string } }
+    | { type: "ping", data: { timestamp: number } }
+    | { type: "join", data: { room: string } }
+  
+  // Server -> Client messages
+  export type ServerMessage =
+    | { type: "message", user: string, text: string, room: string }
+    | { type: "pong", timestamp: number }
+    | { type: "joined", room: string, userCount: number }
+    | { type: "error", message: string, code?: string }
+}
+
+/**
+ * WebSocket route: /api/notifications
+ * Generated from: routes/notifications.websocket.ts
+ */
+export namespace NotificationsWebSocket {
+  export type ClientMessage =
+    | { type: "markRead", data: { id: string } }
+  
+  export type ServerMessage =
+    | { type: "notification", id: string, title: string, body: string }
+    | { type: "read", id: string }
+}
+```
+
+### Client Usage
+
+```typescript
+// client/chat.ts
+import type { ChatWebSocket } from "./websocket-types"
+
+const ws = new WebSocket("ws://localhost:3000/api/chat?token=xxx")
+
+// ✅ Type-safe send
+const sendMessage = (text: string) => {
+  const message: ChatWebSocket.ClientMessage = {
+    type: "chat",
+    data: { text, room: "general" },
+  }
+  ws.send(JSON.stringify(message))
+}
+
+// ✅ Type-safe receive with discriminated union
+ws.onmessage = (event) => {
+  const message = JSON.parse(event.data) as ChatWebSocket.ServerMessage
+  
+  // TypeScript narrows the type based on .type
+  if (message.type === "message") {
+    console.log(`${message.user}: ${message.text} in ${message.room}`)
+  } else if (message.type === "pong") {
+    console.log(`Latency: ${Date.now() - message.timestamp}ms`)
+  } else if (message.type === "joined") {
+    console.log(`Joined ${message.room} with ${message.userCount} users`)
+  }
+}
+```
+
+### Integration with Build Process
+
+```json
+// package.json
+{
+  "scripts": {
+    "dev": "bun run generate:types && bun run --hot src/main.ts",
+    "generate:types": "bun run scripts/generate-websocket-types.ts",
+    "build": "bun run generate:types && bun build src/main.ts"
+  }
+}
+```
+
+```typescript
+// scripts/generate-websocket-types.ts
+import { createServer } from "@bunkit/server"
+import "../src/routes/chat.websocket"
+import "../src/routes/notifications.websocket"
+
+const server = createServer({ port: 3000 })
+
+await server.generateWebSocketTypes({
+  outputPath: "./client/websocket-types.ts",
+})
+
+console.log("✅ WebSocket types generated")
+process.exit(0)
+```
+
+### Type Generation Details
+
+**What gets generated:**
+- TypeScript types for all client -> server messages (from `.on()` schemas)
+- TypeScript types for all server -> client messages (from `.serverMessages<T>()`)
+- Namespaced by route path to avoid conflicts
+- JSDoc comments with route path and source file
+- Discriminated unions for easy type narrowing
+
+**Benefits:**
+- ✅ Type safety across server/client boundary
+- ✅ Auto-completion in client code
+- ✅ Catch mismatches at compile time
+- ✅ Single source of truth (server defines contracts)
+- ✅ Works with any TypeScript client (React, Vue, Svelte, React Native, etc.)
 
 ## Implementation Structure
 
@@ -275,6 +448,7 @@ src/
 ├── websocket-registry.ts           # WebSocket route registry
 ├── websocket-handler.ts            # Connection/message handling
 ├── websocket-context.ts            # Connection context type
+├── websocket-type-generator.ts    # Client type generation
 └── types/
     └── websocket.ts                # WebSocket types
 ```
@@ -290,11 +464,12 @@ interface WebSocketContext<TUser = unknown> {
   data: Map<string, unknown>
 }
 
-// Enhanced WebSocket with context
+// Enhanced WebSocket with context and type-safe messaging
 interface TypedWebSocket<TServerMsg = unknown> extends ServerWebSocket {
   data: WebSocketContext
-  send(message: TServerMsg): void
-  publish(topic: string, message: TServerMsg): void
+  send(message: TServerMsg): void              // ✅ Type-safe send
+  publish(topic: string, message: TServerMsg): void  // ✅ Type-safe publish
+  getBufferedAmount(): number                  // Backpressure monitoring
 }
 
 // Message handler type
@@ -396,9 +571,16 @@ await server.start()
 
 ### Phase 2: Validation & Type Safety (MVP)
 - Zod schema validation for messages
-- Type inference for handlers
+- Type inference for handlers (client messages)
+- `.serverMessages<T>()` for type-safe send/publish
 - Error handling for validation failures
 - Standardized error messages
+
+### Phase 2.5: Client Type Generation (MVP)
+- Extract message types from registered routes
+- Generate TypeScript types file
+- CLI command or server method for generation
+- Watch mode for development
 
 ### Phase 3: Authentication & Context (MVP)
 - Auth middleware support (reuse HTTP middleware)
@@ -659,22 +841,29 @@ createWebSocketRoute("/document/:docId")
 
 ## Design Decisions Summary
 
-1. **Message Handling:** Multiple Typed Handlers (`.on(type, schema, handler)`) ✅
-2. **Rooms/Channels:** External utility, use Bun's native subscribe/publish ✅
-3. **Broadcasting from Services:** `server.publish()` + `webSocketRegistry` ✅
-4. **State Management:** Users implement their own (no built-in Redis) ✅
-5. **Compression:** Enabled by default, configurable ✅
-6. **Binary Messages:** Support with separate `.onBinary(handler)` ✅
-7. **Backpressure:** Expose `getBufferedAmount()`, document patterns ✅
-8. **AsyncAPI Generation:** Skip for now ✅
+1. **Route API:** Separate WebSocket Routes (not HTTP upgrade) ✅
+2. **Message Handling:** Multiple Typed Handlers (`.on(type, schema, handler)`) ✅
+3. **Type Safety:** `.serverMessages<T>()` for type-safe send/publish ✅
+4. **Client Types:** Auto-generate TypeScript types file ✅
+5. **Rooms/Channels:** Bun's native subscribe/publish (no built-in manager) ✅
+6. **Broadcasting:** `server.publish()` + `webSocketRegistry` for filtering ✅
+7. **State Management:** Users implement their own (no built-in Redis) ✅
+8. **Compression:** Enabled by default, configurable ✅
+9. **Binary Messages:** Support with separate `.onBinary(handler)` ✅
+10. **Backpressure:** Expose `getBufferedAmount()`, document patterns ✅
+11. **AsyncAPI Generation:** Skip for now ✅
 
 ## Next Steps
 
 1. ✅ **Plan Complete** - All design decisions made
 2. 🚀 **Ready to Implement** - Start with Phase 1 (Core Infrastructure)
 3. 📝 **Implementation Order:**
-   - Phase 1-3: MVP (Core + Validation + Auth)
-   - Phase 4: External Broadcasting
-   - Phase 5: Advanced Features
+   - Phase 1: Core Infrastructure (route builder, registry, handlers)
+   - Phase 2: Validation & Type Safety (Zod + `.serverMessages<T>()`)
+   - Phase 2.5: Client Type Generation (auto-generate types)
+   - Phase 3: Authentication & Context (reuse HTTP middleware)
+   - Phase 4: External Broadcasting (server.publish, registry)
+   - Phase 5: Advanced Features (binary, compression, backpressure)
 4. 🧪 **Create tests** alongside each phase
-5. 📚 **Document patterns** (especially backpressure handling)
+5. 📚 **Document patterns** (especially type generation and backpressure)
+6. 🎯 **Example apps** showing client/server type safety in action
