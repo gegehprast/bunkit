@@ -105,17 +105,11 @@ createRoute("POST", "/auth/register")
     // Check if user already exists
     const existingUserResult = await userRepo.findByEmail(body.email)
     if (existingUserResult.isErr()) {
-      return res.internalError({
-        message: "Database error",
-        code: "DATABASE_ERROR",
-      })
+      return res.internalError("Database error")
     }
 
     if (existingUserResult.value) {
-      return res.badRequest({
-        message: "Email already registered",
-        code: "EMAIL_EXISTS",
-      })
+      return res.badRequest("Email already registered")
     }
 
     // Hash password
@@ -129,10 +123,7 @@ createRoute("POST", "/auth/register")
     })
 
     if (createResult.isErr()) {
-      return res.internalError({
-        message: "Failed to create user",
-        code: "USER_CREATION_FAILED",
-      })
+      return res.internalError("Failed to create user")
     }
 
     const user = createResult.value
@@ -140,10 +131,7 @@ createRoute("POST", "/auth/register")
     // Generate token
     const tokenResult = await generateToken(user.id, user.email)
     if (tokenResult.isErr()) {
-      return res.internalError({
-        message: "Failed to generate token",
-        code: "TOKEN_GENERATION_FAILED",
-      })
+      return res.internalError("Failed to generate token")
     }
 
     return res.created({
@@ -187,17 +175,11 @@ createRoute("POST", "/auth/login")
     // Find user by email
     const userResult = await userRepo.findByEmail(body.email)
     if (userResult.isErr()) {
-      return res.internalError({
-        message: "Database error",
-        code: "DATABASE_ERROR",
-      })
+      return res.internalError("Database error")
     }
 
     if (!userResult.value) {
-      return res.unauthorized({
-        message: "Invalid credentials",
-        code: "INVALID_CREDENTIALS",
-      })
+      return res.unauthorized("Invalid credentials")
     }
 
     const user = userResult.value
@@ -208,19 +190,13 @@ createRoute("POST", "/auth/login")
       user.passwordHash,
     )
     if (!isValidPassword) {
-      return res.unauthorized({
-        message: "Invalid credentials",
-        code: "INVALID_CREDENTIALS",
-      })
+      return res.unauthorized("Invalid credentials")
     }
 
     // Generate token
     const tokenResult = await generateToken(user.id, user.email)
     if (tokenResult.isErr()) {
-      return res.internalError({
-        message: "Failed to generate token",
-        code: "TOKEN_GENERATION_FAILED",
-      })
+      return res.internalError("Failed to generate token")
     }
 
     return res.ok({
@@ -267,17 +243,11 @@ createRoute("GET", "/auth/me")
 
     const userResult = await userRepo.findById(userId)
     if (userResult.isErr()) {
-      return res.internalError({
-        message: "Database error",
-        code: "DATABASE_ERROR",
-      })
+      return res.internalError("Database error")
     }
 
     if (!userResult.value) {
-      return res.notFound({
-        message: "User not found",
-        code: "USER_NOT_FOUND",
-      })
+      return res.notFound("User not found")
     }
 
     const user = userResult.value

@@ -17,7 +17,7 @@ createRoute("GET", "/public/:filename")
 
     // Prevent directory traversal
     if (!filePath.startsWith(publicDir)) {
-      return res.forbidden({ message: "Access denied" })
+      return res.forbidden("Access denied")
     }
 
     const file = Bun.file(filePath)

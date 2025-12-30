@@ -95,10 +95,7 @@ createRoute("GET", "/api/todos")
     })
 
     if (todosResult.isErr()) {
-      return res.internalError({
-        message: "Failed to fetch todos",
-        code: "DATABASE_ERROR",
-      })
+      return res.internalError("Failed to fetch todos")
     }
 
     return res.ok(
@@ -140,10 +137,7 @@ createRoute("POST", "/api/todos")
     })
 
     if (createResult.isErr()) {
-      return res.internalError({
-        message: "Failed to create todo",
-        code: "DATABASE_ERROR",
-      })
+      return res.internalError("Failed to create todo")
     }
 
     const todo = createResult.value
@@ -179,10 +173,7 @@ createRoute("GET", "/api/todos/:id")
     const todoResult = await todoRepo.findById(params.id)
 
     if (todoResult.isErr()) {
-      return res.internalError({
-        message: "Failed to fetch todo",
-        code: "DATABASE_ERROR",
-      })
+      return res.internalError("Failed to fetch todo")
     }
 
     if (!todoResult.value) {
@@ -193,7 +184,7 @@ createRoute("GET", "/api/todos/:id")
 
     // Check if todo belongs to user
     if (todo.userId !== userId) {
-      return res.forbidden({ message: "Access denied" })
+      return res.forbidden("Access denied")
     }
 
     return res.ok({
@@ -229,10 +220,7 @@ createRoute("PUT", "/api/todos/:id")
     const existingResult = await todoRepo.findById(params.id)
 
     if (existingResult.isErr()) {
-      return res.internalError({
-        message: "Failed to fetch todo",
-        code: "DATABASE_ERROR",
-      })
+      return res.internalError("Failed to fetch todo")
     }
 
     if (!existingResult.value) {
@@ -240,17 +228,14 @@ createRoute("PUT", "/api/todos/:id")
     }
 
     if (existingResult.value.userId !== userId) {
-      return res.forbidden({ message: "Access denied" })
+      return res.forbidden("Access denied")
     }
 
     // Update the todo
     const updateResult = await todoRepo.update(params.id, body)
 
     if (updateResult.isErr()) {
-      return res.internalError({
-        message: "Failed to update todo",
-        code: "DATABASE_ERROR",
-      })
+      return res.internalError("Failed to update todo")
     }
 
     if (!updateResult.value) {
@@ -290,10 +275,7 @@ createRoute("DELETE", "/api/todos/:id")
     const existingResult = await todoRepo.findById(params.id)
 
     if (existingResult.isErr()) {
-      return res.internalError({
-        message: "Failed to fetch todo",
-        code: "DATABASE_ERROR",
-      })
+      return res.internalError("Failed to fetch todo")
     }
 
     if (!existingResult.value) {
@@ -301,17 +283,14 @@ createRoute("DELETE", "/api/todos/:id")
     }
 
     if (existingResult.value.userId !== userId) {
-      return res.forbidden({ message: "Access denied" })
+      return res.forbidden("Access denied")
     }
 
     // Delete the todo
     const deleteResult = await todoRepo.delete(params.id)
 
     if (deleteResult.isErr()) {
-      return res.internalError({
-        message: "Failed to delete todo",
-        code: "DATABASE_ERROR",
-      })
+      return res.internalError("Failed to delete todo")
     }
 
     return res.ok({ message: "Todo deleted successfully" })
