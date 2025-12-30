@@ -224,8 +224,6 @@ createRoute("PUT", "/api/todos/:id")
   .handler(async ({ ctx, params, body, res }) => {
     const todoRepo = getTodoRepository()
     const userId = ctx.userId as string
-    
-    console.log("UpdateTodo handler called with params:", params, "body:", body, "userId:", userId);
 
     // First check if todo exists and belongs to user
     const existingResult = await todoRepo.findById(params.id)

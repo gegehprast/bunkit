@@ -25,13 +25,6 @@ export async function handleRequest(
     return createPreflightResponse(origin, serverOptions.cors)
   }
 
-  console.log(
-    "Handling request:",
-    method,
-    url.pathname,
-    globalMiddlewares.length,
-  )
-
   // Find matching route
   const match = routeRegistry.match(method, url.pathname)
 
@@ -118,8 +111,6 @@ export async function handleRequest(
     ...globalMiddlewares,
     ...(definition.middlewares ?? []),
   ]
-
-  console.log("Executing middlewares, total count:", allMiddlewares.length)
 
   // Create the handler wrapper that will be the final step in the chain
   const handlerFn = async (): Promise<Response> => {

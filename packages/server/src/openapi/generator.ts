@@ -54,7 +54,9 @@ export function generateOpenApiSpec(
       pathItem[route.method.toLowerCase()] = operation
     }
 
-    paths[path] = pathItem
+    // Convert Express-style :param to OpenAPI {param} format
+    const openApiPath = path.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, "{$1}")
+    paths[openApiPath] = pathItem
   }
 
   // Create document using zod-openapi

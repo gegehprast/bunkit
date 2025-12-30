@@ -7,9 +7,10 @@ export interface RouteContext<
   TParams = Record<string, string>,
   TQuery = unknown,
   TBody = unknown,
+  TResponse = unknown,
 > {
   req: Request
-  res: ResponseHelpers
+  res: ResponseHelpers<TResponse>
   params: TParams
   query: TQuery
   body: TBody
@@ -23,6 +24,7 @@ export type RouteHandler<
   TQuery = unknown,
   TBody = unknown,
   TParams = Record<string, string>,
+  TResponse = unknown,
 > = (
-  context: RouteContext<TParams, TQuery, TBody>,
+  context: RouteContext<TParams, TQuery, TBody, TResponse>,
 ) => Promise<Response> | Response

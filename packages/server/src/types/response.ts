@@ -9,11 +9,12 @@ export interface ErrorResponse {
 
 /**
  * Response helper methods available in handlers
+ * @template TResponse - The expected response data type from the route schema
  */
-export interface ResponseHelpers {
-  // JSON responses
-  ok<T>(data: T, status?: number): Response
-  created<T>(data: T, location?: string): Response
+export interface ResponseHelpers<TResponse = unknown> {
+  // JSON responses - constrained to TResponse type
+  ok(data: TResponse, status?: number): Response
+  created(data: TResponse, location?: string): Response
   noContent(): Response
 
   // Error responses

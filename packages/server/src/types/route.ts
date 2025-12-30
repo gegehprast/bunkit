@@ -59,7 +59,7 @@ export interface RouteDefinition {
   middlewares?: MiddlewareFn[]
   security?: Array<Record<string, string[]>>
   handler: (
-    context: RouteContext<Record<string, string>, unknown, unknown>,
+    context: RouteContext<Record<string, string>, unknown, unknown, unknown>,
   ) => Promise<Response> | Response
 }
 

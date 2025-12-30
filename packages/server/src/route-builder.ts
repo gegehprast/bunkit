@@ -172,7 +172,7 @@ export class RouteBuilder<
   /**
    * Define the route handler (terminal operation)
    */
-  public handler(fn: RouteHandler<TQuery, TBody, TParams>): void {
+  public handler(fn: RouteHandler<TQuery, TBody, TParams, TResponse>): void {
     const definition: RouteDefinition = {
       method: this.method,
       path: this.path,
