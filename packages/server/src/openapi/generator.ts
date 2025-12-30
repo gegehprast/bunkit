@@ -3,6 +3,7 @@ import { createDocument } from "zod-openapi"
 import { routeRegistry } from "../route-registry"
 import type { RouteDefinition } from "../types/route"
 import type { OpenApiSpec } from "../types/server"
+import type { SecuritySchemeObject } from "./security-schemes"
 
 /**
  * Standard error response schema
@@ -22,7 +23,12 @@ const ErrorResponseSchema = z
  * Generate OpenAPI specification from registered routes
  */
 export function generateOpenApiSpec(
-  info: { title: string; version: string; description?: string } = {
+  info: {
+    title: string
+    version: string
+    description?: string
+    securitySchemes?: Record<string, SecuritySchemeObject>
+  } = {
     title: "API",
     version: "1.0.0",
   },
@@ -59,16 +65,11 @@ export function generateOpenApiSpec(
       description: info.description,
     },
     paths,
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-          description: "JWT authorization token",
-        },
-      },
-    },
+    components: info.securitySchemes
+      ? {
+          securitySchemes: info.securitySchemes,
+        }
+      : undefined,
   })
 
   return document as OpenApiSpec

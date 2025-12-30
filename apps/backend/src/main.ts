@@ -1,4 +1,4 @@
-import { createServer } from "@bunkit/server"
+import { createServer, SecuritySchemes } from "@bunkit/server"
 import z from "zod"
 import { config } from "@/config"
 import { logger } from "@/core/logger"
@@ -41,6 +41,9 @@ async function main() {
         title: "BunKit API",
         version: "1.0.0",
         description: "Production-ready HTTP API built with BunKit",
+        securitySchemes: {
+          bearerAuth: SecuritySchemes.bearerAuth(),
+        },
       },
     })
 

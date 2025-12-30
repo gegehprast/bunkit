@@ -94,6 +94,7 @@ export function createServer(options: ServerOptions = {}): Server {
         title: openapi.title ?? "API",
         version: openapi.version ?? "1.0.0",
         description: openapi.description,
+        securitySchemes: openapi.securitySchemes,
       })
     },
 

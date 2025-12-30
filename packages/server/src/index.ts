@@ -1,3 +1,8 @@
+export {
+  createSecurityScheme,
+  type SecuritySchemeObject,
+  SecuritySchemes,
+} from "./openapi/security-schemes"
 export { createRoute } from "./route-builder"
 export { routeRegistry } from "./route-registry"
 export { createServer } from "./server"

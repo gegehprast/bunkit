@@ -1,4 +1,5 @@
 import type { Result } from "@bunkit/result"
+import type { SecuritySchemeObject } from "../openapi/security-schemes"
 import type { CorsOptions } from "./cors"
 import type { MiddlewareFn } from "./middleware"
 
@@ -16,6 +17,7 @@ export interface ServerOptions {
     title?: string
     version?: string
     description?: string
+    securitySchemes?: Record<string, SecuritySchemeObject>
   }
 }
 
