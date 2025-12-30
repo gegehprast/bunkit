@@ -1,7 +1,7 @@
 import { ok, type Result } from "@bunkit/result"
 import { createDocument } from "zod-openapi"
 import { routeRegistry } from "../route-registry"
-import { ErrorResponseSchema } from "../standard-errors"
+import { CommonErrorResponses, ErrorResponseSchema } from "../standard-errors"
 import type { RouteDefinition } from "../types/route"
 import type { OpenApiSpec } from "../types/server"
 import type { SecuritySchemeObject } from "./security-schemes"
@@ -167,6 +167,22 @@ function buildOperation(route: RouteDefinition): Record<string, unknown> {
         },
       }
     }
+  }
+
+  // Add common error responses by default if not already defined
+  // 400 - Bad Request (if route has validation)
+  if (!responses["400"] && (route.querySchema || route.bodySchema)) {
+    responses["400"] = CommonErrorResponses[400]
+  }
+
+  // 401 - Unauthorized (if route requires authentication)
+  if (!responses["401"] && route.security && route.security.length > 0) {
+    responses["401"] = CommonErrorResponses[401]
+  }
+
+  // 500 - Internal Server Error (always add to all routes)
+  if (!responses["500"]) {
+    responses["500"] = CommonErrorResponses[500]
   }
 
   // Ensure at least a default response exists
