@@ -170,10 +170,7 @@ describe("@bunkit/server - Basic functionality", () => {
       })
       .handler(({ body, res }) => {
         if (!body.title.trim()) {
-          return res.badRequest({
-            message: "Title cannot be empty",
-            code: "INVALID_TITLE",
-          })
+          return res.badRequest("Title cannot be empty", "INVALID_TITLE")
         }
         return res.created({ id: "1", title: body.title })
       })
@@ -211,10 +208,7 @@ describe("@bunkit/server - Basic functionality", () => {
       .handler(({ params, res }) => {
         const todo = null // simulate not found
         if (!todo) {
-          return res.notFound({
-            message: "Todo not found",
-            code: "TODO_NOT_FOUND",
-          })
+          return res.notFound("Todo not found", "TODO_NOT_FOUND")
         }
         return res.ok({ id: params.id, title: "Test" })
       })
@@ -261,10 +255,10 @@ describe("@bunkit/server - Basic functionality", () => {
     const authMiddleware = async ({
       res,
     }: {
-      res: { unauthorized: (error: { message: string }) => Response }
+      res: { unauthorized: (message: string, code: string) => Response }
     }) => {
       // Middleware that returns response (short-circuits handler)
-      return res.unauthorized({ message: "Unauthorized" })
+      return res.unauthorized("Unauthorized", "UNAUTHORIZED")
     }
 
     createRoute("GET", "/api/protected")
@@ -400,17 +394,17 @@ describe("@bunkit/server - Basic functionality", () => {
 
     // Test badRequest
     createRoute("POST", "/api/badrequest").handler(({ res }) => {
-      return res.badRequest({ message: "Invalid input", code: "BAD_INPUT" })
+      return res.badRequest("Invalid input", "BAD_INPUT")
     })
 
     // Test unauthorized
     createRoute("GET", "/api/unauthorized").handler(({ res }) => {
-      return res.unauthorized("Missing token")
+      return res.unauthorized("Missing token", "UNAUTHORIZED")
     })
 
     // Test forbidden
     createRoute("GET", "/api/forbidden").handler(({ res }) => {
-      return res.forbidden({ message: "Access denied" })
+      return res.forbidden("Access denied", "FORBIDDEN")
     })
 
     // Test notFound
@@ -420,7 +414,7 @@ describe("@bunkit/server - Basic functionality", () => {
 
     // Test internalError
     createRoute("GET", "/api/error").handler(({ res }) => {
-      return res.internalError({ message: "Something went wrong" })
+      return res.internalError("Something went wrong", "INTERNAL_ERROR")
     })
 
     // Test text

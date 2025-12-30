@@ -17,12 +17,12 @@ export interface ResponseHelpers<TResponse = unknown> {
   created(data: TResponse, location?: string): Response
   noContent(): Response
 
-  // Error responses
-  badRequest(error: ErrorResponse | string, code?: string): Response
-  unauthorized(error: ErrorResponse | string, code?: string): Response
-  forbidden(error: ErrorResponse | string, code?: string): Response
-  notFound(error: ErrorResponse | string, code?: string): Response
-  internalError(error: ErrorResponse | string, code?: string): Response
+  // Error responses - all require message, code, and optional details
+  badRequest(message: string, code?: string, details?: unknown): Response
+  unauthorized(message: string, code?: string, details?: unknown): Response
+  forbidden(message: string, code?: string, details?: unknown): Response
+  notFound(message: string, code?: string, details?: unknown): Response
+  internalError(message: string, code?: string, details?: unknown): Response
 
   // Other content types
   text(content: string, status?: number): Response

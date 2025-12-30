@@ -1,24 +1,10 @@
 import { ok, type Result } from "@bunkit/result"
-import { z } from "zod"
 import { createDocument } from "zod-openapi"
 import { routeRegistry } from "../route-registry"
+import { ErrorResponseSchema } from "../standard-errors"
 import type { RouteDefinition } from "../types/route"
 import type { OpenApiSpec } from "../types/server"
 import type { SecuritySchemeObject } from "./security-schemes"
-
-/**
- * Standard error response schema
- */
-const ErrorResponseSchema = z
-  .object({
-    message: z.string().meta({ description: "Error message" }),
-    code: z.string().optional().meta({ description: "Error code" }),
-    details: z
-      .any()
-      .optional()
-      .meta({ description: "Additional error details" }),
-  })
-  .meta({ id: "ErrorResponse" })
 
 /**
  * Generate OpenAPI specification from registered routes
@@ -59,7 +45,7 @@ export function generateOpenApiSpec(
     paths[openApiPath] = pathItem
   }
 
-  // Create document using zod-openapi
+  // Create document using zod-openapi with standard error schema
   const document = createDocument({
     openapi: "3.1.0",
     info: {
@@ -68,11 +54,16 @@ export function generateOpenApiSpec(
       description: info.description,
     },
     paths,
-    components: info.securitySchemes
-      ? {
-          securitySchemes: info.securitySchemes,
-        }
-      : undefined,
+    components: {
+      schemas: {
+        ErrorResponse: ErrorResponseSchema,
+      },
+      ...(info.securitySchemes
+        ? {
+            securitySchemes: info.securitySchemes,
+          }
+        : {}),
+    },
   })
 
   return ok(document as OpenApiSpec)
@@ -183,9 +174,7 @@ function buildOperation(route: RouteDefinition): Record<string, unknown> {
     responses["200"] = {
       description: "Success",
       content: {
-        "application/json": {
-          schema: z.any(),
-        },
+        "application/json": {},
       },
     }
   }

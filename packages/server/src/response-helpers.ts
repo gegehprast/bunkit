@@ -1,14 +1,15 @@
+import { ErrorCode } from "./standard-errors"
 import type { ErrorResponse, ResponseHelpers } from "./types/response"
 
 // JSON responses
-function ok<T>(data: T, status = 200): Response {
+export function ok<T>(data: T, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
     headers: { "Content-Type": "application/json" },
   })
 }
 
-function created<T>(data: T, location?: string): Response {
+export function created<T>(data: T, location?: string): Response {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   }
@@ -21,50 +22,65 @@ function created<T>(data: T, location?: string): Response {
   })
 }
 
-function noContent(): Response {
+export function noContent(): Response {
   return new Response(null, { status: 204 })
 }
 
 // Error responses
-function badRequest(error: ErrorResponse | string, code?: string): Response {
-  const body: ErrorResponse =
-    typeof error === "string" ? { message: error, code } : error
+export function badRequest(
+  message: string,
+  code: string = ErrorCode.BAD_REQUEST,
+  details?: unknown,
+): Response {
+  const body: ErrorResponse = { message, code, details }
   return new Response(JSON.stringify(body), {
     status: 400,
     headers: { "Content-Type": "application/json" },
   })
 }
 
-function unauthorized(error: ErrorResponse | string, code?: string): Response {
-  const body: ErrorResponse =
-    typeof error === "string" ? { message: error, code } : error
+export function unauthorized(
+  message: string,
+  code: string = ErrorCode.UNAUTHORIZED,
+  details?: unknown,
+): Response {
+  const body: ErrorResponse = { message, code, details }
   return new Response(JSON.stringify(body), {
     status: 401,
     headers: { "Content-Type": "application/json" },
   })
 }
 
-function forbidden(error: ErrorResponse | string, code?: string): Response {
-  const body: ErrorResponse =
-    typeof error === "string" ? { message: error, code } : error
+export function forbidden(
+  message: string,
+  code: string = ErrorCode.FORBIDDEN,
+  details?: unknown,
+): Response {
+  const body: ErrorResponse = { message, code, details }
   return new Response(JSON.stringify(body), {
     status: 403,
     headers: { "Content-Type": "application/json" },
   })
 }
 
-function notFound(error: ErrorResponse | string, code?: string): Response {
-  const body: ErrorResponse =
-    typeof error === "string" ? { message: error, code } : error
+export function notFound(
+  message: string,
+  code: string = ErrorCode.NOT_FOUND,
+  details?: unknown,
+): Response {
+  const body: ErrorResponse = { message, code, details }
   return new Response(JSON.stringify(body), {
     status: 404,
     headers: { "Content-Type": "application/json" },
   })
 }
 
-function internalError(error: ErrorResponse | string, code?: string): Response {
-  const body: ErrorResponse =
-    typeof error === "string" ? { message: error, code } : error
+export function internalError(
+  message: string,
+  code: string = ErrorCode.INTERNAL_ERROR,
+  details?: unknown,
+): Response {
+  const body: ErrorResponse = { message, code, details }
   return new Response(JSON.stringify(body), {
     status: 500,
     headers: { "Content-Type": "application/json" },
@@ -72,21 +88,24 @@ function internalError(error: ErrorResponse | string, code?: string): Response {
 }
 
 // Other content types
-function text(content: string, status = 200): Response {
+export function text(content: string, status = 200): Response {
   return new Response(content, {
     status,
     headers: { "Content-Type": "text/plain; charset=utf-8" },
   })
 }
 
-function html(content: string, status = 200): Response {
+export function html(content: string, status = 200): Response {
   return new Response(content, {
     status,
     headers: { "Content-Type": "text/html; charset=utf-8" },
   })
 }
 
-async function file(path: string, contentType?: string): Promise<Response> {
+export async function file(
+  path: string,
+  contentType?: string,
+): Promise<Response> {
   const file = Bun.file(path)
   const exists = await file.exists()
 
@@ -108,7 +127,7 @@ async function file(path: string, contentType?: string): Promise<Response> {
   return new Response(file, { headers })
 }
 
-function stream(
+export function stream(
   readable: ReadableStream,
   contentType = "application/octet-stream",
 ): Response {
@@ -117,14 +136,14 @@ function stream(
   })
 }
 
-function redirect(url: string, status = 302): Response {
+export function redirect(url: string, status = 302): Response {
   return new Response(null, {
     status,
     headers: { Location: url },
   })
 }
 
-function custom(
+export function custom(
   body: string | null,
   options: ResponseInit & { status?: number },
 ): Response {

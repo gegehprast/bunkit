@@ -1,5 +1,6 @@
 import type { z } from "zod"
 import { routeRegistry } from "./route-registry"
+import { CommonErrorResponses } from "./standard-errors"
 import type { RouteHandler } from "./types/context"
 import type { MiddlewareFn } from "./types/middleware"
 import type {
@@ -137,6 +138,7 @@ export class RouteBuilder<
 
   /**
    * Add standard error responses by status code
+   * Uses predefined error response schemas from CommonErrorResponses
    */
   public errors(
     statusCodes: number[],
@@ -146,13 +148,20 @@ export class RouteBuilder<
     }
 
     for (const status of statusCodes) {
-      this._errorResponses[status] = {
-        description: this.getErrorDescription(status),
-        content: {
-          "application/json": {
-            schema: undefined, // Will use standard error schema
+      // Use common error response if available, otherwise create a basic one
+      const commonError =
+        CommonErrorResponses[status as keyof typeof CommonErrorResponses]
+      if (commonError) {
+        this._errorResponses[status] = commonError
+      } else {
+        this._errorResponses[status] = {
+          description: this.getErrorDescription(status),
+          content: {
+            "application/json": {
+              // Will use standard ErrorResponse schema
+            },
           },
-        },
+        }
       }
     }
 

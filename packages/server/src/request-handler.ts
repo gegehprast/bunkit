@@ -1,7 +1,8 @@
 import { createPreflightResponse } from "./cors"
 import { createMiddlewareArgs, executeMiddlewareChain } from "./middleware"
-import { createResponseHelpers } from "./response-helpers"
+import { badRequest, createResponseHelpers, notFound } from "./response-helpers"
 import { routeRegistry } from "./route-registry"
+import { ErrorCode } from "./standard-errors"
 import type { MiddlewareFn } from "./types/middleware"
 import type { HttpMethod } from "./types/route"
 import type { ServerOptions } from "./types/server"
@@ -29,13 +30,7 @@ export async function handleRequest(
   const match = routeRegistry.match(method, url.pathname)
 
   if (!match) {
-    return new Response(
-      JSON.stringify({ message: "Not Found", code: "ROUTE_NOT_FOUND" }),
-      {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      },
-    )
+    return notFound("Route not found", ErrorCode.NOT_FOUND)
   }
 
   const { definition, params } = match
@@ -46,16 +41,10 @@ export async function handleRequest(
   // Parse request body
   const bodyResult = await parseBody(request)
   if (bodyResult.isErr()) {
-    return new Response(
-      JSON.stringify({
-        message: "Failed to parse request body",
-        code: "BODY_PARSE_ERROR",
-        details: bodyResult.error.message,
-      }),
-      {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      },
+    return badRequest(
+      "Failed to parse request body",
+      ErrorCode.BAD_REQUEST,
+      bodyResult.error.message,
     )
   }
 
@@ -66,16 +55,10 @@ export async function handleRequest(
   if (definition.querySchema) {
     const queryResult = validateSchema(definition.querySchema, queryParams)
     if (queryResult.isErr()) {
-      return new Response(
-        JSON.stringify({
-          message: "Query validation failed",
-          code: "QUERY_VALIDATION_ERROR",
-          details: queryResult.error.issues,
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        },
+      return badRequest(
+        "Query validation failed",
+        ErrorCode.BAD_REQUEST,
+        queryResult.error.issues,
       )
     }
     query = queryResult.value
@@ -85,16 +68,10 @@ export async function handleRequest(
   if (definition.bodySchema) {
     const bodyValidationResult = validateSchema(definition.bodySchema, body)
     if (bodyValidationResult.isErr()) {
-      return new Response(
-        JSON.stringify({
-          message: "Body validation failed",
-          code: "BODY_VALIDATION_ERROR",
-          details: bodyValidationResult.error.issues,
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        },
+      return badRequest(
+        "Body validation failed",
+        ErrorCode.BAD_REQUEST,
+        bodyValidationResult.error.issues,
       )
     }
     body = bodyValidationResult.value
@@ -126,16 +103,10 @@ export async function handleRequest(
       return response
     } catch (error) {
       console.error("Handler error:", error)
-      return new Response(
-        JSON.stringify({
-          message: "Internal Server Error",
-          code: "HANDLER_ERROR",
-          details: error instanceof Error ? error.message : "Unknown error",
-        }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        },
+      return res.internalError(
+        "Internal Server Error",
+        ErrorCode.INTERNAL_ERROR,
+        error instanceof Error ? error.message : "Unknown error",
       )
     }
   }
