@@ -57,6 +57,7 @@ export interface RouteDefinition {
   responses?: Record<number, ResponseConfig>
   errorResponses?: Record<number, ResponseConfig>
   middlewares?: MiddlewareFn[]
+  security?: Array<Record<string, string[]>>
   handler: (
     context: RouteContext<Record<string, string>, unknown, unknown>,
   ) => Promise<Response> | Response

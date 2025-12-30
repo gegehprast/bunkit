@@ -229,6 +229,7 @@ createRoute("GET", "/auth/me")
     description: "Get the authenticated user's profile (requires Bearer token)",
     tags: ["Authentication"],
   })
+  .security([{ bearerAuth: [] }])
   .middlewares(authMiddleware())
   .response(UserResponseSchema)
   .errorResponses({

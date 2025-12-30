@@ -76,6 +76,7 @@ createRoute("GET", "/api/todos")
       "Lists all todo items for the authenticated user (requires Bearer token)",
     tags: ["Todos"],
   })
+  .security([{ bearerAuth: [] }])
   .middlewares(authMiddleware())
   .query(ListTodosQuerySchema)
   .response(z.array(TodoSchema))
@@ -124,6 +125,7 @@ createRoute("POST", "/api/todos")
       "Creates a new todo for the authenticated user (requires Bearer token)",
     tags: ["Todos"],
   })
+  .security([{ bearerAuth: [] }])
   .middlewares(authMiddleware())
   .body(CreateTodoBodySchema)
   .response(TodoSchema)
@@ -167,6 +169,7 @@ createRoute("GET", "/api/todos/:id")
       "Retrieves a specific todo item by its ID (requires Bearer token)",
     tags: ["Todos"],
   })
+  .security([{ bearerAuth: [] }])
   .middlewares(authMiddleware())
   .response(TodoSchema)
   .handler(async ({ ctx, params, res }) => {
@@ -214,6 +217,7 @@ createRoute("PUT", "/api/todos/:id")
     description: "Updates a todo item by its ID (requires Bearer token)",
     tags: ["Todos"],
   })
+  .security([{ bearerAuth: [] }])
   .middlewares(authMiddleware())
   .body(UpdateTodoBodySchema)
   .response(TodoSchema)
@@ -275,6 +279,7 @@ createRoute("DELETE", "/api/todos/:id")
     description: "Deletes a todo item by its ID (requires Bearer token)",
     tags: ["Todos"],
   })
+  .security([{ bearerAuth: [] }])
   .middlewares(authMiddleware())
   .response(z.object({ message: z.string() }))
   .handler(async ({ ctx, params, res }) => {

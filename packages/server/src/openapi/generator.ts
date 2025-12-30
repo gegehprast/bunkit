@@ -59,6 +59,16 @@ export function generateOpenApiSpec(
       description: info.description,
     },
     paths,
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "JWT authorization token",
+        },
+      },
+    },
   })
 
   return document as OpenApiSpec
@@ -177,6 +187,11 @@ function buildOperation(route: RouteDefinition): Record<string, unknown> {
   }
 
   operation.responses = responses
+
+  // Add security if route has security requirements
+  if (route.security) {
+    operation.security = route.security
+  }
 
   return operation
 }

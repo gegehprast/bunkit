@@ -28,6 +28,7 @@ export class RouteBuilder<
   private _responses?: Record<number, ResponseConfig>
   private _errorResponses?: Record<number, ResponseConfig>
   private _middlewares: MiddlewareFn[] = []
+  private _security?: Array<Record<string, string[]>>
 
   public constructor(
     private readonly method: HttpMethod,
@@ -51,6 +52,17 @@ export class RouteBuilder<
     ...fns: MiddlewareFn[]
   ): RouteBuilder<TPath, TQuery, TBody, TParams, TResponse> {
     this._middlewares.push(...fns)
+    return this
+  }
+
+  /**
+   * Add security requirements for this route
+   * Example: .security([{ bearerAuth: [] }])
+   */
+  public security(
+    requirements: Array<Record<string, string[]>>,
+  ): RouteBuilder<TPath, TQuery, TBody, TParams, TResponse> {
+    this._security = requirements
     return this
   }
 
@@ -171,6 +183,7 @@ export class RouteBuilder<
       responses: this._responses,
       errorResponses: this._errorResponses,
       middlewares: this._middlewares,
+      security: this._security,
       handler: fn as unknown as RouteDefinition["handler"],
     }
 
