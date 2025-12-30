@@ -56,7 +56,7 @@ function isOriginAllowed(
 /**
  * Create preflight response for OPTIONS requests
  */
-function createPreflightResponse(
+export function createPreflightResponse(
   origin: string | null,
   options: CorsOptions,
 ): Response {

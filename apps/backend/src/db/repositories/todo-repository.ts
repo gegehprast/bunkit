@@ -6,7 +6,7 @@
  */
 
 import type { Result } from "@bunkit/result"
-import { and, desc, eq, sql } from "drizzle-orm"
+import { and, asc, desc, eq, sql } from "drizzle-orm"
 import type { DatabaseError } from "@/core/errors"
 import { type NewTodo, type Todo, todos } from "@/db/schemas/todos.schema"
 import { BaseRepository, RepositoryErrors } from "./base-repository"
@@ -51,7 +51,7 @@ export class TodoRepository extends BaseRepository {
         .select()
         .from(todos)
         .where(and(...conditions))
-        .orderBy(desc(todos.createdAt))
+        .orderBy(asc(todos.createdAt))
 
       if (options?.limit) {
         query = query.limit(options.limit) as typeof query

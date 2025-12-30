@@ -44,7 +44,7 @@ export function createServer(options: ServerOptions = {}): Server {
           hostname: host,
           development,
           async fetch(request: Request): Promise<Response> {
-            return handleRequest(request, middlewares)
+            return handleRequest(request, middlewares, options)
           },
           error(error: Error): Response {
             console.error("Server error:", error)

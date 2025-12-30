@@ -9,18 +9,22 @@
         "lint": "bun run scripts/lint.ts",
         "typecheck": "bunx --bun tsc --noEmit",
         "test": "bun run scripts/test.ts",
+
         "dev:backend": "bun --filter @apps/backend --elide-lines=0 dev",
         "build:backend": "bun --filter @apps/backend --elide-lines=0 build",
         "start:backend": "bun --filter @apps/backend --elide-lines=0 start",
         "start:backend:bundled": "bun --filter @apps/backend --elide-lines=0 start:bundled",
         "typecheck:backend": "bun --filter @apps/backend --elide-lines=0 typecheck",
+
         "dev:frontend": "bun --filter @apps/frontend --elide-lines=0 dev",
         "build:frontend": "bun --filter @apps/frontend --elide-lines=0 build",
         "preview:frontend": "bun --filter @apps/frontend --elide-lines=0 preview",
         "typecheck:frontend": "bun --filter @apps/frontend --elide-lines=0 typecheck",
+
         "db:generate:backend": "bun --filter @apps/backend --elide-lines=0 db:generate",
         "db:migrate:backend": "bun --filter @apps/backend --elide-lines=0 db:migrate",
         "db:studio:backend": "bun --filter @apps/backend --elide-lines=0 db:studio",
+
         "openapi:generate:backend": "bun --filter @apps/backend --elide-lines=0 openapi:generate",
         "openapi:generate:backend:to-frontend": "bun --filter @apps/backend --elide-lines=0 openapi:generate --types --output=../../apps/frontend/src/generated"
     },

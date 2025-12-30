@@ -231,7 +231,7 @@ describe("@bunkit/server - Basic functionality", () => {
     const firstMiddleware = async ({
       next,
     }: {
-      next: () => Promise<Response | undefined>
+      next: () => Promise<Response>
     }) => {
       return next()
     }
@@ -239,7 +239,7 @@ describe("@bunkit/server - Basic functionality", () => {
     const secondMiddleware = async ({
       next,
     }: {
-      next: () => Promise<Response | undefined>
+      next: () => Promise<Response>
     }) => {
       return next()
     }
@@ -286,7 +286,7 @@ describe("@bunkit/server - Basic functionality", () => {
       next,
     }: {
       ctx: Record<string, unknown>
-      next: () => Promise<Response | undefined>
+      next: () => Promise<Response>
     }) => {
       ctx.user = { id: "123", name: "John" }
       ctx.timestamp = Date.now()

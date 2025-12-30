@@ -13,4 +13,12 @@ export const server = createServer({
       basicAuth: SecuritySchemes.basicAuth(),
     },
   },
+  cors: {
+    origin: (origin) => {
+      console.log("CORS origin check:", origin)
+      const allowedOrigins = config.CORS_ORIGIN.split(",").map((o) => o.trim())
+      return allowedOrigins.includes(origin)
+    },
+    credentials: true,
+  },
 })

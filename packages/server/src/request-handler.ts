@@ -1,8 +1,10 @@
+import { createPreflightResponse } from "./cors"
 import { createMiddlewareArgs, executeMiddlewareChain } from "./middleware"
 import { createResponseHelpers } from "./response-helpers"
 import { routeRegistry } from "./route-registry"
 import type { MiddlewareFn } from "./types/middleware"
 import type { HttpMethod } from "./types/route"
+import type { ServerOptions } from "./types/server"
 import { parseBody, parseQueryParams, validateSchema } from "./validation"
 
 /**
@@ -11,9 +13,24 @@ import { parseBody, parseQueryParams, validateSchema } from "./validation"
 export async function handleRequest(
   request: Request,
   globalMiddlewares: MiddlewareFn[],
+  serverOptions: ServerOptions,
 ): Promise<Response> {
   const url = new URL(request.url)
   const method = request.method as HttpMethod
+
+  // Handle OPTIONS requests (CORS preflight) before route matching
+  // This allows CORS middleware to respond even if no route is defined
+  if (method === "OPTIONS" && serverOptions.cors) {
+    const origin = request.headers.get("origin")
+    return createPreflightResponse(origin, serverOptions.cors)
+  }
+
+  console.log(
+    "Handling request:",
+    method,
+    url.pathname,
+    globalMiddlewares.length,
+  )
 
   // Find matching route
   const match = routeRegistry.match(method, url.pathname)
@@ -102,7 +119,37 @@ export async function handleRequest(
     ...(definition.middlewares ?? []),
   ]
 
-  // Execute middleware chain
+  console.log("Executing middlewares, total count:", allMiddlewares.length)
+
+  // Create the handler wrapper that will be the final step in the chain
+  const handlerFn = async (): Promise<Response> => {
+    try {
+      const response = await definition.handler({
+        req: request,
+        res,
+        params,
+        query,
+        body,
+        ctx,
+      })
+      return response
+    } catch (error) {
+      console.error("Handler error:", error)
+      return new Response(
+        JSON.stringify({
+          message: "Internal Server Error",
+          code: "HANDLER_ERROR",
+          details: error instanceof Error ? error.message : "Unknown error",
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        },
+      )
+    }
+  }
+
+  // Execute middleware chain with handler
   if (allMiddlewares.length > 0) {
     const middlewareArgs = createMiddlewareArgs(
       request,
@@ -113,41 +160,15 @@ export async function handleRequest(
       res,
     )
 
-    const middlewareResult = await executeMiddlewareChain(
+    const response = await executeMiddlewareChain(
       allMiddlewares,
       middlewareArgs,
+      handlerFn,
     )
-
-    // If middleware returned a response, short-circuit
-    if (middlewareResult) {
-      return middlewareResult
-    }
-  }
-
-  // Execute handler
-  try {
-    const response = await definition.handler({
-      req: request,
-      res,
-      params,
-      query,
-      body,
-      ctx,
-    })
 
     return response
-  } catch (error) {
-    console.error("Handler error:", error)
-    return new Response(
-      JSON.stringify({
-        message: "Internal Server Error",
-        code: "HANDLER_ERROR",
-        details: error instanceof Error ? error.message : "Unknown error",
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      },
-    )
   }
+
+  // No middlewares, execute handler directly
+  return handlerFn()
 }

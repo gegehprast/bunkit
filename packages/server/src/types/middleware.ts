@@ -10,7 +10,7 @@ export interface MiddlewareArgs {
   body: unknown
   ctx: Record<string, unknown>
   res: ResponseHelpers
-  next: () => Promise<Response | undefined>
+  next: () => Promise<Response>
 }
 
 /**
@@ -18,4 +18,4 @@ export interface MiddlewareArgs {
  */
 export type MiddlewareFn = (
   context: MiddlewareArgs,
-) => Promise<Response | undefined> | Response | undefined
+) => Promise<Response> | Response

@@ -3,22 +3,26 @@ import type { ResponseHelpers } from "./types/response"
 
 /**
  * Execute middleware chain
- * Returns Response if chain is short-circuited, undefined if handler should run
+ * Returns Response from handler or middleware that short-circuits
  */
 export async function executeMiddlewareChain(
   middlewares: MiddlewareFn[],
   args: MiddlewareArgs,
-): Promise<Response | undefined> {
+  handler: () => Promise<Response>,
+): Promise<Response> {
   let index = 0
 
-  async function next(): Promise<Response | undefined> {
+  async function next(): Promise<Response> {
     if (index >= middlewares.length) {
-      return undefined
+      // End of middleware chain, execute handler
+      return handler()
     }
 
     const middleware = middlewares[index]
+
+    // No middleware or end of chain, execute handler
     if (!middleware) {
-      return undefined
+      return handler()
     }
 
     index++
@@ -31,7 +35,8 @@ export async function executeMiddlewareChain(
     return result
   }
 
-  return next()
+  const result = await next()
+  return result
 }
 
 /**
@@ -52,6 +57,8 @@ export function createMiddlewareArgs(
     body,
     ctx,
     res,
-    next: async () => undefined, // Will be replaced by executeMiddlewareChain
+    next: async () => {
+      throw new Error("next() not implemented")
+    }, // Will be replaced by executeMiddlewareChain
   }
 }
