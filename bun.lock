@@ -34,6 +34,15 @@
       "name": "@bunkit/result",
       "version": "1.0.0",
     },
+    "packages/server": {
+      "name": "@bunkit/server",
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
   },
   "catalog": {
     "@tailwindcss/vite": "^4.1.18",
@@ -88,6 +97,8 @@
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.3.10", "", { "os": "win32", "cpu": "x64" }, "sha512-pHEFgq7dUEsKnqG9mx9bXihxGI49X+ar+UBrEIj3Wqj3UCZp1rNgV+OoyjFgcXsjCWpuEAF4VJdkZr3TrWdCbQ=="],
 
     "@bunkit/result": ["@bunkit/result@workspace:packages/result"],
+
+    "@bunkit/server": ["@bunkit/server@workspace:packages/server"],
 
     "@drizzle-team/brocli": ["@drizzle-team/brocli@0.10.2", "", {}, "sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w=="],
 

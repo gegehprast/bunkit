@@ -1,0 +1,16 @@
+{
+  "name": "@bunkit/server",
+  "version": "0.0.1",
+  "module": "./src/index.ts",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "engines": {
+    "bun": ">=1.3.3"
+  }
+}
