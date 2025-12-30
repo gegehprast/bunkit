@@ -1,4 +1,4 @@
-import type { MiddlewareFn, MiddlewareArgs } from "./types/middleware"
+import type { MiddlewareArgs, MiddlewareFn } from "./types/middleware"
 import type { ResponseHelpers } from "./types/response"
 
 /**
@@ -6,52 +6,52 @@ import type { ResponseHelpers } from "./types/response"
  * Returns Response if chain is short-circuited, undefined if handler should run
  */
 export async function executeMiddlewareChain(
-	middlewares: MiddlewareFn[],
-	args: MiddlewareArgs,
+  middlewares: MiddlewareFn[],
+  args: MiddlewareArgs,
 ): Promise<Response | undefined> {
-	let index = 0
+  let index = 0
 
-	async function next(): Promise<Response | undefined> {
-		if (index >= middlewares.length) {
-			return undefined
-		}
+  async function next(): Promise<Response | undefined> {
+    if (index >= middlewares.length) {
+      return undefined
+    }
 
-		const middleware = middlewares[index]
-		if (!middleware) {
-			return undefined
-		}
+    const middleware = middlewares[index]
+    if (!middleware) {
+      return undefined
+    }
 
-		index++
+    index++
 
-		const result = await middleware({
-			...args,
-			next,
-		})
+    const result = await middleware({
+      ...args,
+      next,
+    })
 
-		return result
-	}
+    return result
+  }
 
-	return next()
+  return next()
 }
 
 /**
  * Create middleware execution arguments
  */
 export function createMiddlewareArgs(
-	req: Request,
-	params: Record<string, string>,
-	query: unknown,
-	body: unknown,
-	ctx: Record<string, unknown>,
-	res: ResponseHelpers,
+  req: Request,
+  params: Record<string, string>,
+  query: unknown,
+  body: unknown,
+  ctx: Record<string, unknown>,
+  res: ResponseHelpers,
 ): MiddlewareArgs {
-	return {
-		req,
-		params,
-		query,
-		body,
-		ctx,
-		res,
-		next: async () => undefined, // Will be replaced by executeMiddlewareChain
-	}
+  return {
+    req,
+    params,
+    query,
+    body,
+    ctx,
+    res,
+    next: async () => undefined, // Will be replaced by executeMiddlewareChain
+  }
 }

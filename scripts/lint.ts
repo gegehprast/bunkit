@@ -9,7 +9,7 @@
  */
 const commands = [
   { name: "Biome Lint", cmd: "bunx --bun biome lint --write" },
-  { name: "Typecheck Root", cmd: "bun run typecheck" },
+  { name: "Typecheck Root & Packages", cmd: "bun run typecheck" },
 ]
 
 async function runLint() {
