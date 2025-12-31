@@ -258,6 +258,12 @@ const ChatSchema = z.object({ text: z.string(), room: z.string().optional() })
 const PingSchema = z.object({ timestamp: z.number() })
 const JoinSchema = z.object({ room: z.string() })
 
+// Define all possible client -> server messages (optional, for documentation)
+type ClientMessage =
+  | { type: "chat", data: { text: string, room?: string } }
+  | { type: "ping", data: { timestamp: number } }
+  | { type: "join", data: { room: string } }
+
 // Define all possible server -> client messages
 type ServerMessage =
   | { type: "message", user: string, text: string, room: string }
@@ -266,7 +272,8 @@ type ServerMessage =
   | { type: "error", message: string, code?: string }
 
 createWebSocketRoute("/api/chat")
-  .serverMessages<ServerMessage>()  // ✅ Type-safe outgoing messages
+  .clientMessages<ClientMessage>()   // Optional: document client message contract
+  .serverMessages<ServerMessage>()   // Required: type-safe outgoing messages
   .authenticate(authMiddleware)
   .on("chat", ChatSchema, (ws, data, ctx) => {
     const room = data.room ?? "general"
@@ -493,7 +500,54 @@ type CloseHandler<TUser = unknown> = (
 ) => Promise<void> | void
 ```
 
+**Type Safety Methods:**
+
+| Method | Purpose | Required? |
+|--------|---------|----------|
+| `.clientMessages<T>()` | Document client message contract, used for type generation | Optional |
+| `.serverMessages<T>()` | Enforce type safety on `ws.send()` and `ws.publish()` | Required |
+
 ## Integration with HTTP Server
+
+**Architecture: Single Bun.serve Instance**
+
+HTTP and WebSocket routes are served from the **same** `Bun.serve()` instance:
+
+```typescript
+// Internally, the server uses a single Bun.serve:
+Bun.serve({
+  port: 3000,
+  
+  // Handle HTTP requests AND WebSocket upgrades
+  fetch(req, server) {
+    // Check if it's a WebSocket upgrade request
+    const wsRoute = findWebSocketRoute(req.url)
+    if (wsRoute && req.headers.get("upgrade") === "websocket") {
+      // Upgrade to WebSocket
+      if (server.upgrade(req, { data: { route: wsRoute } })) {
+        return  // WebSocket connection established
+      }
+      return new Response("WebSocket upgrade failed", { status: 400 })
+    }
+    
+    // Otherwise handle as HTTP request
+    return handleHTTPRequest(req)
+  },
+  
+  // WebSocket handlers
+  websocket: {
+    open(ws) { /* connection opened */ },
+    message(ws, message) { /* dispatch to route handler */ },
+    close(ws, code, reason) { /* connection closed */ },
+  }
+})
+```
+
+**Benefits:**
+- ✅ **Same port** - HTTP and WebSocket on same port (e.g., `http://localhost:3000` + `ws://localhost:3000`)
+- ✅ **Same origin** - No CORS issues between HTTP and WebSocket
+- ✅ **Shared resources** - Same server instance, memory, auth system
+- ✅ **Simple deployment** - One process handles everything
 
 **Server Options:**
 ```typescript
@@ -842,16 +896,17 @@ createWebSocketRoute("/document/:docId")
 ## Design Decisions Summary
 
 1. **Route API:** Separate WebSocket Routes (not HTTP upgrade) ✅
-2. **Message Handling:** Multiple Typed Handlers (`.on(type, schema, handler)`) ✅
-3. **Type Safety:** `.serverMessages<T>()` for type-safe send/publish ✅
-4. **Client Types:** Auto-generate TypeScript types file ✅
-5. **Rooms/Channels:** Bun's native subscribe/publish (no built-in manager) ✅
-6. **Broadcasting:** `server.publish()` + `webSocketRegistry` for filtering ✅
-7. **State Management:** Users implement their own (no built-in Redis) ✅
-8. **Compression:** Enabled by default, configurable ✅
-9. **Binary Messages:** Support with separate `.onBinary(handler)` ✅
-10. **Backpressure:** Expose `getBufferedAmount()`, document patterns ✅
-11. **AsyncAPI Generation:** Skip for now ✅
+2. **Server Instance:** Same `Bun.serve()` for HTTP + WebSocket ✅
+3. **Message Handling:** Multiple Typed Handlers (`.on(type, schema, handler)`) ✅
+4. **Type Safety:** `.serverMessages<T>()` for send/publish, `.clientMessages<T>()` optional ✅
+5. **Client Types:** Auto-generate TypeScript types file ✅
+6. **Rooms/Channels:** Bun's native subscribe/publish (no built-in manager) ✅
+7. **Broadcasting:** `server.publish()` + `webSocketRegistry` for filtering ✅
+8. **State Management:** Users implement their own (no built-in Redis) ✅
+9. **Compression:** Enabled by default, configurable ✅
+10. **Binary Messages:** Support with separate `.onBinary(handler)` ✅
+11. **Backpressure:** Expose `getBufferedAmount()`, document patterns ✅
+12. **AsyncAPI Generation:** Skip for now ✅
 
 ## Next Steps
 
