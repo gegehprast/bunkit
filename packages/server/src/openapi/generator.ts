@@ -1,6 +1,6 @@
 import { ok, type Result } from "@bunkit/result"
 import { createDocument } from "zod-openapi"
-import { routeRegistry } from "../route-registry"
+import { routeRegistry } from "../http/route-registry"
 import { CommonErrorResponses, ErrorResponseSchema } from "../standard-errors"
 import type { RouteDefinition } from "../types/route"
 import type { OpenApiSpec } from "../types/server"
