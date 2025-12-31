@@ -662,7 +662,9 @@ await server.start()
 
 **Use Case:** Background jobs, scheduled tasks, or services that need to push updates to connected clients.
 
-### Option A: Server-Level Publish
+We provide two main mechanisms:
+
+### Server-Level Publish
 
 ```typescript
 // main.ts
@@ -696,7 +698,7 @@ setInterval(async () => {
 }, 5000)
 ```
 
-### Option B: Global WebSocket Registry
+### Global WebSocket Registry
 
 ```typescript
 // Background service can access all connections
@@ -724,38 +726,6 @@ setInterval(async () => {
   }
 }, 10000)
 ```
-
-### Option C: Event Emitter Pattern
-
-```typescript
-// Create a global event bus
-import { EventEmitter } from "events"
-export const wsEvents = new EventEmitter()
-
-// WebSocket route listens to events
-createWebSocketRoute("/updates")
-  .onConnect((ws, ctx) => {
-    const handler = (data: unknown) => {
-      ws.send({ type: "update", data })
-    }
-    
-    wsEvents.on(`user:${ctx.user.id}`, handler)
-    
-    ws.onClose(() => {
-      wsEvents.off(`user:${ctx.user.id}`, handler)
-    })
-  })
-
-// Background service emits events
-import { wsEvents } from './events'
-
-setInterval(() => {
-  const data = { temperature: 25 }
-  wsEvents.emit(`user:123`, data) // Send to specific user
-}, 1000)
-```
-
-**Recommendation: Option A (Server Publish) + Option B (Registry for filtering)**
 
 This gives flexibility:
 - Use `server.publish(topic, data)` for pub/sub (most common)
