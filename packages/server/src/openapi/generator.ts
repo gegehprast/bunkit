@@ -1,6 +1,6 @@
 import { ok, type Result } from "@bunkit/result"
 import { createDocument } from "zod-openapi"
-import { routeRegistry } from "../http/route-registry"
+import { type RouteRegistry, routeRegistry } from "../http/route-registry"
 import { CommonErrorResponses, ErrorResponseSchema } from "../standard-errors"
 import type { RouteDefinition } from "../types/route"
 import type { OpenApiSpec } from "../types/server"
@@ -8,6 +8,8 @@ import type { SecuritySchemeObject } from "./security-schemes"
 
 /**
  * Generate OpenAPI specification from registered routes
+ * @param info - API info and configuration
+ * @param localRegistry - Optional local route registry (uses global if not provided)
  */
 export function generateOpenApiSpec(
   info: {
@@ -19,8 +21,11 @@ export function generateOpenApiSpec(
     title: "API",
     version: "1.0.0",
   },
+  localRegistry?: RouteRegistry,
 ): Result<OpenApiSpec, Error> {
-  const routes = routeRegistry.getAll()
+  // Use local registry if provided, otherwise fall back to global
+  const registry = localRegistry ?? routeRegistry
+  const routes = registry.getAll()
   const paths: Record<string, Record<string, unknown>> = {}
 
   // Group routes by path

@@ -9,7 +9,8 @@ import type {
   RouteDefinition,
   RouteMetadata,
 } from "../types/route"
-import { routeRegistry } from "./route-registry"
+import type { Server } from "../types/server"
+import { RouteRegistry, routeRegistry } from "./route-registry"
 
 /**
  * Route builder with fluent API and type-safe generics
@@ -34,6 +35,7 @@ export class RouteBuilder<
   public constructor(
     private readonly method: HttpMethod,
     private readonly path: TPath,
+    private readonly server?: Server,
   ) {}
 
   /**
@@ -196,7 +198,16 @@ export class RouteBuilder<
       handler: fn as unknown as RouteDefinition["handler"],
     }
 
-    routeRegistry.register(definition)
+    // If server is provided, register to local registry
+    // Otherwise, register to global registry
+    if (this.server) {
+      if (!this.server._routeRegistry) {
+        this.server._routeRegistry = new RouteRegistry()
+      }
+      this.server._routeRegistry.register(definition)
+    } else {
+      routeRegistry.register(definition)
+    }
   }
 
   /**
@@ -218,10 +229,17 @@ export class RouteBuilder<
 
 /**
  * Create a new route builder
+ *
+ * @param method - HTTP method (GET, POST, PUT, PATCH, DELETE)
+ * @param path - Route path with optional parameters (e.g., "/users/:id")
+ * @param server - Optional server instance to register the route to.
+ *                 If provided, the route is registered to the server's local registry.
+ *                 If not provided, the route is registered to the global registry.
  */
 export function createRoute<TPath extends string>(
   method: HttpMethod,
   path: TPath,
+  server?: Server,
 ): RouteBuilder<TPath, unknown, unknown, ExtractParams<TPath>, unknown> {
-  return new RouteBuilder(method, path)
+  return new RouteBuilder(method, path, server)
 }

@@ -6,15 +6,20 @@ import type { HttpMethod } from "../types/route"
 import type { ServerOptions } from "../types/server"
 import { parseBody, parseQueryParams, validateSchema } from "../validation"
 import { badRequest, createResponseHelpers, notFound } from "./response-helpers"
-import { routeRegistry } from "./route-registry"
+import { type RouteRegistry, routeRegistry } from "./route-registry"
 
 /**
  * Handle incoming HTTP requests
+ * @param request - The incoming request
+ * @param globalMiddlewares - Global middleware functions
+ * @param serverOptions - Server configuration options
+ * @param localRegistry - Optional local route registry (uses global if not provided)
  */
 export async function handleRequest(
   request: Request,
   globalMiddlewares: MiddlewareFn[],
   serverOptions: ServerOptions,
+  localRegistry?: RouteRegistry,
 ): Promise<Response> {
   const url = new URL(request.url)
   const method = request.method as HttpMethod
@@ -26,8 +31,11 @@ export async function handleRequest(
     return createPreflightResponse(origin, serverOptions.cors)
   }
 
+  // Use local registry if provided, otherwise fall back to global
+  const registry = localRegistry ?? routeRegistry
+
   // Find matching route
-  const match = routeRegistry.match(method, url.pathname)
+  const match = registry.match(method, url.pathname)
 
   if (!match) {
     return notFound("Route not found", ErrorCode.NOT_FOUND)

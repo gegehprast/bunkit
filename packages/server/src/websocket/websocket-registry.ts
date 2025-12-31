@@ -1,28 +1,27 @@
-import type { HttpMethod, MatchedRoute, RouteDefinition } from "../types/route"
+import type {
+  MatchedWebSocketRoute,
+  WebSocketRouteDefinition,
+} from "../types/websocket"
 
 /**
- * Route registry - stores registered routes and provides matching logic
+ * WebSocket route registry - stores registered routes and provides matching logic
  * Can be used as a global singleton or as a per-server instance
  */
-export class RouteRegistry {
-  private routes: RouteDefinition[] = []
+export class WebSocketRouteRegistry {
+  private routes: WebSocketRouteDefinition<unknown, unknown>[] = []
 
   /**
-   * Register a new route
+   * Register a new WebSocket route
    */
-  public register(route: RouteDefinition): void {
+  public register(route: WebSocketRouteDefinition<unknown, unknown>): void {
     this.routes.push(route)
   }
 
   /**
-   * Find a matching route for the given method and path
+   * Find a matching WebSocket route for the given path
    */
-  public match(method: HttpMethod, path: string): MatchedRoute | null {
+  public match(path: string): MatchedWebSocketRoute | null {
     for (const route of this.routes) {
-      if (route.method !== method) {
-        continue
-      }
-
       const params = this.matchPath(route.path, path)
       if (params !== null) {
         return { definition: route, params }
@@ -71,9 +70,9 @@ export class RouteRegistry {
   }
 
   /**
-   * Get all registered routes
+   * Get all registered WebSocket routes
    */
-  public getAll(): RouteDefinition[] {
+  public getAll(): WebSocketRouteDefinition<unknown, unknown>[] {
     return [...this.routes]
   }
 
@@ -86,4 +85,4 @@ export class RouteRegistry {
 }
 
 // Global singleton instance
-export const routeRegistry = new RouteRegistry()
+export const webSocketRouteRegistry = new WebSocketRouteRegistry()
