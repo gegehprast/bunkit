@@ -887,7 +887,7 @@ createWebSocketRoute("/document/:docId")
    - ✅ Phase 2: Validation & Type Safety (Zod + `.serverMessages<T>()`)
    - ✅ Phase 2.5: Client Type Generation (auto-generate types)
    - ✅ Phase 3: Authentication & Context (reuse HTTP middleware)
-   - Phase 4: External Broadcasting (server.publish, registry)
+   - ✅ Phase 4: External Broadcasting (server.publish, registry)
    - Phase 5: Advanced Features (binary, compression, backpressure)
 4. 🧪 **Create tests** alongside each phase
 5. 📚 **Document patterns** (especially type generation and backpressure)
@@ -1117,4 +1117,218 @@ createWebSocketRoute("/api/admin")
   })
   .build()
 ```
+
+---
+
+## Phase 4 Implementation Notes: External Broadcasting
+
+Phase 4 enables broadcasting messages from outside WebSocket route handlers - useful for background jobs, scheduled tasks, and services.
+
+### Two Broadcasting Mechanisms
+
+#### 1. Server-Level Publish (Topic-Based)
+
+Use Bun's native pub/sub system for efficient topic-based messaging:
+
+```typescript
+import { createServer, createWebSocketRoute } from "@bunkit/server"
+
+// WebSocket route subscribes clients to topics
+createWebSocketRoute("/api/notifications")
+  .authenticate(wsAuth)
+  .onConnect((ws, ctx) => {
+    ws.subscribe(`user:${ctx.user.id}`)
+    ws.subscribe("broadcast")  // Global channel
+  })
+  .build()
+
+const server = createServer({ port: 3000 })
+await server.start()
+
+// Later, from background job or service:
+server.publish("broadcast", { 
+  type: "announcement", 
+  message: "Server maintenance in 5 minutes" 
+})
+
+// Send to specific user
+server.publish(`user:${userId}`, { 
+  type: "notification", 
+  data: notificationData 
+})
+
+// Binary data
+server.publishBinary("data-channel", Buffer.from([0x01, 0x02]))
+```
+
+#### 2. WebSocket Registry (Connection Filtering)
+
+For fine-grained control, filter and iterate connections:
+
+```typescript
+import { webSocketRegistry } from "@bunkit/server"
+
+// Broadcast to ALL connections
+webSocketRegistry.broadcast({
+  type: "system_status",
+  status: "healthy",
+})
+
+// Filter by user role
+const adminConnections = webSocketRegistry.filter(
+  (ws) => ws.data.context.user?.role === "admin"
+)
+
+for (const ws of adminConnections) {
+  ws.send(JSON.stringify({
+    type: "admin_alert",
+    message: "Admin-only notification",
+  }))
+}
+
+// Filter by premium status
+const premiumUsers = webSocketRegistry.filter(
+  (ws) => ws.data.context.user?.isPremium === true
+)
+
+// Filter by route path
+const chatConnections = webSocketRegistry.filter(
+  (ws) => ws.data.routePath === "/api/chat"
+)
+```
+
+### WebSocketRegistry API
+
+```typescript
+interface WebSocketRegistry {
+  /** Get all active connections */
+  getAll(): ServerWebSocket[]
+  
+  /** Get number of active connections */
+  size: number
+  
+  /** Filter connections by predicate */
+  filter(predicate: (ws: ServerWebSocket) => boolean): ServerWebSocket[]
+  
+  /** Broadcast JSON message to all connections */
+  broadcast(message: unknown): void
+  
+  /** Broadcast binary data to all connections */
+  broadcastBinary(data: Buffer): void
+  
+  /** Clear all connections (testing) */
+  clear(): void
+}
+```
+
+### Use Cases
+
+**Background Job Notifications:**
+```typescript
+// cron-job.ts
+import { server } from "./main"
+
+async function checkNewNotifications() {
+  const notifications = await db.getUnsentNotifications()
+  
+  for (const notif of notifications) {
+    server.publish(`user:${notif.userId}`, {
+      type: "notification",
+      id: notif.id,
+      title: notif.title,
+      body: notif.body,
+    })
+    await db.markNotificationSent(notif.id)
+  }
+}
+
+setInterval(checkNewNotifications, 5000)
+```
+
+**Admin-Only Alerts:**
+```typescript
+// admin-service.ts
+import { webSocketRegistry } from "@bunkit/server"
+
+export function sendAdminAlert(message: string) {
+  const admins = webSocketRegistry.filter(
+    (ws) => ws.data.context.user?.role === "admin"
+  )
+  
+  const payload = JSON.stringify({
+    type: "admin_alert",
+    message,
+    timestamp: Date.now(),
+  })
+  
+  for (const ws of admins) {
+    ws.send(payload)
+  }
+}
+```
+
+**Regional Targeting:**
+```typescript
+// regional-alerts.ts
+import { webSocketRegistry } from "@bunkit/server"
+
+export function sendRegionalAlert(region: string, alert: object) {
+  const regionalUsers = webSocketRegistry.filter(
+    (ws) => ws.data.context.user?.region === region
+  )
+  
+  const payload = JSON.stringify({
+    type: "regional_alert",
+    region,
+    ...alert,
+  })
+  
+  for (const ws of regionalUsers) {
+    ws.send(payload)
+  }
+}
+```
+
+### Topic vs Registry: When to Use Which
+
+| Scenario | Use Topic (`server.publish`) | Use Registry (`webSocketRegistry`) |
+|----------|------------------------------|-----------------------------------|
+| User-specific messages | ✅ `user:${id}` | ❌ |
+| Room/channel broadcasts | ✅ `room:${name}` | ❌ |
+| Global announcements | ✅ `broadcast` | ✅ Either works |
+| Role-based filtering | ❌ | ✅ `.filter()` |
+| Premium-only features | ❌ | ✅ `.filter()` |
+| Route-specific broadcasts | ❌ | ✅ `.filter()` by `routePath` |
+
+**Rule of thumb:** Use topics when clients self-select (subscribe). Use registry when server selects (filter).
+
+### Connection Tracking
+
+Connections are automatically tracked when using `createWebSocketHandlersWithRegistry`:
+
+```typescript
+// Connections are added on open, removed on close
+// Handled internally by the server
+
+// In your handlers, connections are already in the registry:
+createWebSocketRoute("/api/chat")
+  .onConnect((ws, ctx) => {
+    // ws is already in webSocketRegistry
+    console.log(`Active connections: ${webSocketRegistry.size}`)
+  })
+  .onClose((ws, code, reason, ctx) => {
+    // ws is removed from registry after this handler
+    console.log(`Connection closed, remaining: ${webSocketRegistry.size}`)
+  })
+  .build()
+```
+
+### Important Notes
+
+1. **Server must be started** before calling `server.publish()` - a warning is logged otherwise
+2. **Topic subscriptions** happen in route handlers via `ws.subscribe(topic)`
+3. **Registry filtering** accesses `ws.data.context` for user data
+4. **JSON serialization** is automatic for `broadcast()` and `server.publish()`
+5. **Binary data** must use `broadcastBinary()` or `publishBinary()`
+
 
