@@ -100,7 +100,12 @@ export function createServer(options: ServerOptions = {}): Server {
               return wsResponse
             }
             // Handle as regular HTTP request, passing local registry if available
-            return handleRequest(request, middlewares, options, localRouteRegistry)
+            return handleRequest(
+              request,
+              middlewares,
+              options,
+              localRouteRegistry,
+            )
           },
           websocket: {
             ...wsConfig,
@@ -165,8 +170,11 @@ export function createServer(options: ServerOptions = {}): Server {
 
     async exportOpenApiSpec(path: string): Promise<Result<void, Error>> {
       try {
-        const spec = await this.getOpenApiSpec()
-        await Bun.write(path, JSON.stringify(spec, null, 2))
+        const specResult = await this.getOpenApiSpec()
+        if (specResult.isErr()) {
+          return err(specResult.error)
+        }
+        await Bun.write(path, JSON.stringify(specResult.value, null, 2))
         return ok(undefined)
       } catch (error) {
         return err(

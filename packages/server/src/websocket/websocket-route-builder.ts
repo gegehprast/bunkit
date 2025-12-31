@@ -11,7 +11,10 @@ import type {
   WebSocketAuthFn,
   WebSocketRouteDefinition,
 } from "../types/websocket"
-import { WebSocketRouteRegistry, webSocketRouteRegistry } from "./websocket-registry"
+import {
+  WebSocketRouteRegistry,
+  webSocketRouteRegistry,
+} from "./websocket-registry"
 
 /**
  * WebSocket route builder with fluent API and type-safe generics

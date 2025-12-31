@@ -41,6 +41,41 @@ export interface ServerOptions {
 }
 
 /**
+ * OpenAPI operation object
+ */
+export interface OpenApiOperation {
+  operationId?: string
+  tags?: string[]
+  summary?: string
+  description?: string
+  parameters?: Array<{
+    name: string
+    in: string
+    required?: boolean
+    schema?: unknown
+  }>
+  requestBody?: {
+    required?: boolean
+    content?: Record<string, { schema?: unknown }>
+  }
+  responses?: Record<string, unknown>
+  security?: Array<Record<string, string[]>>
+}
+
+/**
+ * OpenAPI path item object
+ */
+export interface OpenApiPathItem {
+  get?: OpenApiOperation
+  post?: OpenApiOperation
+  put?: OpenApiOperation
+  patch?: OpenApiOperation
+  delete?: OpenApiOperation
+  options?: OpenApiOperation
+  head?: OpenApiOperation
+}
+
+/**
  * OpenAPI specification
  */
 export interface OpenApiSpec {
@@ -48,8 +83,9 @@ export interface OpenApiSpec {
   info: {
     title: string
     version: string
+    description?: string
   }
-  paths: Record<string, unknown>
+  paths: Record<string, OpenApiPathItem>
   components?: Record<string, unknown>
 }
 
