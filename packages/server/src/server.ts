@@ -1,7 +1,7 @@
 import { err, ok, type Result } from "@bunkit/result"
 import { createCorsMiddleware } from "./cors"
+import { handleRequest } from "./http/request-handler"
 import { generateOpenApiSpec } from "./openapi/generator"
-import { handleRequest } from "./request-handler"
 import type { MiddlewareFn } from "./types/middleware"
 import type {
   OpenApiSpec,

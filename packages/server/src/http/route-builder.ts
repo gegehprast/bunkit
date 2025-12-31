@@ -1,15 +1,15 @@
 import type { z } from "zod"
-import { routeRegistry } from "./route-registry"
-import { CommonErrorResponses } from "./standard-errors"
-import type { RouteHandler } from "./types/context"
-import type { MiddlewareFn } from "./types/middleware"
+import { CommonErrorResponses } from "../standard-errors"
+import type { RouteHandler } from "../types/context"
+import type { MiddlewareFn } from "../types/middleware"
 import type {
   ExtractParams,
   HttpMethod,
   ResponseConfig,
   RouteDefinition,
   RouteMetadata,
-} from "./types/route"
+} from "../types/route"
+import { routeRegistry } from "./route-registry"
 
 /**
  * Route builder with fluent API and type-safe generics

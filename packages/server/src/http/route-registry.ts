@@ -1,4 +1,4 @@
-import type { HttpMethod, MatchedRoute, RouteDefinition } from "./types/route"
+import type { HttpMethod, MatchedRoute, RouteDefinition } from "../types/route"
 
 /**
  * Global route registry
