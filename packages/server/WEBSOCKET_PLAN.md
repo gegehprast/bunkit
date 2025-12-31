@@ -883,12 +883,238 @@ createWebSocketRoute("/document/:docId")
 1. ✅ **Plan Complete** - All design decisions made
 2. 🚀 **Ready to Implement** - Start with Phase 1 (Core Infrastructure)
 3. 📝 **Implementation Order:**
-   - Phase 1: Core Infrastructure (route builder, registry, handlers)
-   - Phase 2: Validation & Type Safety (Zod + `.serverMessages<T>()`)
-   - Phase 2.5: Client Type Generation (auto-generate types)
-   - Phase 3: Authentication & Context (reuse HTTP middleware)
+   - ✅ Phase 1: Core Infrastructure (route builder, registry, handlers)
+   - ✅ Phase 2: Validation & Type Safety (Zod + `.serverMessages<T>()`)
+   - ✅ Phase 2.5: Client Type Generation (auto-generate types)
+   - ✅ Phase 3: Authentication & Context (reuse HTTP middleware)
    - Phase 4: External Broadcasting (server.publish, registry)
    - Phase 5: Advanced Features (binary, compression, backpressure)
 4. 🧪 **Create tests** alongside each phase
 5. 📚 **Document patterns** (especially type generation and backpressure)
 6. 🎯 **Example apps** showing client/server type safety in action
+
+---
+
+## Phase 3 Implementation Notes: Authentication & Context
+
+### Authentication Utilities
+
+Phase 3 adds authentication helpers in `websocket-auth.ts`:
+
+```typescript
+import {
+  extractBearerToken,   // Extract Bearer token from Authorization header
+  extractQueryToken,    // Extract token from URL query parameter
+  extractToken,         // Combined: checks header first, then query
+  createTokenAuth,      // Create auth function from token verifier
+  noAuth,               // No auth (public endpoints)
+  extractRequestInfo,   // Extract IP, origin, user-agent
+} from "@bunkit/server"
+```
+
+### Token Extraction Patterns
+
+**Bearer Token (Header)**
+```typescript
+// Client sends: ws://localhost:3000/chat
+// Headers: Authorization: Bearer <token>
+
+const wsAuth = createTokenAuth(async (token) => {
+  const payload = await verifyJWT(token)
+  return { id: payload.sub, email: payload.email }
+})
+
+createWebSocketRoute("/api/chat")
+  .authenticate(wsAuth)
+  .onConnect((ws, ctx) => {
+    console.log(`User ${ctx.user?.id} connected`)
+  })
+  .build()
+```
+
+**Query Parameter Token (WebSocket clients that can't set headers)**
+```typescript
+// Client sends: ws://localhost:3000/chat?token=<token>
+
+const wsAuth = createTokenAuth(
+  async (token) => {
+    const payload = await verifyJWT(token)
+    return { id: payload.sub }
+  },
+  { checkHeader: false, queryParamName: "token" }
+)
+
+createWebSocketRoute("/api/chat")
+  .authenticate(wsAuth)
+  .build()
+```
+
+**Both Header and Query (recommended for flexibility)**
+```typescript
+// Tries header first, falls back to query param
+const wsAuth = createTokenAuth(
+  verifyToken,
+  { checkHeader: true, checkQuery: true }
+)
+```
+
+### Custom Authentication
+
+**Direct auth function (for custom logic)**
+```typescript
+createWebSocketRoute("/api/admin")
+  .authenticate(async (req: Request) => {
+    // Extract token from any source
+    const token = extractBearerToken(req) || extractQueryToken(req, "auth")
+    if (!token) return null
+    
+    // Verify and return user data
+    const user = await verifyAndGetUser(token)
+    if (!user || user.role !== "admin") return null
+    
+    return user  // Type flows to ctx.user in handlers
+  })
+  .build()
+```
+
+**Using request metadata (public endpoints)**
+```typescript
+createWebSocketRoute("/public/stream")
+  .authenticate(extractRequestInfo())
+  .onConnect((ws, ctx) => {
+    // ctx.user has: { ip, origin, userAgent }
+    console.log(`Connection from ${ctx.user?.ip}`)
+  })
+  .build()
+```
+
+### Path Parameters
+
+Path parameters work like HTTP routes:
+
+```typescript
+createWebSocketRoute("/api/rooms/:roomId/chat/:chatId")
+  .onConnect((ws, ctx) => {
+    // ctx.params contains extracted values
+    console.log(`Room: ${ctx.params.roomId}, Chat: ${ctx.params.chatId}`)
+    ws.subscribe(`room:${ctx.params.roomId}`)
+  })
+  .build()
+```
+
+### WebSocket Context
+
+Every handler receives a `WebSocketContext`:
+
+```typescript
+interface WebSocketContext<TUser = unknown> {
+  connectionId: string              // Unique ID for this connection
+  connectedAt: Date                 // When connection was established
+  user?: TUser                      // User from auth function
+  params: Record<string, string>    // Path parameters
+  data: Map<string, unknown>        // Custom connection state
+}
+```
+
+**Using connection state:**
+```typescript
+createWebSocketRoute("/api/chat")
+  .authenticate(wsAuth)
+  .onConnect((ws, ctx) => {
+    ctx.data.set("lastActivity", Date.now())
+    ctx.data.set("messageCount", 0)
+  })
+  .on("chat", ChatSchema, (ws, data, ctx) => {
+    ctx.data.set("lastActivity", Date.now())
+    const count = (ctx.data.get("messageCount") as number) + 1
+    ctx.data.set("messageCount", count)
+  })
+  .onClose((ws, code, reason, ctx) => {
+    console.log(`User sent ${ctx.data.get("messageCount")} messages`)
+  })
+  .build()
+```
+
+### Auth Rejection Behavior
+
+When auth returns `null`, `undefined`, or throws, the upgrade is rejected:
+
+```http
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{"message":"Unauthorized","code":"UNAUTHORIZED"}
+```
+
+When auth function throws:
+
+```http
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{"message":"Authentication failed","code":"AUTH_ERROR"}
+```
+
+### Integration with HTTP Auth
+
+Reuse existing JWT verification:
+
+```typescript
+// Shared auth service
+import { verifyToken } from "@/auth/auth.service"
+
+// HTTP middleware
+export function authMiddleware(): MiddlewareFn {
+  return async ({ req, ctx, next }) => {
+    const authHeader = req.headers.get("authorization")
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ message: "No token" }), { status: 401 })
+    }
+    const result = await verifyToken(authHeader.slice(7))
+    if (result.isErr()) {
+      return new Response(JSON.stringify({ message: "Invalid token" }), { status: 401 })
+    }
+    ctx.userId = result.value.userId
+    return next()
+  }
+}
+
+// WebSocket auth (reuses verifyToken)
+export const wsAuth = createTokenAuth(async (token) => {
+  const result = await verifyToken(token)
+  return result.isOk() ? { id: result.value.userId, email: result.value.email } : null
+})
+```
+
+### Type Safety
+
+User types flow through the entire handler chain:
+
+```typescript
+interface User {
+  id: string
+  role: "admin" | "user"
+}
+
+createWebSocketRoute("/api/admin")
+  .authenticate((req): User | null => {
+    // Return strongly typed user
+    return { id: "123", role: "admin" }
+  })
+  .onConnect((ws, ctx) => {
+    // ctx.user is User | undefined
+    if (ctx.user?.role === "admin") {
+      ws.subscribe("admin-channel")
+    }
+  })
+  .on("command", CommandSchema, (ws, data, ctx) => {
+    // ctx.user is still User | undefined
+    if (ctx.user?.role !== "admin") {
+      ws.close(4003, "Admin only")
+      return
+    }
+    // Handle admin command
+  })
+  .build()
+```
+

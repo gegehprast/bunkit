@@ -37,6 +37,16 @@ export type {
   WebSocketRouteDefinition,
 } from "./types/websocket"
 export { ValidationError } from "./validation"
+export {
+  createTokenAuth,
+  type ExtractedToken,
+  extractBearerToken,
+  extractQueryToken,
+  extractRequestInfo,
+  extractToken,
+  noAuth,
+  type TokenExtractionOptions,
+} from "./websocket/websocket-auth"
 export { webSocketRegistry } from "./websocket/websocket-handler"
 export { webSocketRouteRegistry } from "./websocket/websocket-registry"
 export { createWebSocketRoute } from "./websocket/websocket-route-builder"
