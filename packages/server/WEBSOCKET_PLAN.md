@@ -888,7 +888,7 @@ createWebSocketRoute("/document/:docId")
    - ✅ Phase 2.5: Client Type Generation (auto-generate types)
    - ✅ Phase 3: Authentication & Context (reuse HTTP middleware)
    - ✅ Phase 4: External Broadcasting (server.publish, registry)
-   - Phase 5: Advanced Features (binary, compression, backpressure)
+   - ✅ Phase 5: Advanced Features (binary, compression, backpressure)
 4. 🧪 **Create tests** alongside each phase
 5. 📚 **Document patterns** (especially type generation and backpressure)
 6. 🎯 **Example apps** showing client/server type safety in action
@@ -1331,4 +1331,300 @@ createWebSocketRoute("/api/chat")
 4. **JSON serialization** is automatic for `broadcast()` and `server.publish()`
 5. **Binary data** must use `broadcastBinary()` or `publishBinary()`
 
+---
 
+## Phase 5 Implementation Notes: Advanced Features
+
+Phase 5 adds binary message handling, compression configuration, and backpressure utilities.
+
+### Binary Message Support
+
+Use `.onBinary(handler)` for raw binary data (images, video, files):
+
+```typescript
+createWebSocketRoute("/api/upload")
+  .authenticate(wsAuth)
+  // JSON messages still work
+  .on("meta", MetaSchema, (ws, data, ctx) => {
+    ctx.data.set("fileName", data.fileName)
+  })
+  // Binary handler for file chunks
+  .onBinary((ws, buffer, ctx) => {
+    console.log(`Received ${buffer.byteLength} bytes`)
+    const fileName = ctx.data.get("fileName") as string
+    processFileChunk(fileName, buffer)
+  })
+  .build()
+```
+
+**Binary handler signature:**
+```typescript
+type BinaryHandler<TUser = unknown> = (
+  ws: TypedWebSocket,
+  data: Buffer,
+  ctx: WebSocketContext<TUser>
+) => Promise<void> | void
+```
+
+### Compression Configuration
+
+Compression is enabled by default using `perMessageDeflate`. Configure via server options:
+
+```typescript
+const server = createServer({
+  port: 3000,
+  websocket: {
+    compression: true,  // Default: enabled
+  }
+})
+```
+
+**Disable compression:**
+```typescript
+const server = createServer({
+  port: 3000,
+  websocket: {
+    compression: false,
+  }
+})
+```
+
+**Custom compression settings (Bun's WebSocketCompressor):**
+```typescript
+const server = createServer({
+  port: 3000,
+  websocket: {
+    perMessageDeflate: {
+      compress: "16KB",          // Compress messages larger than 16KB
+      decompress: "16KB",        // Decompress messages larger than 16KB
+    }
+  }
+})
+```
+
+### WebSocket Options
+
+Configure WebSocket behavior with server options:
+
+```typescript
+const server = createServer({
+  port: 3000,
+  websocket: {
+    maxPayloadLength: 16 * 1024 * 1024,  // Default: 16MB
+    idleTimeout: 120,                     // Default: 120 seconds
+    backpressureLimit: 16 * 1024 * 1024,  // Default: 16MB
+    compression: true,                    // Default: true
+  }
+})
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `maxPayloadLength` | 16MB | Maximum message size |
+| `idleTimeout` | 120s | Connection timeout with no activity |
+| `backpressureLimit` | 16MB | Buffer size before backpressure applies |
+| `compression` | `true` | Enable perMessageDeflate compression |
+
+### Backpressure Handling
+
+Use `ws.getBufferedAmount()` to check the send buffer before sending large amounts of data:
+
+```typescript
+createWebSocketRoute("/api/live-data")
+  .on("subscribe", SubscribeSchema, async (ws, data, ctx) => {
+    const sendUpdate = (update: unknown) => {
+      const buffered = ws.getBufferedAmount()
+      
+      // Skip update if buffer is too full (drop strategy)
+      if (buffered > 1024 * 1024) { // 1MB threshold
+        console.warn(`Backpressure: buffer at ${buffered} bytes, skipping`)
+        return false
+      }
+      
+      ws.send({ type: "update", data: update })
+      return true
+    }
+    
+    // High-frequency updates
+    const interval = setInterval(() => {
+      const update = getLatestData()
+      if (!sendUpdate(update)) {
+        // Optional: slow down or pause updates
+      }
+    }, 100)
+    
+    ctx.data.set("interval", interval)
+  })
+  .onClose((ws, code, reason, ctx) => {
+    const interval = ctx.data.get("interval") as NodeJS.Timeout
+    clearInterval(interval)
+  })
+  .build()
+```
+
+**Backpressure strategies:**
+
+| Strategy | Description | Use Case |
+|----------|-------------|----------|
+| **Drop** | Skip messages when buffer is full | Real-time data where latest is most important |
+| **Queue** | Buffer messages externally | Order matters, can tolerate delay |
+| **Throttle** | Reduce send rate | Adaptive streaming |
+| **Close** | Close connection | Slow clients disrupting service |
+
+```typescript
+// Drop strategy (shown above)
+if (ws.getBufferedAmount() > threshold) return
+
+// Throttle strategy
+const baseInterval = 100
+let currentInterval = baseInterval
+
+setInterval(() => {
+  const buffered = ws.getBufferedAmount()
+  
+  if (buffered > highThreshold) {
+    currentInterval = Math.min(currentInterval * 2, 5000) // Back off
+  } else if (buffered < lowThreshold) {
+    currentInterval = Math.max(currentInterval / 2, baseInterval) // Speed up
+  }
+  
+  ws.send({ type: "update", data: getLatestData() })
+}, currentInterval)
+```
+
+### TypedWebSocket Methods
+
+The `TypedWebSocket` interface exposes these methods:
+
+```typescript
+interface TypedWebSocket<TServerMsg = unknown> {
+  // Type-safe messaging
+  send(message: TServerMsg): void
+  sendBinary(data: Buffer | ArrayBuffer | Uint8Array): void
+  
+  // Pub/sub
+  subscribe(topic: string): void
+  unsubscribe(topic: string): void
+  publish(topic: string, message: TServerMsg): void
+  publishBinary(topic: string, data: Buffer): void
+  isSubscribed(topic: string): boolean
+  
+  // Connection management
+  close(code?: number, reason?: string): void
+  
+  // Backpressure
+  getBufferedAmount(): number
+  
+  // Context access
+  data: WebSocketContext
+  
+  // Raw WebSocket (for advanced use)
+  raw: ServerWebSocket
+}
+```
+
+### Connection Lifecycle
+
+Full lifecycle with all handlers:
+
+```typescript
+createWebSocketRoute("/api/stream")
+  .authenticate(wsAuth)
+  .onConnect((ws, ctx) => {
+    console.log(`Connected: ${ctx.connectionId}`)
+    ws.subscribe("updates")
+  })
+  .on("command", CommandSchema, (ws, data, ctx) => {
+    handleCommand(data)
+  })
+  .onBinary((ws, buffer, ctx) => {
+    processBuffer(buffer)
+  })
+  .onClose((ws, code, reason, ctx) => {
+    console.log(`Disconnected: ${ctx.connectionId}, code: ${code}`)
+    cleanup(ctx)
+  })
+  .onError((ws, error, ctx) => {
+    console.error(`Error: ${error.message}`)
+    ws.send({ type: "error", message: "An error occurred" })
+  })
+  .build()
+```
+
+### Error Handling
+
+The `.onError()` handler receives validation and handler errors:
+
+```typescript
+createWebSocketRoute("/api/chat")
+  .on("chat", ChatSchema, (ws, data, ctx) => {
+    // If this throws, onError is called
+    if (data.text.includes("badword")) {
+      throw new Error("Inappropriate content")
+    }
+  })
+  .onError((ws, error, ctx) => {
+    // Handle validation errors and handler exceptions
+    if (error.name === "ZodError") {
+      ws.send({ type: "error", code: "VALIDATION_ERROR", message: error.message })
+    } else {
+      ws.send({ type: "error", code: "INTERNAL_ERROR", message: "Something went wrong" })
+    }
+  })
+  .build()
+```
+
+### Combining Features
+
+All Phase 5 features work together:
+
+```typescript
+import { createWebSocketRoute, createTokenAuth } from "@bunkit/server"
+import { z } from "zod"
+
+const CommandSchema = z.object({ action: z.string() })
+
+type ServerMessage =
+  | { type: "ack", action: string }
+  | { type: "data", buffer: number[] }
+  | { type: "error", message: string }
+
+createWebSocketRoute("/api/stream/:streamId")
+  .serverMessages<ServerMessage>()
+  .authenticate(createTokenAuth(verifyToken))
+  .onConnect((ws, ctx) => {
+    ws.subscribe(`stream:${ctx.params.streamId}`)
+    console.log(`Stream ${ctx.params.streamId} connected`)
+  })
+  .on("command", CommandSchema, (ws, data, ctx) => {
+    // Check backpressure before responding
+    if (ws.getBufferedAmount() > 1024 * 1024) {
+      ws.send({ type: "error", message: "Server busy, try again" })
+      return
+    }
+    
+    ws.send({ type: "ack", action: data.action })
+  })
+  .onBinary((ws, buffer, ctx) => {
+    // Process binary data with backpressure awareness
+    const streamId = ctx.params.streamId
+    processStreamData(streamId, buffer)
+  })
+  .onError((ws, error, ctx) => {
+    ws.send({ type: "error", message: error.message })
+  })
+  .build()
+```
+
+### Test Coverage Summary
+
+Phase 5 includes 22 tests covering:
+- Binary message support (4 tests)
+- Compression configuration (3 tests)
+- WebSocket options (4 tests)
+- Backpressure handling (2 tests)
+- Connection lifecycle (2 tests)
+- TypedWebSocket methods (2 tests)
+- Error handling (2 tests)
+- Path parameters with advanced features (2 tests)
+- Server message types (1 test)
