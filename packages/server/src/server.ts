@@ -128,6 +128,11 @@ export function createServer(options: ServerOptions = {}): Server {
           },
         })
 
+        console.log(
+          `Server started at http://${host}:${port}`,
+          getWsRegistry()?.getAll()[0]?.path,
+        )
+
         return ok(undefined)
       } catch (error) {
         return err({
@@ -164,6 +169,7 @@ export function createServer(options: ServerOptions = {}): Server {
             version: openapi.version ?? "1.0.0",
             description: openapi.description,
             securitySchemes: openapi.securitySchemes,
+            servers: openapi.servers,
           },
           localRouteRegistry,
         )

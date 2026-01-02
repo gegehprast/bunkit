@@ -1,5 +1,5 @@
 import type { Result } from "@bunkit/result"
-import type { SecuritySchemeObject } from "../http/openapi/security-schemes"
+import type { GenerateOpenApiSpecOptions } from "../../src/http/openapi/generator"
 import type { RouteRegistry } from "../http/route-registry"
 import type { WebSocketRouteRegistry } from "../websocket/websocket-registry"
 import type { GenerateWebSocketTypesOptions } from "../websocket/websocket-type-generator"
@@ -30,12 +30,7 @@ export interface ServerOptions {
   cors?: CorsOptions
   static?: Record<string, string>
   globalMiddlewares?: MiddlewareFn[]
-  openapi?: {
-    title?: string
-    version?: string
-    description?: string
-    securitySchemes?: Record<string, SecuritySchemeObject>
-  }
+  openapi?: Partial<GenerateOpenApiSpecOptions>
   /** WebSocket configuration */
   websocket?: WebSocketOptions
 }

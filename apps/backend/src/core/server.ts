@@ -12,6 +12,12 @@ export const server = createServer({
       bearerAuth: SecuritySchemes.bearerAuth(),
       basicAuth: SecuritySchemes.basicAuth(),
     },
+    servers: [
+      {
+        url: `http://${config.HOST}:${config.PORT}`,
+        description: "Development server",
+      },
+    ],
   },
   cors: {
     origin: (origin) => {

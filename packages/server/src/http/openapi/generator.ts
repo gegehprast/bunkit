@@ -1,5 +1,9 @@
 import { ok, type Result } from "@bunkit/result"
-import { createDocument } from "zod-openapi"
+import {
+  createDocument,
+  type ZodOpenApiObject,
+  type ZodOpenApiSecuritySchemeObject,
+} from "zod-openapi"
 import {
   BadRequestErrorResponseSchema,
   CommonErrorResponses,
@@ -13,7 +17,14 @@ import {
 import type { OpenApiSpec } from "../../types/server"
 import { type RouteRegistry, routeRegistry } from "../route-registry"
 import type { RouteDefinition } from "../types/route"
-import type { SecuritySchemeObject } from "./security-schemes"
+
+export interface GenerateOpenApiSpecOptions {
+  title: ZodOpenApiObject["info"]["title"]
+  version: ZodOpenApiObject["info"]["version"]
+  description?: ZodOpenApiObject["info"]["description"]
+  securitySchemes?: Record<string, ZodOpenApiSecuritySchemeObject>
+  servers?: ZodOpenApiObject["servers"]
+}
 
 /**
  * Generate OpenAPI specification from registered routes
@@ -21,12 +32,7 @@ import type { SecuritySchemeObject } from "./security-schemes"
  * @param localRegistry - Optional local route registry (uses global if not provided)
  */
 export function generateOpenApiSpec(
-  info: {
-    title: string
-    version: string
-    description?: string
-    securitySchemes?: Record<string, SecuritySchemeObject>
-  } = {
+  options: GenerateOpenApiSpecOptions = {
     title: "API",
     version: "1.0.0",
   },
@@ -63,10 +69,11 @@ export function generateOpenApiSpec(
   const document = createDocument({
     openapi: "3.1.0",
     info: {
-      title: info.title,
-      version: info.version,
-      description: info.description,
+      title: options.title,
+      version: options.version,
+      description: options.description,
     },
+    servers: options.servers,
     paths,
     components: {
       schemas: {
@@ -78,9 +85,9 @@ export function generateOpenApiSpec(
         ConflictErrorResponse: ConflictErrorResponseSchema,
         InternalServerErrorResponse: InternalServerErrorResponseSchema,
       },
-      ...(info.securitySchemes
+      ...(options.securitySchemes
         ? {
-            securitySchemes: info.securitySchemes,
+            securitySchemes: options.securitySchemes,
           }
         : {}),
     },

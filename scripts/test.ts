@@ -15,7 +15,7 @@ const commands = [
 
 function parseArguments() {
   const { values } = parseArgs({
-    args: Bun.argv.slice(2),
+    args: Bun.argv,
     options: {
       help: {
         type: "boolean",
@@ -27,13 +27,22 @@ function parseArguments() {
         short: "c",
         default: false,
       },
+      filter: {
+        type: "string",
+        short: "f",
+      },
       "test-name-pattern": {
         type: "string",
         short: "t",
       },
+      bail: {
+        type: "boolean",
+        short: "b",
+        default: false,
+      },
     },
     strict: true,
-    allowPositionals: false,
+    allowPositionals: true,
   })
 
   return values
@@ -49,6 +58,7 @@ Usage:
 Options:
   -h, --help       Show this help message
   -c, --coverage   Generate coverage report
+  -f, --filter <file|module>  Run tests only for the specified file or module
   -t, --test-name-pattern <pattern>   Run only tests with names matching the pattern
 `)
 }
@@ -59,7 +69,9 @@ function parseCommand(cmd: string): string[] {
   let match: RegExpExecArray | null
   // biome-ignore lint/suspicious/noAssignInExpressions: Needed for regex exec loop
   while ((match = regex.exec(cmd)) !== null) {
-    args.push(match[1] ?? match[2])
+    // biome-ignore lint/style/noNonNullAssertion: Regex ensures one of the groups will match
+    const arg = match[1] ?? match[2]!
+    args.push(arg)
   }
   return args
 }
@@ -72,10 +84,24 @@ async function runTests() {
     process.exit(0)
   }
 
+  if (args.filter) {
+    // Modify commands to include filter
+    for (const command of commands) {
+      command.cmd += ` "${args.filter}"`
+    }
+  }
+
   if (args["test-name-pattern"]) {
     // Modify commands to include test name pattern
     for (const command of commands) {
       command.cmd += ` -t "${args["test-name-pattern"]}"`
+    }
+  }
+
+  if (args.bail) {
+    // Modify commands to include bail flag
+    for (const command of commands) {
+      command.cmd += ` --bail`
     }
   }
 
