@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import { z } from "zod"
-import { createRoute, createServer, routeRegistry } from "../src/index"
+import { routeRegistry } from "../src/http/route-registry"
+import { createRoute, createServer } from "../src/index"
 
 describe("@bunkit/server - Basic functionality", () => {
   test("should register a route", () => {

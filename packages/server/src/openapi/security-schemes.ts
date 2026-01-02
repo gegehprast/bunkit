@@ -195,12 +195,3 @@ export const SecuritySchemes = {
     description,
   }),
 } as const
-
-/**
- * Helper to create custom security scheme
- */
-export function createSecurityScheme(
-  scheme: SecuritySchemeObject,
-): SecuritySchemeObject {
-  return scheme
-}

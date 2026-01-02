@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test } from "bun:test"
 import { z } from "zod"
-import { createRoute, routeRegistry } from "../../src/index"
+import { routeRegistry } from "../../src/http/route-registry"
+import { createRoute } from "../../src/index"
 
 describe("RouteBuilder", () => {
   beforeEach(() => {

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
-import { createRoute, createServer, routeRegistry } from "../../src/index"
+import { routeRegistry } from "../../src/http/route-registry"
+import { createRoute, createServer } from "../../src/index"
 import type { Server } from "../../src/types/server"
 
 // Helper to parse JSON response with type assertion
