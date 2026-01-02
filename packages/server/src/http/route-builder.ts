@@ -1,6 +1,6 @@
 import type { z } from "zod"
-import { CommonErrorResponses } from "../standard-errors"
-import type { RouteHandler } from "../types/context"
+import { CommonErrorResponses } from "../core/standard-errors"
+import type { RouteHandler } from "./types/context"
 import type { MiddlewareFn } from "../types/middleware"
 import type {
   ExtractParams,
@@ -8,7 +8,7 @@ import type {
   ResponseConfig,
   RouteDefinition,
   RouteMetadata,
-} from "../types/route"
+} from "./types/route"
 import type { Server } from "../types/server"
 import { RouteRegistry, routeRegistry } from "./route-registry"
 

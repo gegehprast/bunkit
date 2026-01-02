@@ -254,27 +254,37 @@ interface CorsOptions {
 
 ```
 src/
-├── index.ts                # Public API
-├── server.ts               # Server management
-├── route-builder.ts        # RouteBuilder class
-├── route-registry.ts       # Global route collection
-├── middleware.ts           # Middleware types
-├── response-helpers.ts     # Response helpers
-├── request-handler.ts      # Request routing
-├── validation.ts           # Zod validation
-├── errors.ts               # Error types
-├── cors.ts                 # CORS handling
-├── openapi/
-│   ├── generator.ts        # OpenAPI generation
-│   ├── error-responses.ts  # Standard errors
-│   ├── types.ts            # OpenAPI types
-│   └── utils.ts
-└── types/
-    ├── route.ts
-    ├── server.ts
-    ├── middleware.ts
-    ├── context.ts
-    └── cors.ts
+├── index.ts                # Public API exports
+├── server.ts               # Main server orchestration (HTTP + WebSocket)
+├── core/                   # Shared core utilities
+│   ├── cors.ts             # CORS handling
+│   ├── middleware.ts       # Middleware execution engine
+│   ├── standard-errors.ts  # Standard error definitions
+│   └── validation.ts       # Zod validation utilities
+├── http/                   # HTTP-specific modules
+│   ├── request-handler.ts  # HTTP request routing & handling
+│   ├── response-helpers.ts # Response builder methods
+│   ├── route-builder.ts    # HTTP route builder (fluent API)
+│   ├── route-registry.ts   # HTTP route storage & matching
+│   ├── openapi/            # OpenAPI generation
+│   │   ├── generator.ts    # OpenAPI spec generator
+│   │   └── security-schemes.ts # Security scheme templates
+│   └── types/              # HTTP-specific types
+│       ├── context.ts      # Route handler context
+│       ├── response.ts     # Response types
+│       └── route.ts        # Route definition types
+├── websocket/              # WebSocket-specific modules
+│   ├── websocket-auth.ts   # WebSocket authentication utilities
+│   ├── websocket-handler.ts # WebSocket connection handling
+│   ├── websocket-registry.ts # WebSocket route storage & matching
+│   ├── websocket-route-builder.ts # WebSocket route builder
+│   ├── websocket-type-generator.ts # Client type generation
+│   └── types/              # WebSocket-specific types
+│       └── websocket.ts    # WebSocket types
+└── types/                  # Shared types
+    ├── cors.ts             # CORS configuration types
+    ├── middleware.ts       # Middleware types
+    └── server.ts           # Server configuration types
 ```
 
 ## Type System

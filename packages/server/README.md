@@ -1,17 +1,31 @@
 # @bunkit/server
 
-Type-safe HTTP server with automatic OpenAPI 3.1 generation using `zod-openapi`, route management, and middleware support for BunKit applications.
+Type-safe HTTP and WebSocket server with automatic OpenAPI 3.1 generation using `zod-openapi`, route management, and middleware support for BunKit applications.
 
 ## Features
 
+### HTTP Features
 - ✅ **Type-Safe** - Full TypeScript inference with compile-time validation
 - ✅ **Auto Path Parameters** - Automatically extracted from route strings
 - ✅ **OpenAPI Generation** - Automatic spec generation via `zod-openapi`
 - ✅ **Zod Validation** - Request validation with helpful error messages
 - ✅ **Middleware Support** - Global and route-level middlewares
 - ✅ **CORS Built-in** - Configurable CORS with automatic preflight handling
+
+### WebSocket Features (NEW!)
+- ✅ **Type-Safe WebSocket Routes** - Full TypeScript inference for messages
+- ✅ **Message Validation** - Zod schemas for message validation
+- ✅ **Authentication** - Reuse HTTP middleware patterns
+- ✅ **External Broadcasting** - Publish from background jobs/services
+- ✅ **Client Type Generation** - Auto-generate TypeScript types for clients
+- ✅ **Binary Messages** - Support for binary data streams
+- ✅ **Backpressure Handling** - Built-in flow control utilities
+
+### Shared Features
 - ✅ **Result Pattern** - Error handling without exceptions
 - ✅ **Bun Native** - Uses `Bun.serve` for optimal performance
+- ✅ **Single Port** - HTTP and WebSocket on the same port
+- ✅ **Unified Server** - One server instance handles everything
 
 ## Installation
 
@@ -109,6 +123,27 @@ const server = createServer()
 const spec = server.getOpenApiSpec()
 await server.exportOpenApiSpec("./openapi.json")
 ```
+
+## Project Structure
+
+The package is organized into distinct modules for better separation of concerns:
+
+```
+src/
+├── core/              # Shared utilities (CORS, middleware, validation, errors)
+├── http/              # HTTP-specific functionality
+│   ├── openapi/       # OpenAPI generation
+│   └── types/         # HTTP types
+├── websocket/         # WebSocket-specific functionality
+│   └── types/         # WebSocket types
+└── types/             # Shared types (server, middleware, CORS)
+```
+
+**Key Design Principles:**
+- **Clear separation** between HTTP, WebSocket, and shared modules
+- **Co-located types** with their respective modules
+- **Centralized core** utilities used by both HTTP and WebSocket
+- **Single server** orchestrates both protocols
 
 ## Testing
 

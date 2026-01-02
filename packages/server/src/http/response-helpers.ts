@@ -1,5 +1,5 @@
-import { ErrorCode } from "../standard-errors"
-import type { ErrorResponse, ResponseHelpers } from "../types/response"
+import { ErrorCode } from "../core/standard-errors"
+import type { ErrorResponse, ResponseHelpers } from "./types/response"
 
 // JSON responses
 export function ok<T>(data: T, status = 200): Response {

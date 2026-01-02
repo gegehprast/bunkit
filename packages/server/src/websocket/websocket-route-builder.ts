@@ -10,7 +10,7 @@ import type {
   RegisteredMessageHandler,
   WebSocketAuthFn,
   WebSocketRouteDefinition,
-} from "../types/websocket"
+} from "./types/websocket"
 import {
   WebSocketRouteRegistry,
   webSocketRouteRegistry,

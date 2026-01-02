@@ -6,8 +6,8 @@ export type { Server, ServerOptions } from "./types/server"
 
 // HTTP Routes
 export { createRoute } from "./http/route-builder"
-export type { RouteContext, RouteHandler } from "./types/context"
-export type { ExtractParams, HttpMethod, RouteMetadata } from "./types/route"
+export type { RouteContext, RouteHandler } from "./http/types/context"
+export type { ExtractParams, HttpMethod, RouteMetadata } from "./http/types/route"
 
 // WebSocket Routes
 export { createWebSocketRoute } from "./websocket/websocket-route-builder"
@@ -23,7 +23,7 @@ export type {
   WebSocketContext,
   WebSocketData,
   WebSocketRouteDefinition,
-} from "./types/websocket"
+} from "./websocket/types/websocket"
 export type { WebSocketOptions } from "./types/server"
 
 // WebSocket Authentication & Broadcasting
@@ -47,15 +47,15 @@ export type { MiddlewareArgs, MiddlewareFn } from "./types/middleware"
 export type { CorsOptions } from "./types/cors"
 
 // Responses & Error Handling
-export type { ErrorResponse, ResponseHelpers } from "./types/response"
+export type { ErrorResponse, ResponseHelpers } from "./http/types/response"
 export {
   CommonErrorResponses,
   ErrorCode,
   type ErrorCode as ErrorCodeType,
   ErrorResponseSchema,
-} from "./standard-errors"
-export { ValidationError } from "./validation"
+} from "./core/standard-errors"
+export { ValidationError } from "./core/validation"
 
 // OpenAPI
-export { SecuritySchemes } from "./openapi/security-schemes"
+export { SecuritySchemes } from "./http/openapi/security-schemes"
 export type { OpenApiSpec } from "./types/server"

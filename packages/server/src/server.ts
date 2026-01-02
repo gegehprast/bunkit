@@ -1,8 +1,8 @@
 import { err, ok, type Result } from "@bunkit/result"
-import { createCorsMiddleware } from "./cors"
+import { createCorsMiddleware } from "./core/cors"
 import { handleRequest } from "./http/request-handler"
 import type { RouteRegistry } from "./http/route-registry"
-import { generateOpenApiSpec } from "./openapi/generator"
+import { generateOpenApiSpec } from "./http/openapi/generator"
 import type { MiddlewareFn } from "./types/middleware"
 import type {
   OpenApiSpec,
@@ -11,7 +11,7 @@ import type {
   ServerStartError,
   ServerStopError,
 } from "./types/server"
-import type { WebSocketData } from "./types/websocket"
+import type { WebSocketData } from "./websocket/types/websocket"
 import {
   createWebSocketHandlersWithRegistry,
   handleWebSocketUpgrade,

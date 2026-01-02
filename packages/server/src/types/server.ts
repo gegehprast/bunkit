@@ -1,6 +1,6 @@
 import type { Result } from "@bunkit/result"
 import type { RouteRegistry } from "../http/route-registry"
-import type { SecuritySchemeObject } from "../openapi/security-schemes"
+import type { SecuritySchemeObject } from "../http/openapi/security-schemes"
 import type { WebSocketRouteRegistry } from "../websocket/websocket-registry"
 import type { GenerateWebSocketTypesOptions } from "../websocket/websocket-type-generator"
 import type { CorsOptions } from "./cors"
@@ -93,18 +93,40 @@ export interface OpenApiSpec {
  * Server instance interface
  */
 export interface Server {
+  /**
+   * Start the server
+   */
   start(): Promise<Result<void, ServerError>>
+  /**
+   * Stop the server
+   */
   stop(): Promise<Result<void, ServerError>>
-  getOpenApiSpec(): Promise<Result<OpenApiSpec, Error>>
-  exportOpenApiSpec(path: string): Promise<Result<void, Error>>
-  /** Publish a message to all WebSocket subscribers of a topic */
-  publish(topic: string, message: unknown): void
-  /** Publish binary data to all WebSocket subscribers of a topic */
-  publishBinary(topic: string, data: Buffer): void
-  /** Generate TypeScript types for WebSocket routes */
-  generateWebSocketTypes(
-    options: GenerateWebSocketTypesOptions,
-  ): Promise<Result<void, Error>>
+  http: {
+    /**
+     * Get the OpenAPI specification for this server
+     */
+    getOpenApiSpec(): Promise<Result<OpenApiSpec, Error>>
+    /**
+     * Export the OpenAPI specification to a JSON file
+     */
+    exportOpenApiSpec(path: string): Promise<Result<void, Error>>
+  }
+  ws: {
+    /**
+     * Publish a message to all WebSocket subscribers of a topic
+     */
+    publish(topic: string, message: unknown): void
+    /**
+     * Publish binary data to all WebSocket subscribers of a topic
+     */
+    publishBinary(topic: string, data: Buffer): void
+    /**
+     * Generate TypeScript types for WebSocket routes
+     */
+    generateWebSocketTypes(
+      options: GenerateWebSocketTypesOptions,
+    ): Promise<Result<void, Error>>
+  }
   /**
    * Internal: Local route registry for this server instance
    * Created lazily when a route is registered to this server

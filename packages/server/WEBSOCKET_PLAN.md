@@ -450,14 +450,37 @@ process.exit(0)
 
 ```
 src/
-├── websocket.ts                    # Main WebSocket exports
-├── websocket-route-builder.ts     # WebSocket route builder
-├── websocket-registry.ts           # WebSocket route registry
-├── websocket-handler.ts            # Connection/message handling
-├── websocket-context.ts            # Connection context type
-├── websocket-type-generator.ts    # Client type generation
-└── types/
-    └── websocket.ts                # WebSocket types
+├── index.ts                        # Public API exports
+├── server.ts                       # Main server (integrates HTTP + WebSocket)
+├── core/                           # Shared core utilities
+│   ├── cors.ts                     # CORS handling
+│   ├── middleware.ts               # Middleware execution
+│   ├── standard-errors.ts          # Standard errors
+│   └── validation.ts               # Validation utilities
+├── http/                           # HTTP-specific modules
+│   ├── request-handler.ts          # HTTP routing
+│   ├── response-helpers.ts         # Response builders
+│   ├── route-builder.ts            # HTTP route builder
+│   ├── route-registry.ts           # HTTP route registry
+│   ├── openapi/                    # OpenAPI generation
+│   │   ├── generator.ts            # Spec generator
+│   │   └── security-schemes.ts    # Security templates
+│   └── types/                      # HTTP types
+│       ├── context.ts              # Handler context
+│       ├── response.ts             # Response types
+│       └── route.ts                # Route types
+├── websocket/                      # WebSocket-specific modules
+│   ├── websocket-auth.ts           # Authentication utilities
+│   ├── websocket-handler.ts        # Connection/message handling
+│   ├── websocket-registry.ts       # WebSocket route registry
+│   ├── websocket-route-builder.ts  # WebSocket route builder
+│   ├── websocket-type-generator.ts # Client type generation
+│   └── types/                      # WebSocket types
+│       └── websocket.ts            # All WebSocket types
+└── types/                          # Shared types
+    ├── cors.ts                     # CORS types
+    ├── middleware.ts               # Middleware types
+    └── server.ts                   # Server types
 ```
 
 ## Type System

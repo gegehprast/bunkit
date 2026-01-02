@@ -1,5 +1,5 @@
-import type { MiddlewareArgs, MiddlewareFn } from "./types/middleware"
-import type { ResponseHelpers } from "./types/response"
+import type { MiddlewareArgs, MiddlewareFn } from "../types/middleware"
+import type { ResponseHelpers } from "../http/types/response"
 
 /**
  * Execute middleware chain

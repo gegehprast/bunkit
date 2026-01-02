@@ -1,6 +1,6 @@
 import type { z } from "zod"
 import type { RouteContext } from "./context"
-import type { MiddlewareFn } from "./middleware"
+import type { MiddlewareFn } from "../../types/middleware"
 
 /**
  * Extract path parameters from a route path string

@@ -1,6 +1,6 @@
 import { ok, type Result } from "@bunkit/result"
 import type { z } from "zod"
-import type { RegisteredMessageHandler } from "../types/websocket"
+import type { RegisteredMessageHandler } from "./types/websocket"
 import {
   type WebSocketRouteRegistry,
   webSocketRouteRegistry,

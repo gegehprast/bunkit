@@ -3,7 +3,7 @@ import type {
   TypedWebSocket,
   WebSocketContext,
   WebSocketData,
-} from "../types/websocket"
+} from "./types/websocket"
 import {
   type WebSocketRouteRegistry,
   webSocketRouteRegistry,

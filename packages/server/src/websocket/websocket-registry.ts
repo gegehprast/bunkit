@@ -1,7 +1,7 @@
 import type {
   MatchedWebSocketRoute,
   WebSocketRouteDefinition,
-} from "../types/websocket"
+} from "./types/websocket"
 
 /**
  * WebSocket route registry - stores registered routes and provides matching logic
