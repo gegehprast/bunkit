@@ -24,12 +24,7 @@
         // Some stricter flags (disabled by default)
         "noUnusedLocals": false,
         "noUnusedParameters": false,
-        "noPropertyAccessFromIndexSignature": false,
-
-        "paths": {
-            "@/*": ["./apps/backend/src/*", "./apps/frontend/src/*"]
-        }
+        "noPropertyAccessFromIndexSignature": false
     },
-    "include": ["packages/**/*"],
-    "exclude": ["node_modules", "apps/**/*"]
+    "exclude": ["node_modules"]
 }

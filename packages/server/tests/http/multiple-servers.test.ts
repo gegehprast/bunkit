@@ -244,8 +244,8 @@ describe("Multiple Servers", () => {
         .openapi({ operationId: "getProducts", tags: ["Products"] })
         .handler(({ res }) => res.ok([]))
 
-      const spec1Result = await server1.getOpenApiSpec()
-      const spec2Result = await server2.getOpenApiSpec()
+      const spec1Result = await server1.http.getOpenApiSpec()
+      const spec2Result = await server2.http.getOpenApiSpec()
 
       expect(spec1Result.isOk()).toBe(true)
       expect(spec2Result.isOk()).toBe(true)
@@ -276,7 +276,7 @@ describe("Multiple Servers", () => {
       })
       servers.push(server)
 
-      const specResult = await server.getOpenApiSpec()
+      const specResult = await server.http.getOpenApiSpec()
       expect(specResult.isOk()).toBe(true)
 
       const spec = specResult.unwrap()

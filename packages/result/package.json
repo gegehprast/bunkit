@@ -4,6 +4,9 @@
     "module": "./src/index.ts",
     "type": "module",
     "exports": "./src/index.ts",
+    "scripts": {
+        "typecheck": "tsc --noEmit"
+    },
     "engines": {
         "bun": ">=1.3.3"
     }

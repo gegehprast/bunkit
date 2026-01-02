@@ -1,8 +1,8 @@
 import { err, ok, type Result } from "@bunkit/result"
 import { createCorsMiddleware } from "./core/cors"
+import { generateOpenApiSpec } from "./http/openapi/generator"
 import { handleRequest } from "./http/request-handler"
 import type { RouteRegistry } from "./http/route-registry"
-import { generateOpenApiSpec } from "./http/openapi/generator"
 import type { MiddlewareFn } from "./types/middleware"
 import type {
   OpenApiSpec,
@@ -156,55 +156,61 @@ export function createServer(options: ServerOptions = {}): Server {
       }
     },
 
-    async getOpenApiSpec(): Promise<Result<OpenApiSpec, Error>> {
-      return generateOpenApiSpec(
-        {
-          title: openapi.title ?? "API",
-          version: openapi.version ?? "1.0.0",
-          description: openapi.description,
-          securitySchemes: openapi.securitySchemes,
-        },
-        localRouteRegistry,
-      )
-    },
-
-    async exportOpenApiSpec(path: string): Promise<Result<void, Error>> {
-      try {
-        const specResult = await this.getOpenApiSpec()
-        if (specResult.isErr()) {
-          return err(specResult.error)
-        }
-        await Bun.write(path, JSON.stringify(specResult.value, null, 2))
-        return ok(undefined)
-      } catch (error) {
-        return err(
-          error instanceof Error
-            ? error
-            : new Error("Failed to export OpenAPI spec"),
+    http: {
+      async getOpenApiSpec(): Promise<Result<OpenApiSpec, Error>> {
+        return generateOpenApiSpec(
+          {
+            title: openapi.title ?? "API",
+            version: openapi.version ?? "1.0.0",
+            description: openapi.description,
+            securitySchemes: openapi.securitySchemes,
+          },
+          localRouteRegistry,
         )
-      }
+      },
+
+      async exportOpenApiSpec(path: string): Promise<Result<void, Error>> {
+        try {
+          const specResult = await serverInstance.http.getOpenApiSpec()
+          if (specResult.isErr()) {
+            return err(specResult.error)
+          }
+          await Bun.write(path, JSON.stringify(specResult.value, null, 2))
+          return ok(undefined)
+        } catch (error) {
+          return err(
+            error instanceof Error
+              ? error
+              : new Error("Failed to export OpenAPI spec"),
+          )
+        }
+      },
     },
 
-    publish(topic: string, message: unknown): void {
-      if (!server) {
-        console.warn("Cannot publish: server not started")
-        return
-      }
-      const serialized =
-        typeof message === "object" ? JSON.stringify(message) : String(message)
-      server.publish(topic, serialized)
-    },
+    ws: {
+      publish(topic: string, message: unknown): void {
+        if (!server) {
+          console.warn("Cannot publish: server not started")
+          return
+        }
+        const serialized =
+          typeof message === "object"
+            ? JSON.stringify(message)
+            : String(message)
+        server.publish(topic, serialized)
+      },
 
-    publishBinary(topic: string, data: Buffer): void {
-      if (!server) {
-        console.warn("Cannot publish: server not started")
-        return
-      }
-      server.publish(topic, data)
-    },
+      publishBinary(topic: string, data: Buffer): void {
+        if (!server) {
+          console.warn("Cannot publish: server not started")
+          return
+        }
+        server.publish(topic, data)
+      },
 
-    async generateWebSocketTypes(options): Promise<Result<void, Error>> {
-      return generateWebSocketTypes(options, localWsRouteRegistry)
+      async generateWebSocketTypes(options): Promise<Result<void, Error>> {
+        return generateWebSocketTypes(options, localWsRouteRegistry)
+      },
     },
   }
 

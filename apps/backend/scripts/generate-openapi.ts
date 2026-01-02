@@ -113,7 +113,7 @@ async function main() {
     }
 
     // Generate OpenAPI spec
-    const specResult = await server.getOpenApiSpec()
+    const specResult = await server.http.getOpenApiSpec()
 
     if (specResult.isErr()) {
       throw specResult.error

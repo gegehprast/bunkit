@@ -7,7 +7,11 @@ export type { Server, ServerOptions } from "./types/server"
 // HTTP Routes
 export { createRoute } from "./http/route-builder"
 export type { RouteContext, RouteHandler } from "./http/types/context"
-export type { ExtractParams, HttpMethod, RouteMetadata } from "./http/types/route"
+export type {
+  ExtractParams,
+  HttpMethod,
+  RouteMetadata,
+} from "./http/types/route"
 
 // WebSocket Routes
 export { createWebSocketRoute } from "./websocket/websocket-route-builder"

@@ -1,4 +1,4 @@
-import type { ResponseHelpers } from "./response"
+import type { ResponseHelpers } from "../http/types/response.js"
 
 /**
  * Arguments passed to middleware functions

@@ -14,12 +14,12 @@
         "build:backend": "bun --filter @apps/backend --elide-lines=0 build",
         "start:backend": "bun --filter @apps/backend --elide-lines=0 start",
         "start:backend:bundled": "bun --filter @apps/backend --elide-lines=0 start:bundled",
-        "typecheck:backend": "bun --filter @apps/backend --elide-lines=0 typecheck",
+        "typecheck:backend": "cd apps/backend && bun run typecheck",
 
         "dev:frontend": "bun --filter @apps/frontend --elide-lines=0 dev",
         "build:frontend": "bun --filter @apps/frontend --elide-lines=0 build",
         "preview:frontend": "bun --filter @apps/frontend --elide-lines=0 preview",
-        "typecheck:frontend": "bun --filter @apps/frontend --elide-lines=0 typecheck",
+        "typecheck:frontend": "cd apps/frontend && bun run typecheck",
 
         "db:generate:backend": "bun --filter @apps/backend --elide-lines=0 db:generate",
         "db:migrate:backend": "bun --filter @apps/backend --elide-lines=0 db:migrate",

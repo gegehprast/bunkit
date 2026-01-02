@@ -1,6 +1,6 @@
 import type { Result } from "@bunkit/result"
-import type { RouteRegistry } from "../http/route-registry"
 import type { SecuritySchemeObject } from "../http/openapi/security-schemes"
+import type { RouteRegistry } from "../http/route-registry"
 import type { WebSocketRouteRegistry } from "../websocket/websocket-registry"
 import type { GenerateWebSocketTypesOptions } from "../websocket/websocket-type-generator"
 import type { CorsOptions } from "./cors"

@@ -4,13 +4,16 @@
     "module": "./src/index.ts",
     "type": "module",
     "exports": "./src/index.ts",
+    "scripts": {
+        "typecheck": "tsc --noEmit"
+    },
     "dependencies": {
         "@bunkit/result": "workspace:*",
         "zod": "catalog:",
         "zod-openapi": "catalog:"
     },
     "devDependencies": {
-        "@types/bun": "latest"
+        "@types/bun": "catalog:"
     },
     "peerDependencies": {
         "typescript": "^5"

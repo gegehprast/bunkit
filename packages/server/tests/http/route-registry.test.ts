@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test"
-import { RouteRegistry } from "../../src/http/route-registry"
-import type { RouteDefinition } from "../../src/types/route"
+import { RouteRegistry } from "src/http/route-registry"
+import type { RouteDefinition } from "src/http/types/route"
 
 const mockHandler = () => new Response("ok")
 

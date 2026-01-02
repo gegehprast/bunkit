@@ -108,8 +108,10 @@ describe("@bunkit/server - Basic functionality", () => {
     expect(server).toBeDefined()
     expect(server.start).toBeDefined()
     expect(server.stop).toBeDefined()
-    expect(server.getOpenApiSpec).toBeDefined()
-    expect(server.exportOpenApiSpec).toBeDefined()
+    expect(server.http.getOpenApiSpec).toBeDefined()
+    expect(server.http.exportOpenApiSpec).toBeDefined()
+    expect(server.ws.publish).toBeDefined()
+    expect(server.ws.publishBinary).toBeDefined()
   })
 
   test("should generate OpenAPI spec", async () => {
@@ -131,7 +133,7 @@ describe("@bunkit/server - Basic functionality", () => {
       })
 
     const server = createServer()
-    const spec = await server.getOpenApiSpec()
+    const spec = await server.http.getOpenApiSpec()
 
     expect(spec.isOk()).toBe(true)
     const specValue = spec.unwrap()

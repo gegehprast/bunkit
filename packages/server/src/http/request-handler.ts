@@ -1,12 +1,15 @@
 import { createPreflightResponse } from "../core/cors"
-import { createMiddlewareArgs, executeMiddlewareChain } from "../core/middleware"
+import {
+  createMiddlewareArgs,
+  executeMiddlewareChain,
+} from "../core/middleware"
 import { ErrorCode } from "../core/standard-errors"
-import type { MiddlewareFn } from "../types/middleware"
-import type { HttpMethod } from "./types/route"
-import type { ServerOptions } from "../types/server"
 import { parseBody, parseQueryParams, validateSchema } from "../core/validation"
+import type { MiddlewareFn } from "../types/middleware"
+import type { ServerOptions } from "../types/server"
 import { badRequest, createResponseHelpers, notFound } from "./response-helpers"
 import { type RouteRegistry, routeRegistry } from "./route-registry"
+import type { HttpMethod } from "./types/route"
 
 /**
  * Handle incoming HTTP requests

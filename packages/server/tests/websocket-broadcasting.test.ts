@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 import type { ServerWebSocket } from "bun"
 import { z } from "zod"
 import { createServer } from "../src/server"
-import type { WebSocketData } from "../src/types/websocket"
+import type { WebSocketData } from "../src/websocket/types/websocket"
 import { webSocketRegistry } from "../src/websocket/websocket-handler"
 import { webSocketRouteRegistry } from "../src/websocket/websocket-registry"
 import { createWebSocketRoute } from "../src/websocket/websocket-route-builder"
@@ -178,7 +178,7 @@ describe("WebSocket External Broadcasting (Phase 4)", () => {
       const originalWarn = console.warn
       console.warn = (msg: string) => warnings.push(msg)
 
-      server.publish("test-topic", { type: "test" })
+      server.ws.publish("test-topic", { type: "test" })
 
       console.warn = originalWarn
       expect(warnings).toContain("Cannot publish: server not started")
@@ -190,7 +190,7 @@ describe("WebSocket External Broadcasting (Phase 4)", () => {
       const originalWarn = console.warn
       console.warn = (msg: string) => warnings.push(msg)
 
-      server.publishBinary("test-topic", Buffer.from([0x01]))
+      server.ws.publishBinary("test-topic", Buffer.from([0x01]))
 
       console.warn = originalWarn
       expect(warnings).toContain("Cannot publish: server not started")
@@ -253,7 +253,7 @@ describe("WebSocket External Broadcasting (Phase 4)", () => {
       const originalWarn = console.warn
       console.warn = (msg: string) => warnings.push(msg)
 
-      server.publish("test-topic", { type: "notification", data: "test" })
+      server.ws.publish("test-topic", { type: "notification", data: "test" })
 
       console.warn = originalWarn
       expect(warnings).not.toContain("Cannot publish: server not started")

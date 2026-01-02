@@ -23,7 +23,7 @@ describe("OpenAPI Generator", () => {
       createRoute("GET", "/api/test").handler(({ res }) => res.ok({}))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
 
       expect(result.isOk()).toBe(true)
       const spec = result.unwrap()
@@ -39,7 +39,7 @@ describe("OpenAPI Generator", () => {
         },
       })
 
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       expect(spec.info.title).toBe("Test API")
@@ -50,7 +50,7 @@ describe("OpenAPI Generator", () => {
     test("should use default info when not specified", async () => {
       server = createServer()
 
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       expect(spec.info.title).toBe("API")
@@ -67,7 +67,7 @@ describe("OpenAPI Generator", () => {
       createRoute("GET", "/api/users/:id").handler(({ res }) => res.ok({}))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       expect(spec.paths["/api/users"]).toBeDefined()
@@ -83,7 +83,7 @@ describe("OpenAPI Generator", () => {
       ).handler(({ res }) => res.ok({}))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       expect(
@@ -95,7 +95,7 @@ describe("OpenAPI Generator", () => {
       createRoute("GET", "/api/users/:userId").handler(({ res }) => res.ok({}))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       const operation = spec.paths["/api/users/{userId}"]?.get
@@ -117,7 +117,7 @@ describe("OpenAPI Generator", () => {
         .handler(({ res }) => res.ok([]))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       expect(spec.paths["/api/users"]?.get?.operationId).toBe("listUsers")
@@ -129,7 +129,7 @@ describe("OpenAPI Generator", () => {
         .handler(({ res }) => res.ok([]))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       expect(spec.paths["/api/users"]?.get?.tags).toEqual(["Users", "Admin"])
@@ -144,7 +144,7 @@ describe("OpenAPI Generator", () => {
         .handler(({ res }) => res.ok([]))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       const operation = spec.paths["/api/users"]?.get
@@ -158,7 +158,7 @@ describe("OpenAPI Generator", () => {
       createRoute("GET", "/api/users").handler(({ res }) => res.ok([]))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       // Operation should exist even without operationId
@@ -179,7 +179,7 @@ describe("OpenAPI Generator", () => {
         .handler(({ res }) => res.ok([]))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       const operation = spec.paths["/api/users"]?.get
@@ -212,7 +212,7 @@ describe("OpenAPI Generator", () => {
         .handler(({ res }) => res.created({}))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       const operation = spec.paths["/api/users"]?.post
@@ -235,7 +235,7 @@ describe("OpenAPI Generator", () => {
         .handler(({ res }) => res.ok({ id: "1", name: "John" }))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       const operation = spec.paths["/api/user"]?.get
@@ -260,7 +260,7 @@ describe("OpenAPI Generator", () => {
         .handler(({ res }) => res.ok({ data: "ok" }))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       const operation = spec.paths["/api/action"]?.post
@@ -274,7 +274,7 @@ describe("OpenAPI Generator", () => {
         .handler(({ res }) => res.ok({}))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       const operation = spec.paths["/api/resource/{id}"]?.get
@@ -297,7 +297,7 @@ describe("OpenAPI Generator", () => {
         },
       })
 
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       const securitySchemes = spec.components?.securitySchemes as
@@ -324,7 +324,7 @@ describe("OpenAPI Generator", () => {
         },
       })
 
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
       const spec = result.unwrap()
 
       const operation = spec.paths["/api/protected"]?.get
@@ -353,8 +353,8 @@ describe("OpenAPI Generator", () => {
         .openapi({ operationId: "server2Route" })
         .handler(({ res }) => res.ok({}))
 
-      const spec1Result = await server1.getOpenApiSpec()
-      const spec2Result = await server2.getOpenApiSpec()
+      const spec1Result = await server1.http.getOpenApiSpec()
+      const spec2Result = await server2.http.getOpenApiSpec()
 
       const spec1 = spec1Result.unwrap()
       const spec2 = spec2Result.unwrap()
@@ -398,7 +398,7 @@ describe("OpenAPI Generator", () => {
         )
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
 
       expect(result.isOk()).toBe(true)
     })
@@ -416,7 +416,7 @@ describe("OpenAPI Generator", () => {
         .handler(({ res }) => res.ok([]))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
 
       expect(result.isOk()).toBe(true)
     })
@@ -437,7 +437,7 @@ describe("OpenAPI Generator", () => {
         .handler(({ res }) => res.ok({ success: true, data: "test" }))
 
       server = createServer()
-      const result = await server.getOpenApiSpec()
+      const result = await server.http.getOpenApiSpec()
 
       expect(result.isOk()).toBe(true)
     })
@@ -450,7 +450,7 @@ describe("OpenAPI Generator", () => {
       server = createServer()
 
       const tempPath = `/tmp/openapi-test-${Date.now()}.json`
-      const result = await server.exportOpenApiSpec(tempPath)
+      const result = await server.http.exportOpenApiSpec(tempPath)
 
       expect(result.isOk()).toBe(true)
 

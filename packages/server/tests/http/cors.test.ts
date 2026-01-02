@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
-import { routeRegistry } from "../../src/http/route-registry"
-import { createRoute, createServer } from "../../src/index"
-import type { Server } from "../../src/types/server"
+import { createRoute, createServer, type Server } from "src"
+import { routeRegistry } from "src/http/route-registry"
 
 // Helper to parse JSON response with type assertion
 const json = <T = Record<string, unknown>>(response: Response): Promise<T> =>
