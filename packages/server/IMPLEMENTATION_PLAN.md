@@ -18,17 +18,19 @@ Type-safe HTTP server with automatic OpenAPI 3.1 generation using `zod-openapi`,
 ### createRoute()
 
 ```typescript
-createRoute(method: HttpMethod, path: string)
+createRoute(method: HttpMethod, path: string, server?: Server)
   .openapi(metadata)           // OpenAPI docs
   .middlewares(...fns)         // Route middlewares
+  .security(requirements?)     // Security requirements (defaults to bearerAuth)
   .query(schema)               // Query validation
   .body(schema)                // Body validation
-  .response(schema, opts?)     // Success schema
-  .responses(responses)        // Multiple responses
-  .errors([400, 401, 404])     // Common errors
-  .errorResponses(responses)   // Custom errors
+  .response(schema, opts?)     // Single success response schema
+  .errors([400, 401, 404])     // Standard error responses
+  .errorResponses(responses)   // Custom error schemas
   .handler(async (ctx) => {}) // Handler (required)
 ```
+
+**Note:** The `.responses()` method has been **removed**. Routes now support only **one success response** to maintain clear API contracts and improve type safety. Use `.response()` for the success case and `.errors()` or `.errorResponses()` for error cases.
 
 **Path Parameters:** Auto-extracted via template literals
 - `/todos/:id` → `params: { id: string }`
@@ -62,7 +64,7 @@ createRoute("GET", "/api/users/:userId/posts/:postId")
 
 **Type Safety for Handler Return Values:**
 
-The handler's return type is **strictly validated at compile time** against the response schema(s):
+The handler's return type is **strictly validated at compile time** against the response schema:
 
 ```typescript
 // ✅ CORRECT: Handler returns data matching TodoSchema
@@ -91,61 +93,85 @@ createRoute("GET", "/api/todos/:id")
   })
 ```
 
-**Multiple Response Schemas:**
+**Single Success Response Pattern:**
 
-When using `.responses()`, the handler can return any of the defined schema types:
+Routes support only one success response schema for clarity:
 
 ```typescript
 const TodoSchema = z.object({ id: z.string(), title: z.string() })
-const ErrorSchema = z.object({ message: z.string() })
 
+// ✅ CORRECT: One success response, multiple error responses
 createRoute("POST", "/api/todos")
   .body(z.object({ title: z.string() }))
-  .responses({
-    201: {
-      description: 'Created',
-      content: { 'application/json': { schema: TodoSchema } }
-    },
-    400: {
-      description: 'Bad Request',
-      content: { 'application/json': { schema: ErrorSchema } }
+  .response(TodoSchema, { status: 201, description: "Todo created" })
+  .errors([400])  // Standard error responses
+  .errorResponses({
+    409: {
+      description: "Todo already exists",
+      content: {
+        "application/json": { schema: ErrorResponseSchema }
+      }
     }
   })
   .handler(({ body, res }) => {
     if (!body.title.trim()) {
-      // ✅ Can return ErrorSchema type with 400 status
-      return res.badRequest({ message: "Title cannot be empty" })
+      return res.badRequest("Title cannot be empty")
     }
-    // ✅ Can return TodoSchema type with 201 status
+    if (todoExists(body.title)) {
+      return res.conflict("Todo already exists")
+    }
     return res.created({ id: "1", title: body.title })
   })
 ```
 
 **Error Response Helpers:**
 
-Error helpers (`res.notFound()`, `res.unauthorized()`, etc.) are also type-checked:
+All error helpers are type-checked and use standard error schemas:
 
 ```typescript
 createRoute("GET", "/api/todos/:id")
   .response(TodoSchema)
-  .errorResponses({
-    404: {
-      description: 'Not Found',
-      content: {
-        'application/json': {
-          schema: z.object({ message: z.string(), code: z.string() })
-        }
-      }
-    }
-  })
+  .errors([400, 404])  // Automatically adds standard error schemas
   .handler(({ params, res }) => {
+    if (!isValidId(params.id)) {
+      // Uses BadRequestErrorResponseSchema
+      return res.badRequest("Invalid ID format", "INVALID_ID")
+    }
     const todo = findTodo(params.id)
     if (!todo) {
-      // ✅ Must match the 404 error schema
-      return res.notFound({ message: "Todo not found", code: "TODO_NOT_FOUND" })
+      // Uses NotFoundErrorResponseSchema
+      return res.notFound("Todo not found", "TODO_NOT_FOUND")
     }
     return res.ok(todo)
   })
+
+// Standard error response helpers:
+// res.badRequest(message, code?)       // 400 - BadRequestErrorResponseSchema
+// res.unauthorized(message, code?)     // 401 - UnauthorizedErrorResponseSchema
+// res.forbidden(message, code?)        // 403 - ForbiddenErrorResponseSchema
+// res.notFound(message, code?)         // 404 - NotFoundErrorResponseSchema
+// res.conflict(message, code?)         // 409 - ConflictErrorResponseSchema
+// res.internalError(message, code?)    // 500 - InternalServerErrorResponseSchema
+```
+
+**Security Requirements:**
+
+```typescript
+// Default bearerAuth when called without arguments
+createRoute("GET", "/api/protected")
+  .security()  // Defaults to [{ bearerAuth: [] }]
+  .middlewares(authMiddleware())
+  .response(DataSchema)
+  .errors([401])
+  .handler(({ ctx, res }) => {
+    const userId = ctx.userId  // Set by auth middleware
+    return res.ok(getUserData(userId))
+  })
+
+// Custom security schemes
+createRoute("GET", "/api/admin")
+  .security([{ apiKey: [], bearerAuth: [] }])  // Multiple schemes
+  .handler(({ res }) => res.ok({ data: "admin" }))
 ```
 
 ### Handler Context
@@ -225,6 +251,20 @@ interface ServerOptions {
   cors?: CorsOptions
   static?: Record<string, string>  // { '/public': './public' }
   globalMiddlewares?: MiddlewareFn[]
+  openapi?: {
+    info?: {
+      title?: string
+      version?: string
+      description?: string
+    }
+    servers?: Array<{ url: string, description?: string }>
+    securitySchemes?: Record<string, SecuritySchemeObject>
+  }
+  websocket?: {
+    publishBehavior?: "server" | "client" | "both"
+    compression?: boolean | { enabled: boolean }
+    // ... other WebSocket options
+  }
 }
 
 createServer(options: ServerOptions): Server
@@ -232,8 +272,23 @@ createServer(options: ServerOptions): Server
 interface Server {
   start(): Promise<Result<void, ServerError>>
   stop(): Promise<Result<void, ServerError>>
-  getOpenApiSpec(): OpenApiSpec
-  exportOpenApiSpec(path: string): Promise<Result<void, Error>>
+  
+  // HTTP methods (namespaced)
+  http: {
+    getOpenApiSpec(): Result<OpenApiSpec, Error>
+    exportOpenApiSpec(path: string): Promise<Result<void, Error>>
+  }
+  
+  // WebSocket methods (namespaced)
+  ws: {
+    publish(topic: string, message: unknown): void
+    publishBinary(topic: string, data: ArrayBuffer | Uint8Array): void
+    generateWebSocketTypes(options?: GenerateWebSocketTypesOptions): Result<string, Error>
+  }
+  
+  // Internal (for advanced use)
+  _routeRegistry?: RouteRegistry
+  _wsRouteRegistry?: WebSocketRouteRegistry
 }
 ```
 
@@ -311,12 +366,17 @@ class RouteBuilder<
   TResponse = unknown
 > {
   middlewares(...fns: MiddlewareFn[]): RouteBuilder<TPath, TQuery, TBody, TParams, TResponse>
-  query<T extends ZodSchema>(schema: T): RouteBuilder<TPath, z.infer<T>, TBody, TParams, TResponse>
-  body<T extends ZodSchema>(schema: T): RouteBuilder<TPath, TQuery, z.infer<T>, TParams, TResponse>
-  response<T extends ZodSchema>(schema: T): RouteBuilder<TPath, TQuery, TBody, TParams, z.infer<T>>
+  security(requirements?: Array<Record<string, string[]>>): RouteBuilder<TPath, TQuery, TBody, TParams, TResponse>
+  query<T extends z.ZodType>(schema: T): RouteBuilder<TPath, z.infer<T>, TBody, TParams, TResponse>
+  body<T extends z.ZodType>(schema: T): RouteBuilder<TPath, TQuery, z.infer<T>, TParams, TResponse>
+  response<T extends z.ZodType>(schema: T, opts?: { description?: string, status?: number }): RouteBuilder<TPath, TQuery, TBody, TParams, z.infer<T>>
+  errors(statusCodes: number[]): RouteBuilder<TPath, TQuery, TBody, TParams, TResponse>
+  errorResponses(responses: Record<number, ResponseConfig>): RouteBuilder<TPath, TQuery, TBody, TParams, TResponse>
   handler(fn: RouteHandler<TQuery, TBody, TParams, TResponse>): void
 }
 ```
+
+**Note:** The `responses()` method (plural) has been removed. Use `response()` (singular) for the success case.
 
 ## Implementation Phases
 
@@ -371,13 +431,16 @@ class RouteBuilder<
 ## Key Decisions
 
 1. **Route Discovery** - Auto-register on import, files imported after `createServer()`
-2. **OpenAPI** - Generated on demand, no caching
+2. **OpenAPI** - Generated on demand using `zod-openapi`, no caching
 3. **Path Parameters** - Auto-extracted from path string, always strings
-4. **Error Format** - Standardized `{ message, code?, details? }`
-5. **Global Middlewares** - Required, runs after CORS before route middlewares
-6. **CORS** - Disabled by default, explicit configuration required
-7. **Static Files** - Built-in via `static` option
-8. **WebSocket** - Defer to Phase 6 (HTTP first)
+4. **Error Format** - Standardized with typed schemas (BadRequestErrorResponseSchema, etc.)
+5. **Single Success Response** - Routes support only one success response via `.response()`
+6. **Security Defaults** - `.security()` without arguments defaults to bearerAuth
+7. **Global Middlewares** - Optional, runs after CORS before route middlewares
+8. **CORS** - Disabled by default, explicit configuration required
+9. **Static Files** - Built-in via `static` option
+10. **Namespaced Server Methods** - HTTP methods under `server.http.*`, WebSocket under `server.ws.*`
+11. **Relative Imports** - Use relative paths instead of path aliases for better compatibility
 
 ## Usage Example
 
