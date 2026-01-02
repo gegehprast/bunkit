@@ -1,4 +1,4 @@
-import type { HttpMethod } from "../http/types/route.js"
+import type { HttpMethod } from "../http/types/route"
 
 /**
  * CORS configuration options

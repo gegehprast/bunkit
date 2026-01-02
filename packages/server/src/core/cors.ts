@@ -1,5 +1,5 @@
-import type { CorsOptions } from "../types/cors.js"
-import type { MiddlewareFn } from "../types/middleware.js"
+import type { CorsOptions } from "../types/cors"
+import type { MiddlewareFn } from "../types/middleware"
 
 /**
  * Create CORS middleware
