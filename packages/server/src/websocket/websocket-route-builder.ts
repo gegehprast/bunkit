@@ -65,7 +65,7 @@ export class WebSocketRouteBuilder<
    * Register a handler for a specific message type
    * Messages are validated against the provided Zod schema
    */
-  public on<TSchema extends z.ZodTypeAny>(
+  public on<TSchema extends z.ZodType>(
     type: string,
     schema: TSchema,
     handler: MessageHandler<z.infer<TSchema>, TServerMsg, TUser>,

@@ -24,9 +24,9 @@ export class RouteBuilder<
   TResponse = unknown,
 > {
   private _metadata?: RouteMetadata
-  private _querySchema?: z.ZodTypeAny
-  private _bodySchema?: z.ZodTypeAny
-  private _responseSchema?: z.ZodTypeAny
+  private _querySchema?: z.ZodType
+  private _bodySchema?: z.ZodType
+  private _responseSchema?: z.ZodType
   private _responses?: Record<number, ResponseConfig>
   private _errorResponses?: Record<number, ResponseConfig>
   private _middlewares: MiddlewareFn[] = []
@@ -72,7 +72,7 @@ export class RouteBuilder<
   /**
    * Define query parameter schema
    */
-  public query<T extends z.ZodTypeAny>(
+  public query<T extends z.ZodType>(
     schema: T,
   ): RouteBuilder<TPath, z.infer<T>, TBody, TParams, TResponse> {
     this._querySchema = schema
@@ -88,7 +88,7 @@ export class RouteBuilder<
   /**
    * Define request body schema
    */
-  public body<T extends z.ZodTypeAny>(
+  public body<T extends z.ZodType>(
     schema: T,
   ): RouteBuilder<TPath, TQuery, z.infer<T>, TParams, TResponse> {
     this._bodySchema = schema
@@ -104,7 +104,7 @@ export class RouteBuilder<
   /**
    * Define single response schema
    */
-  public response<T extends z.ZodTypeAny>(
+  public response<T extends z.ZodType>(
     schema: T,
     options?: { description?: string; status?: number },
   ): RouteBuilder<TPath, TQuery, TBody, TParams, z.infer<T>> {

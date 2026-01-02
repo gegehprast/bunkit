@@ -34,7 +34,7 @@ function pathToNamespace(path: string): string {
  * Get the type name from a Zod schema
  * Handles both Zod v3 (typeName) and Zod v4+ (type) conventions
  */
-function getZodTypeName(schema: z.ZodTypeAny): string {
+function getZodTypeName(schema: z.ZodType): string {
   const def = schema._def as unknown as Record<string, unknown>
   // Zod v4+ uses "type", v3 uses "typeName"
   return (def.type as string) || (def.typeName as string) || "unknown"
@@ -43,7 +43,7 @@ function getZodTypeName(schema: z.ZodTypeAny): string {
 /**
  * Convert a Zod schema to TypeScript type string
  */
-function zodSchemaToTypeString(schema: z.ZodTypeAny, indent = 2): string {
+function zodSchemaToTypeString(schema: z.ZodType, indent = 2): string {
   const typeDef = schema._def as unknown as Record<string, unknown>
   const typeName = getZodTypeName(schema)
 
@@ -85,13 +85,13 @@ function zodSchemaToTypeString(schema: z.ZodTypeAny, indent = 2): string {
     case "array":
     case "ZodArray": {
       // In Zod v4+, array element type is in "element"
-      const elementSchema = typeDef.element as z.ZodTypeAny | undefined
+      const elementSchema = typeDef.element as z.ZodType | undefined
       if (elementSchema) {
         const innerType = zodSchemaToTypeString(elementSchema, indent)
         return `${innerType}[]`
       }
       // Fallback for v3 which uses "type"
-      const typeRef = typeDef.type as z.ZodTypeAny | undefined
+      const typeRef = typeDef.type as z.ZodType | undefined
       if (typeRef) {
         const innerType = zodSchemaToTypeString(typeRef, indent)
         return `${innerType}[]`
@@ -102,7 +102,7 @@ function zodSchemaToTypeString(schema: z.ZodTypeAny, indent = 2): string {
     case "ZodOptional": {
       // In Zod v4+, inner type is in "innerType"
       const innerSchema =
-        (typeDef.innerType as z.ZodTypeAny) || (typeDef.wrapped as z.ZodTypeAny)
+        (typeDef.innerType as z.ZodType) || (typeDef.wrapped as z.ZodType)
       if (innerSchema) {
         const innerType = zodSchemaToTypeString(innerSchema, indent)
         return `${innerType} | undefined`
@@ -112,7 +112,7 @@ function zodSchemaToTypeString(schema: z.ZodTypeAny, indent = 2): string {
     case "nullable":
     case "ZodNullable": {
       const innerSchema =
-        (typeDef.innerType as z.ZodTypeAny) || (typeDef.wrapped as z.ZodTypeAny)
+        (typeDef.innerType as z.ZodType) || (typeDef.wrapped as z.ZodType)
       if (innerSchema) {
         const innerType = zodSchemaToTypeString(innerSchema, indent)
         return `${innerType} | null`
@@ -121,7 +121,7 @@ function zodSchemaToTypeString(schema: z.ZodTypeAny, indent = 2): string {
     }
     case "object":
     case "ZodObject": {
-      const shape = typeDef.shape as Record<string, z.ZodTypeAny> | undefined
+      const shape = typeDef.shape as Record<string, z.ZodType> | undefined
       if (!shape || typeof shape !== "object") {
         return "Record<string, unknown>"
       }
@@ -138,7 +138,7 @@ function zodSchemaToTypeString(schema: z.ZodTypeAny, indent = 2): string {
     }
     case "record":
     case "ZodRecord": {
-      const valueSchema = typeDef.valueType as z.ZodTypeAny | undefined
+      const valueSchema = typeDef.valueType as z.ZodType | undefined
       if (valueSchema) {
         const valueType = zodSchemaToTypeString(valueSchema, indent)
         return `Record<string, ${valueType}>`
@@ -149,7 +149,7 @@ function zodSchemaToTypeString(schema: z.ZodTypeAny, indent = 2): string {
     case "ZodUnion":
     case "discriminatedUnion":
     case "ZodDiscriminatedUnion": {
-      const options = (typeDef.options as z.ZodTypeAny[]) || []
+      const options = (typeDef.options as z.ZodType[]) || []
       if (options.length === 0) return "never"
       return options
         .map((opt) => zodSchemaToTypeString(opt, indent))
@@ -167,7 +167,7 @@ function zodSchemaToTypeString(schema: z.ZodTypeAny, indent = 2): string {
     }
     case "tuple":
     case "ZodTuple": {
-      const items = (typeDef.items as z.ZodTypeAny[]) || []
+      const items = (typeDef.items as z.ZodType[]) || []
       if (items.length === 0) return "[]"
       const types = items.map((item) => zodSchemaToTypeString(item, indent))
       return `[${types.join(", ")}]`

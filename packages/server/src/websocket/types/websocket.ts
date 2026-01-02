@@ -140,7 +140,7 @@ export type WebSocketAuthFn<TUser = unknown> = (
  */
 export interface RegisteredMessageHandler {
   type: string
-  schema: z.ZodTypeAny
+  schema: z.ZodType
   handler: MessageHandler<unknown, unknown, unknown>
 }
 

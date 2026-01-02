@@ -41,7 +41,7 @@ export interface RouteMetadata {
  */
 export interface ResponseConfig {
   description?: string
-  content?: Record<string, { schema?: z.ZodTypeAny }>
+  content?: Record<string, { schema?: z.ZodType }>
 }
 
 /**
@@ -51,9 +51,9 @@ export interface RouteDefinition {
   method: HttpMethod
   path: string
   metadata?: RouteMetadata
-  querySchema?: z.ZodTypeAny
-  bodySchema?: z.ZodTypeAny
-  responseSchema?: z.ZodTypeAny
+  querySchema?: z.ZodType
+  bodySchema?: z.ZodType
+  responseSchema?: z.ZodType
   responses?: Record<number, ResponseConfig>
   errorResponses?: Record<number, ResponseConfig>
   middlewares?: MiddlewareFn[]
