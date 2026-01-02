@@ -119,7 +119,11 @@ describe("RouteBuilder", () => {
         .handler(({ res }) => res.ok({ id: "1", name: "Test" }))
 
       const routes = routeRegistry.getAll()
-      expect(routes[0]?.responseSchema).toBeDefined()
+      expect(routes[0]?.response).toBeDefined()
+      expect(routes[0]?.response?.content).toBeDefined()
+      expect(
+        routes[0]?.response?.content["application/json"]?.schema,
+      ).toBeDefined()
     })
 
     test("should accept response options", () => {
@@ -130,32 +134,10 @@ describe("RouteBuilder", () => {
         .handler(({ res }) => res.created({ id: "1" }))
 
       const routes = routeRegistry.getAll()
-      expect(routes[0]?.responses?.[201]).toBeDefined()
-      expect(routes[0]?.responses?.[201]?.description).toBe("Created item")
-    })
-  })
-
-  describe("responses (multiple)", () => {
-    test("should register multiple response schemas", () => {
-      const SuccessSchema = z.object({ data: z.string() })
-      const ErrorSchema = z.object({ error: z.string() })
-
-      createRoute("POST", "/api/action")
-        .responses({
-          200: {
-            description: "Success",
-            content: { "application/json": { schema: SuccessSchema } },
-          },
-          400: {
-            description: "Bad Request",
-            content: { "application/json": { schema: ErrorSchema } },
-          },
-        })
-        .handler(({ res }) => res.ok({ data: "ok" }))
-
-      const routes = routeRegistry.getAll()
-      expect(routes[0]?.responses?.[200]).toBeDefined()
-      expect(routes[0]?.responses?.[400]).toBeDefined()
+      expect(routes[0]?.response).toBeDefined()
+      expect(routes[0]?.response?.status).toBe(201)
+      expect(routes[0]?.response?.description).toBe("Created item")
+      expect(routes[0]?.response?.content).toBeDefined()
     })
   })
 
@@ -330,7 +312,7 @@ describe("RouteBuilder", () => {
       expect(routes[0]?.security).toBeDefined()
       expect(routes[0]?.querySchema).toBeDefined()
       expect(routes[0]?.bodySchema).toBeDefined()
-      expect(routes[0]?.responseSchema).toBeDefined()
+      expect(routes[0]?.response).toBeDefined()
       expect(routes[0]?.errorResponses?.[400]).toBeDefined()
       expect(routes[0]?.errorResponses?.[401]).toBeDefined()
     })
@@ -349,7 +331,7 @@ describe("RouteBuilder", () => {
 
       const routes = routeRegistry.getAll()
       expect(routes[0]?.querySchema).toBeDefined()
-      expect(routes[0]?.responseSchema).toBeDefined()
+      expect(routes[0]?.response).toBeDefined()
       expect(routes[0]?.metadata?.operationId).toBe("flexible")
     })
   })

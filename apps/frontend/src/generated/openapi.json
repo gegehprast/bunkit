@@ -21,10 +21,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -57,10 +58,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -78,7 +80,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "200 response",
             "content": {
               "application/json": {
                 "schema": {
@@ -93,10 +95,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -119,10 +122,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -145,10 +149,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -166,7 +171,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "200 response",
             "content": {
               "application/json": {
                 "schema": {
@@ -190,10 +195,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -221,7 +227,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "200 response",
             "content": {
               "application/json": {
                 "schema": {
@@ -231,24 +237,38 @@
             }
           },
           "400": {
-            "description": "Invalid input or email already exists",
+            "description": "Bad Request - Invalid input or validation failed",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "code": {
-                      "type": "string"
+                "example": {
+                  "message": "Validation failed",
+                  "code": "BAD_REQUEST",
+                  "details": [
+                    {
+                      "path": [
+                        "email"
+                      ],
+                      "message": "Invalid email format"
                     }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ],
-                  "additionalProperties": false
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Resource already exists or state conflict",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Resource already exists",
+                  "code": "CONFLICT",
+                  "details": "A user with this email already exists"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictErrorResponse"
                 }
               }
             }
@@ -259,10 +279,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -290,7 +311,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "200 response",
             "content": {
               "application/json": {
                 "schema": {
@@ -316,7 +337,7 @@
                   ]
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/BadRequestErrorResponse"
                 }
               }
             }
@@ -326,20 +347,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "code": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
                 }
               }
             }
@@ -350,10 +358,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -376,7 +385,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "200 response",
             "content": {
               "application/json": {
                 "schema": {
@@ -386,24 +395,15 @@
             }
           },
           "401": {
-            "description": "Unauthorized - Invalid or missing token",
+            "description": "Unauthorized - Invalid or missing token hahah",
             "content": {
               "application/json": {
+                "example": {
+                  "message": "Authentication required",
+                  "code": "UNAUTHORIZED"
+                },
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    },
-                    "code": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "code"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
                 }
               }
             }
@@ -414,10 +414,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -462,7 +463,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "200 response",
             "content": {
               "application/json": {
                 "schema": {
@@ -491,7 +492,7 @@
                   ]
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/BadRequestErrorResponse"
                 }
               }
             }
@@ -505,7 +506,7 @@
                   "code": "UNAUTHORIZED"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
                 }
               }
             }
@@ -516,10 +517,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -550,7 +552,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "200 response",
             "content": {
               "application/json": {
                 "schema": {
@@ -576,7 +578,7 @@
                   ]
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/BadRequestErrorResponse"
                 }
               }
             }
@@ -590,7 +592,7 @@
                   "code": "UNAUTHORIZED"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
                 }
               }
             }
@@ -601,10 +603,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -637,7 +640,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "200 response",
             "content": {
               "application/json": {
                 "schema": {
@@ -655,7 +658,7 @@
                   "code": "UNAUTHORIZED"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
                 }
               }
             }
@@ -666,10 +669,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -710,7 +714,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "200 response",
             "content": {
               "application/json": {
                 "schema": {
@@ -736,7 +740,7 @@
                   ]
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/BadRequestErrorResponse"
                 }
               }
             }
@@ -750,7 +754,7 @@
                   "code": "UNAUTHORIZED"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
                 }
               }
             }
@@ -761,10 +765,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -795,7 +800,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "200 response",
             "content": {
               "application/json": {
                 "schema": {
@@ -822,7 +827,7 @@
                   "code": "UNAUTHORIZED"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/UnauthorizedErrorResponse"
                 }
               }
             }
@@ -833,10 +838,11 @@
               "application/json": {
                 "example": {
                   "message": "Internal server error",
-                  "code": "INTERNAL_ERROR"
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
                 }
               }
             }
@@ -956,7 +962,7 @@
             "const": "ok"
           },
           "timestamp": {
-            "example": "2026-01-02T09:45:47.492Z",
+            "example": "2026-01-02T11:27:32.370Z",
             "type": "string"
           },
           "uptime": {
@@ -1079,11 +1085,11 @@
             "type": "boolean"
           },
           "createdAt": {
-            "example": "2026-01-02T09:45:47.516Z",
+            "example": "2026-01-02T11:27:32.391Z",
             "type": "string"
           },
           "updatedAt": {
-            "example": "2026-01-02T09:45:47.516Z",
+            "example": "2026-01-02T11:27:32.391Z",
             "type": "string"
           }
         },
@@ -1098,6 +1104,125 @@
         ],
         "additionalProperties": false
       },
+      "BadRequestErrorResponse": {
+        "description": "Bad Request Error Response",
+        "type": "object",
+        "properties": {
+          "message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "const": "BAD_REQUEST"
+          },
+          "details": {
+            "description": "List of validation errors",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "description": "Field with validation error",
+                  "type": "string"
+                },
+                "message": {
+                  "description": "Validation error message",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "field",
+                "message"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "message",
+          "code",
+          "details"
+        ],
+        "additionalProperties": false
+      },
+      "UnauthorizedErrorResponse": {
+        "description": "Unauthorized Error Response",
+        "type": "object",
+        "properties": {
+          "message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "const": "UNAUTHORIZED"
+          },
+          "details": {
+            "description": "Additional error details"
+          }
+        },
+        "required": [
+          "message",
+          "code"
+        ],
+        "additionalProperties": false
+      },
+      "ConflictErrorResponse": {
+        "description": "Conflict Error Response",
+        "type": "object",
+        "properties": {
+          "message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "const": "CONFLICT"
+          },
+          "details": {
+            "description": "Conflict details",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "required": [
+          "message",
+          "code"
+        ],
+        "additionalProperties": false
+      },
+      "InternalServerErrorResponse": {
+        "description": "Internal Server Error Response",
+        "type": "object",
+        "properties": {
+          "message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "const": "INTERNAL_ERROR"
+          },
+          "details": {
+            "description": "Internal error details (for debugging)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message",
+          "code"
+        ],
+        "additionalProperties": false
+      },
       "ErrorResponse": {
         "type": "object",
         "properties": {
@@ -1108,6 +1233,50 @@
           "code": {
             "description": "Error code",
             "type": "string"
+          },
+          "details": {
+            "description": "Additional error details"
+          }
+        },
+        "required": [
+          "message",
+          "code"
+        ],
+        "additionalProperties": false
+      },
+      "ForbiddenErrorResponse": {
+        "description": "Forbidden Error Response",
+        "type": "object",
+        "properties": {
+          "message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "const": "FORBIDDEN"
+          },
+          "details": {
+            "description": "Additional error details"
+          }
+        },
+        "required": [
+          "message",
+          "code"
+        ],
+        "additionalProperties": false
+      },
+      "NotFoundErrorResponse": {
+        "description": "Not Found Error Response",
+        "type": "object",
+        "properties": {
+          "message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "const": "NOT_FOUND"
           },
           "details": {
             "description": "Additional error details"

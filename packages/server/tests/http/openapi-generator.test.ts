@@ -242,32 +242,6 @@ describe("OpenAPI Generator", () => {
       expect(operation?.responses?.["200"]).toBeDefined()
     })
 
-    test("should include multiple response schemas", async () => {
-      const SuccessSchema = z.object({ data: z.string() })
-      const ErrorSchema = z.object({ error: z.string() })
-
-      createRoute("POST", "/api/action")
-        .responses({
-          200: {
-            description: "Success",
-            content: { "application/json": { schema: SuccessSchema } },
-          },
-          400: {
-            description: "Bad Request",
-            content: { "application/json": { schema: ErrorSchema } },
-          },
-        })
-        .handler(({ res }) => res.ok({ data: "ok" }))
-
-      server = createServer()
-      const result = await server.http.getOpenApiSpec()
-      const spec = result.unwrap()
-
-      const operation = spec.paths["/api/action"]?.post
-      expect(operation?.responses?.["200"]).toBeDefined()
-      expect(operation?.responses?.["400"]).toBeDefined()
-    })
-
     test("should include error responses", async () => {
       createRoute("GET", "/api/resource/:id")
         .errors([404, 500])

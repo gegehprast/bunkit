@@ -15,6 +15,7 @@ export interface ResponseHelpers<TResponse = unknown> {
   // JSON responses - constrained to TResponse type
   ok(data: TResponse, status?: number): Response
   created(data: TResponse, location?: string): Response
+  accepted(data: TResponse): Response
   noContent(): Response
 
   // Error responses - all require message, code, and optional details

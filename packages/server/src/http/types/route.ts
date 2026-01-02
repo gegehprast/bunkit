@@ -1,3 +1,4 @@
+import type { MakeRequired } from "node_modules/zod/v4/core/util"
 import type { z } from "zod"
 import type { MiddlewareFn } from "../../types/middleware"
 import type { RouteContext } from "./context"
@@ -40,9 +41,21 @@ export interface RouteMetadata {
  * Response configuration for a route
  */
 export interface ResponseConfig {
+  status: number
   description?: string
   content?: Record<string, { schema?: z.ZodType }>
 }
+
+/**
+ * Error Response configuration for a route
+ */
+export type ErrorResponseConfig = Record<
+  number,
+  {
+    description?: string
+    content?: Record<string, { schema?: z.ZodType }>
+  }
+>
 
 /**
  * Internal route definition stored in the registry
@@ -53,9 +66,8 @@ export interface RouteDefinition {
   metadata?: RouteMetadata
   querySchema?: z.ZodType
   bodySchema?: z.ZodType
-  responseSchema?: z.ZodType
-  responses?: Record<number, ResponseConfig>
-  errorResponses?: Record<number, ResponseConfig>
+  response?: MakeRequired<ResponseConfig, "content">
+  errorResponses?: ErrorResponseConfig
   middlewares?: MiddlewareFn[]
   security?: Array<Record<string, string[]>>
   handler: (

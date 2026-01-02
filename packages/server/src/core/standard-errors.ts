@@ -19,7 +19,7 @@ export const ErrorCode = {
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode]
 
 /**
- * Standard error response schema
+ * Standard error response schemas
  */
 export const ErrorResponseSchema = z.object({
   message: z.string().meta({ description: "Error message" }),
@@ -30,6 +30,46 @@ export const ErrorResponseSchema = z.object({
     .meta({ description: "Additional error details" }),
 })
 
+export const BadRequestErrorResponseSchema = ErrorResponseSchema.extend({
+  code: z.literal(ErrorCode.BAD_REQUEST),
+  details: z
+    .array(
+      z.object({
+        field: z.string().meta({ description: "Field with validation error" }),
+        message: z.string().meta({ description: "Validation error message" }),
+      }),
+    )
+    .meta({ description: "List of validation errors" }),
+}).meta({ description: "Bad Request Error Response" })
+
+export const UnauthorizedErrorResponseSchema = ErrorResponseSchema.extend({
+  code: z.literal(ErrorCode.UNAUTHORIZED),
+}).meta({ description: "Unauthorized Error Response" })
+
+export const ForbiddenErrorResponseSchema = ErrorResponseSchema.extend({
+  code: z.literal(ErrorCode.FORBIDDEN),
+}).meta({ description: "Forbidden Error Response" })
+
+export const NotFoundErrorResponseSchema = ErrorResponseSchema.extend({
+  code: z.literal(ErrorCode.NOT_FOUND),
+}).meta({ description: "Not Found Error Response" })
+
+export const ConflictErrorResponseSchema = ErrorResponseSchema.extend({
+  code: z.literal(ErrorCode.CONFLICT),
+  details: z
+    .union([z.string(), z.object({})])
+    .optional()
+    .meta({ description: "Conflict details" }),
+}).meta({ description: "Conflict Error Response" })
+
+export const InternalServerErrorResponseSchema = ErrorResponseSchema.extend({
+  code: z.literal(ErrorCode.INTERNAL_ERROR),
+  details: z
+    .string()
+    .optional()
+    .meta({ description: "Internal error details (for debugging)" }),
+}).meta({ description: "Internal Server Error Response" })
+
 /**
  * Common error response definitions for OpenAPI
  */
@@ -38,7 +78,7 @@ export const CommonErrorResponses = {
     description: "Bad Request - Invalid input or validation failed",
     content: {
       "application/json": {
-        schema: ErrorResponseSchema,
+        schema: BadRequestErrorResponseSchema,
         example: {
           message: "Validation failed",
           code: ErrorCode.BAD_REQUEST,
@@ -51,7 +91,7 @@ export const CommonErrorResponses = {
     description: "Unauthorized - Authentication required or failed",
     content: {
       "application/json": {
-        schema: ErrorResponseSchema,
+        schema: UnauthorizedErrorResponseSchema,
         example: {
           message: "Authentication required",
           code: ErrorCode.UNAUTHORIZED,
@@ -63,7 +103,7 @@ export const CommonErrorResponses = {
     description: "Forbidden - Insufficient permissions",
     content: {
       "application/json": {
-        schema: ErrorResponseSchema,
+        schema: ForbiddenErrorResponseSchema,
         example: {
           message: "Insufficient permissions",
           code: ErrorCode.FORBIDDEN,
@@ -75,7 +115,7 @@ export const CommonErrorResponses = {
     description: "Not Found - Resource does not exist",
     content: {
       "application/json": {
-        schema: ErrorResponseSchema,
+        schema: NotFoundErrorResponseSchema,
         example: {
           message: "Resource not found",
           code: ErrorCode.NOT_FOUND,
@@ -87,10 +127,11 @@ export const CommonErrorResponses = {
     description: "Conflict - Resource already exists or state conflict",
     content: {
       "application/json": {
-        schema: ErrorResponseSchema,
+        schema: ConflictErrorResponseSchema,
         example: {
           message: "Resource already exists",
           code: ErrorCode.CONFLICT,
+          details: "A user with this email already exists",
         },
       },
     },
@@ -99,10 +140,11 @@ export const CommonErrorResponses = {
     description: "Internal Server Error - Unexpected server error",
     content: {
       "application/json": {
-        schema: ErrorResponseSchema,
+        schema: InternalServerErrorResponseSchema,
         example: {
           message: "Internal server error",
           code: ErrorCode.INTERNAL_ERROR,
+          details: "Stack trace or error details for debugging",
         },
       },
     },

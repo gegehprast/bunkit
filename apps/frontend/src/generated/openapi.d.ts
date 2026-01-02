@@ -303,7 +303,7 @@ export interface components {
              * @constant
              */
             status: "ok";
-            /** @example 2026-01-02T09:45:47.492Z */
+            /** @example 2026-01-02T11:27:32.370Z */
             timestamp: string;
             /** @example 123.456 */
             uptime: number;
@@ -345,16 +345,75 @@ export interface components {
             description: string | null;
             /** @example false */
             completed: boolean;
-            /** @example 2026-01-02T09:45:47.516Z */
+            /** @example 2026-01-02T11:27:32.391Z */
             createdAt: string;
-            /** @example 2026-01-02T09:45:47.516Z */
+            /** @example 2026-01-02T11:27:32.391Z */
             updatedAt: string;
+        };
+        /** @description Bad Request Error Response */
+        BadRequestErrorResponse: {
+            /** @description Error message */
+            message: string;
+            /** @constant */
+            code: "BAD_REQUEST";
+            /** @description List of validation errors */
+            details: {
+                /** @description Field with validation error */
+                field: string;
+                /** @description Validation error message */
+                message: string;
+            }[];
+        };
+        /** @description Unauthorized Error Response */
+        UnauthorizedErrorResponse: {
+            /** @description Error message */
+            message: string;
+            /** @constant */
+            code: "UNAUTHORIZED";
+            /** @description Additional error details */
+            details?: unknown;
+        };
+        /** @description Conflict Error Response */
+        ConflictErrorResponse: {
+            /** @description Error message */
+            message: string;
+            /** @constant */
+            code: "CONFLICT";
+            /** @description Conflict details */
+            details?: string | Record<string, never>;
+        };
+        /** @description Internal Server Error Response */
+        InternalServerErrorResponse: {
+            /** @description Error message */
+            message: string;
+            /** @constant */
+            code: "INTERNAL_ERROR";
+            /** @description Internal error details (for debugging) */
+            details?: string;
         };
         ErrorResponse: {
             /** @description Error message */
             message: string;
             /** @description Error code */
             code: string;
+            /** @description Additional error details */
+            details?: unknown;
+        };
+        /** @description Forbidden Error Response */
+        ForbiddenErrorResponse: {
+            /** @description Error message */
+            message: string;
+            /** @constant */
+            code: "FORBIDDEN";
+            /** @description Additional error details */
+            details?: unknown;
+        };
+        /** @description Not Found Error Response */
+        NotFoundErrorResponse: {
+            /** @description Error message */
+            message: string;
+            /** @constant */
+            code: "NOT_FOUND";
             /** @description Additional error details */
             details?: unknown;
         };
@@ -385,10 +444,11 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };
@@ -413,10 +473,11 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };
@@ -430,7 +491,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Success */
+            /** @description 200 response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -448,10 +509,11 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };
@@ -474,10 +536,11 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };
@@ -500,10 +563,11 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };
@@ -517,7 +581,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Success */
+            /** @description 200 response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -537,10 +601,11 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };
@@ -558,58 +623,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthResponse"];
-                };
-            };
-            /** @description Invalid input or email already exists */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        message: string;
-                        code: string;
-                    };
-                };
-            };
-            /** @description Internal Server Error - Unexpected server error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
-                     *     }
-                     */
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    login: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginBody"];
-            };
-        };
-        responses: {
-            /** @description Success */
+            /** @description 200 response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -638,19 +652,23 @@ export interface operations {
                      *       ]
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
                 };
             };
-            /** @description Invalid credentials */
-            401: {
+            /** @description Conflict - Resource already exists or state conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        message: string;
-                        code: string;
-                    };
+                    /**
+                     * @example {
+                     *       "message": "Resource already exists",
+                     *       "code": "CONFLICT",
+                     *       "details": "A user with this email already exists"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["ConflictErrorResponse"];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -662,10 +680,83 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginBody"];
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthResponse"];
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
+                };
+            };
+            /** @description Invalid credentials */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };
@@ -679,7 +770,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Success */
+            /** @description 200 response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -688,16 +779,19 @@ export interface operations {
                     "application/json": components["schemas"]["UserResponse"];
                 };
             };
-            /** @description Unauthorized - Invalid or missing token */
+            /** @description Unauthorized - Invalid or missing token hahah */
             401: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        message: string;
-                        code: string;
-                    };
+                    /**
+                     * @example {
+                     *       "message": "Authentication required",
+                     *       "code": "UNAUTHORIZED"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -709,10 +803,11 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };
@@ -731,7 +826,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Success */
+            /** @description 200 response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -760,7 +855,7 @@ export interface operations {
                      *       ]
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
                 };
             };
             /** @description Unauthorized - Authentication required or failed */
@@ -775,7 +870,7 @@ export interface operations {
                      *       "code": "UNAUTHORIZED"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -787,10 +882,11 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };
@@ -808,7 +904,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Success */
+            /** @description 200 response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -837,7 +933,7 @@ export interface operations {
                      *       ]
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
                 };
             };
             /** @description Unauthorized - Authentication required or failed */
@@ -852,7 +948,7 @@ export interface operations {
                      *       "code": "UNAUTHORIZED"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -864,10 +960,11 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };
@@ -883,7 +980,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Success */
+            /** @description 200 response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -904,7 +1001,7 @@ export interface operations {
                      *       "code": "UNAUTHORIZED"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -916,10 +1013,11 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };
@@ -939,7 +1037,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Success */
+            /** @description 200 response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -968,7 +1066,7 @@ export interface operations {
                      *       ]
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
                 };
             };
             /** @description Unauthorized - Authentication required or failed */
@@ -983,7 +1081,7 @@ export interface operations {
                      *       "code": "UNAUTHORIZED"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -995,10 +1093,11 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };
@@ -1014,7 +1113,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Success */
+            /** @description 200 response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1037,7 +1136,7 @@ export interface operations {
                      *       "code": "UNAUTHORIZED"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -1049,10 +1148,11 @@ export interface operations {
                     /**
                      * @example {
                      *       "message": "Internal server error",
-                     *       "code": "INTERNAL_ERROR"
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
                 };
             };
         };

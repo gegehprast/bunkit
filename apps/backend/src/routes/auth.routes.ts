@@ -1,4 +1,5 @@
 import { createRoute } from "@bunkit/server"
+import { UnauthorizedErrorResponseSchema } from "node_modules/@bunkit/server/src/core/standard-errors"
 import { z } from "zod"
 import {
   generateToken,
@@ -86,19 +87,7 @@ createRoute("POST", "/auth/register")
   })
   .body(RegisterBodySchema)
   .response(AuthResponseSchema)
-  .errorResponses({
-    400: {
-      description: "Invalid input or email already exists",
-      content: {
-        "application/json": {
-          schema: z.object({
-            message: z.string(),
-            code: z.string(),
-          }),
-        },
-      },
-    },
-  })
+  .errors([400, 409])
   .handler(async ({ body, res }) => {
     const userRepo = getUserRepository()
 
@@ -161,10 +150,7 @@ createRoute("POST", "/auth/login")
       description: "Invalid credentials",
       content: {
         "application/json": {
-          schema: z.object({
-            message: z.string(),
-            code: z.string(),
-          }),
+          schema: UnauthorizedErrorResponseSchema,
         },
       },
     },
@@ -219,20 +205,12 @@ createRoute("GET", "/auth/me")
     description: "Get the authenticated user's profile (requires Bearer token)",
     tags: ["Authentication"],
   })
-  .security([{ bearerAuth: [] }])
+  .security()
   .middlewares(authMiddleware())
   .response(UserResponseSchema)
   .errorResponses({
     401: {
-      description: "Unauthorized - Invalid or missing token",
-      content: {
-        "application/json": {
-          schema: z.object({
-            message: z.string(),
-            code: z.string(),
-          }),
-        },
-      },
+      description: "Unauthorized - Invalid or missing token hahah",
     },
   })
   .handler(async ({ ctx, res }) => {

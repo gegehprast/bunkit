@@ -100,7 +100,9 @@ describe("@bunkit/server - Basic functionality", () => {
       })
 
     const routes = routeRegistry.getAll()
-    expect(routes[0]?.responseSchema).toBeDefined()
+    expect(
+      routes[0]?.response?.content["application/json"]?.schema,
+    ).toBeDefined()
   })
 
   test("should create server instance", () => {
@@ -140,48 +142,6 @@ describe("@bunkit/server - Basic functionality", () => {
     expect(specValue.openapi).toBe("3.1.0")
     expect(specValue.paths).toBeDefined()
     expect(specValue.paths["/api/todos/{id}"]).toBeDefined()
-  })
-
-  test("should handle multiple response schemas using .responses()", () => {
-    routeRegistry.clear()
-
-    const TodoSchema = z.object({
-      id: z.string(),
-      title: z.string(),
-    })
-
-    const ErrorSchema = z.object({
-      message: z.string(),
-      code: z.string(),
-    })
-
-    createRoute("POST", "/api/todos")
-      .body(z.object({ title: z.string() }))
-      .responses({
-        201: {
-          description: "Created",
-          content: {
-            "application/json": { schema: TodoSchema },
-          },
-        },
-        400: {
-          description: "Bad Request",
-          content: {
-            "application/json": { schema: ErrorSchema },
-          },
-        },
-      })
-      .handler(({ body, res }) => {
-        if (!body.title.trim()) {
-          return res.badRequest("Title cannot be empty", "INVALID_TITLE")
-        }
-        return res.created({ id: "1", title: body.title })
-      })
-
-    const routes = routeRegistry.getAll()
-    expect(routes[0]?.responses).toBeDefined()
-    expect(routes[0]?.responses?.[201]).toBeDefined()
-    expect(routes[0]?.responses?.[400]).toBeDefined()
   })
 
   test("should handle custom error responses using .errorResponses()", () => {
@@ -301,6 +261,7 @@ describe("@bunkit/server - Basic functionality", () => {
     expect(routes[0]?.middlewares?.length).toBe(1)
   })
 
+  // NOTE: This test does nothing
   test("should demonstrate handler return type validation", () => {
     routeRegistry.clear()
 
@@ -322,59 +283,17 @@ describe("@bunkit/server - Basic functionality", () => {
         })
       })
 
-    // Multiple response types
-    createRoute("POST", "/api/user")
-      .body(
-        z.object({
-          name: z.string(),
-          email: z.email(),
-        }),
-      )
-      .responses({
-        201: {
-          description: "Created",
-          content: {
-            "application/json": { schema: UserSchema },
-          },
-        },
-        409: {
-          description: "Conflict",
-          content: {
-            "application/json": {
-              schema: z.object({
-                message: z.string(),
-                existingId: z.string(),
-              }),
-            },
-          },
-        },
-      })
-      .handler(({ body, res }) => {
-        // Can return either 201 or 409
-        const exists = false
-        if (exists) {
-          return res.custom(
-            JSON.stringify({
-              message: "User already exists",
-              existingId: "123",
-            }),
-            {
-              status: 409,
-              headers: { "Content-Type": "application/json" },
-            },
-          )
-        }
-        return res.created({
-          id: "new-id",
-          name: body.name,
-          email: body.email,
+    // This should not compile - handler returns incorrect type
+    createRoute("GET", "/api/invalid-user/:id")
+      .response(UserSchema)
+      .handler(({ params, res }) => {
+        // @ts-expect-error: I should be marked as `unused` if the return type validation does not work
+        return res.ok({
+          id: params.id,
+          name: "John Doe",
+          // Missing email field should cause TypeScript error
         })
       })
-
-    const routes = routeRegistry.getAll()
-    expect(routes.length).toBe(2)
-    expect(routes[0]?.responseSchema).toBeDefined()
-    expect(routes[1]?.responses).toBeDefined()
   })
 
   test("should support all response helper methods", () => {
@@ -480,6 +399,6 @@ describe("@bunkit/server - Basic functionality", () => {
 
     const routes = routeRegistry.getAll()
     expect(routes[0]?.bodySchema).toBeDefined()
-    expect(routes[0]?.responseSchema).toBeDefined()
+    expect(routes[0]?.response).toBeDefined()
   })
 })

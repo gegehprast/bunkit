@@ -22,6 +22,13 @@ export function created<T>(data: T, location?: string): Response {
   })
 }
 
+export function accepted<T>(data: T): Response {
+  return new Response(JSON.stringify(data), {
+    status: 202,
+    headers: { "Content-Type": "application/json" },
+  })
+}
+
 export function noContent(): Response {
   return new Response(null, { status: 204 })
 }
@@ -159,6 +166,7 @@ export function createResponseHelpers(): ResponseHelpers {
     // JSON responses
     ok,
     created,
+    accepted,
     noContent,
 
     // Error responses

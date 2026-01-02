@@ -1,8 +1,14 @@
 import { ok, type Result } from "@bunkit/result"
 import { createDocument } from "zod-openapi"
 import {
+  BadRequestErrorResponseSchema,
   CommonErrorResponses,
+  ConflictErrorResponseSchema,
   ErrorResponseSchema,
+  ForbiddenErrorResponseSchema,
+  InternalServerErrorResponseSchema,
+  NotFoundErrorResponseSchema,
+  UnauthorizedErrorResponseSchema,
 } from "../../core/standard-errors"
 import type { OpenApiSpec } from "../../types/server"
 import { type RouteRegistry, routeRegistry } from "../route-registry"
@@ -65,6 +71,12 @@ export function generateOpenApiSpec(
     components: {
       schemas: {
         ErrorResponse: ErrorResponseSchema,
+        BadRequestErrorResponse: BadRequestErrorResponseSchema,
+        UnauthorizedErrorResponse: UnauthorizedErrorResponseSchema,
+        ForbiddenErrorResponse: ForbiddenErrorResponseSchema,
+        NotFoundErrorResponse: NotFoundErrorResponseSchema,
+        ConflictErrorResponse: ConflictErrorResponseSchema,
+        InternalServerErrorResponse: InternalServerErrorResponseSchema,
       },
       ...(info.securitySchemes
         ? {
@@ -143,23 +155,12 @@ function buildOperation(route: RouteDefinition): Record<string, unknown> {
   // Add responses
   const responses: Record<string, unknown> = {}
 
-  // Add success responses
-  if (route.responses) {
-    for (const [status, config] of Object.entries(route.responses)) {
-      responses[status] = {
-        description: config.description ?? `${status} response`,
-        content: config.content,
-      }
-    }
-  } else if (route.responseSchema) {
-    // Default success response
-    responses["200"] = {
-      description: "Success",
-      content: {
-        "application/json": {
-          schema: route.responseSchema,
-        },
-      },
+  // Add success response
+  if (route.response) {
+    const { status, description, content } = route.response
+    responses[status.toString()] = {
+      description: description ?? `${status} response`,
+      content: content,
     }
   }
 
@@ -168,11 +169,9 @@ function buildOperation(route: RouteDefinition): Record<string, unknown> {
     for (const [status, config] of Object.entries(route.errorResponses)) {
       responses[status] = {
         description: config.description ?? `${status} error`,
-        content: config.content ?? {
-          "application/json": {
-            schema: ErrorResponseSchema,
-          },
-        },
+        content:
+          config.content ??
+          getCommonErrorResponse(parseInt(status, 10)).content,
       }
     }
   }
@@ -197,9 +196,6 @@ function buildOperation(route: RouteDefinition): Record<string, unknown> {
   if (Object.keys(responses).length === 0) {
     responses["200"] = {
       description: "Success",
-      content: {
-        "application/json": {},
-      },
     }
   }
 
@@ -211,6 +207,17 @@ function buildOperation(route: RouteDefinition): Record<string, unknown> {
   }
 
   return operation
+}
+
+function getCommonErrorResponse(status: number) {
+  const check =
+    CommonErrorResponses[status as unknown as keyof typeof CommonErrorResponses]
+
+  if (!check) {
+    return CommonErrorResponses[500]
+  }
+
+  return check
 }
 
 /**
