@@ -14,9 +14,9 @@ import {
   NotFoundErrorResponseSchema,
   UnauthorizedErrorResponseSchema,
 } from "../../core/standard-errors"
+import { type RouteRegistry, routeRegistry } from "../../http/route-registry.ts"
+import type { RouteDefinition } from "../../http/types/route"
 import type { OpenApiSpec } from "../../types/server"
-import { type RouteRegistry, routeRegistry } from "../route-registry"
-import type { RouteDefinition } from "../types/route"
 
 export interface GenerateOpenApiSpecOptions {
   title: ZodOpenApiObject["info"]["title"]

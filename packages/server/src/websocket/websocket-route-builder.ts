@@ -15,7 +15,6 @@ import {
   WebSocketRouteRegistry,
   webSocketRouteRegistry,
 } from "./websocket-registry"
-
 /**
  * WebSocket route builder with fluent API and type-safe generics
  * Automatically extracts path parameters and enforces handler type safety

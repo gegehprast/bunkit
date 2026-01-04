@@ -1,10 +1,10 @@
 import type { Result } from "@bunkit/result"
-import type { GenerateOpenApiSpecOptions } from "../../src/http/openapi/generator"
+import type { GenerateOpenApiSpecOptions } from "../http/openapi/generator"
 import type { RouteRegistry } from "../http/route-registry"
+import type { CorsOptions } from "../types/cors"
+import type { MiddlewareFn } from "../types/middleware"
 import type { WebSocketRouteRegistry } from "../websocket/websocket-registry"
 import type { GenerateWebSocketTypesOptions } from "../websocket/websocket-type-generator"
-import type { CorsOptions } from "./cors"
-import type { MiddlewareFn } from "./middleware"
 
 /**
  * WebSocket server configuration

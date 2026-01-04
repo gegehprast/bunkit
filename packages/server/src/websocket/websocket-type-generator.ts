@@ -5,7 +5,6 @@ import {
   type WebSocketRouteRegistry,
   webSocketRouteRegistry,
 } from "./websocket-registry"
-
 /**
  * Options for generating WebSocket types
  */

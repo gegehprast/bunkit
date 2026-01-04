@@ -45,7 +45,6 @@ export { webSocketRegistry } from "./websocket/websocket-handler"
 
 // WebSocket Type Generation
 export type { GenerateWebSocketTypesOptions } from "./websocket/websocket-type-generator"
-
 // Middleware
 export type { MiddlewareArgs, MiddlewareFn } from "./types/middleware"
 export type { CorsOptions } from "./types/cors"
