@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 import { existsSync, unlinkSync } from "node:fs"
 import { z } from "zod"
-import { webSocketRouteRegistry } from "../src/websocket/websocket-registry"
-import { createWebSocketRoute } from "../src/websocket/websocket-route-builder"
-import { generateWebSocketTypes } from "../src/websocket/websocket-type-generator"
+import { webSocketRouteRegistry } from "../../src/websocket/websocket-registry"
+import { createWebSocketRoute } from "../../src/websocket/websocket-route-builder"
+import { generateWebSocketTypes } from "../../src/websocket/websocket-type-generator"
 
 describe("WebSocket Type Generator", () => {
   const testOutputPath = "/tmp/test-ws-types.ts"

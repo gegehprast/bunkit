@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
 import { z } from "zod"
-import { routeRegistry } from "../../src/http/route-registry"
-import { createRoute, createServer } from "../../src/index"
-import type { Server } from "../../src/types/server"
+import { routeRegistry } from "../../../src/http/route-registry"
+import { createRoute, createServer } from "../../../src/index"
+import type { Server } from "../../../src/types/server"
 
 describe("OpenAPI Generator", () => {
   let server: Server | null = null
@@ -441,6 +441,35 @@ describe("OpenAPI Generator", () => {
       } catch {
         // Ignore cleanup errors
       }
+    })
+  })
+
+  describe("Integration with route builder", () => {
+    test("should generate OpenAPI spec from route builder", async () => {
+      const TaskSchema = z
+        .object({
+          id: z.string(),
+          title: z.string(),
+        })
+        .meta({ id: "Task" })
+
+      createRoute("GET", "/api/tasks/:id")
+        .openapi({ operationId: "getTask", tags: ["Tasks"] })
+        .response(TaskSchema)
+        .errors([404])
+        .handler(({ params, res }) => {
+          return res.ok({ id: params.id, title: "Test" })
+        })
+
+      server = createServer()
+      const spec = await server.http.getOpenApiSpec()
+
+      expect(spec.isOk()).toBe(true)
+      const specValue = spec.unwrap()
+      expect(specValue.openapi).toBe("3.1.0")
+      expect(specValue.paths).toBeDefined()
+      expect(specValue.paths["/api/tasks/{id}"]).toBeDefined()
+      expect(specValue.paths["/api/tasks/{id}"]?.get).toBeDefined()
     })
   })
 })

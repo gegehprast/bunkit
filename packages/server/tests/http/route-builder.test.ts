@@ -335,4 +335,83 @@ describe("RouteBuilder", () => {
       expect(routes[0]?.metadata?.operationId).toBe("flexible")
     })
   })
+
+  describe("path parameters", () => {
+    test("should extract single path parameter", () => {
+      createRoute("GET", "/api/users/:userId").handler(({ params, res }) => {
+        return res.ok({ userId: params.userId })
+      })
+
+      const match = routeRegistry.match("GET", "/api/users/123")
+      expect(match).not.toBeNull()
+      expect(match?.params.userId).toBe("123")
+    })
+
+    test("should handle multiple path parameters", () => {
+      createRoute("GET", "/api/users/:userId/posts/:postId").handler(
+        ({ params, res }) => {
+          return res.ok({
+            userId: params.userId,
+            postId: params.postId,
+          })
+        },
+      )
+
+      const match = routeRegistry.match("GET", "/api/users/123/posts/456")
+      expect(match).not.toBeNull()
+      expect(match?.params.userId).toBe("123")
+      expect(match?.params.postId).toBe("456")
+    })
+
+    test("should type check path parameters", () => {
+      createRoute("GET", "/api/users/:userId/posts/:postId").handler(
+        ({ params, res }) => {
+          // params should be typed with userId and postId
+          const userId: string = params.userId
+          const postId: string = params.postId
+          return res.ok({ userId, postId })
+        },
+      )
+
+      const routes = routeRegistry.getAll()
+      expect(routes.length).toBe(1)
+    })
+  })
+
+  describe("handler return type validation", () => {
+    test("should demonstrate handler return type validation", () => {
+      const UserSchema = z.object({
+        id: z.string(),
+        name: z.string(),
+        email: z.email(),
+      })
+
+      // This should compile - handler returns correct type
+      createRoute("GET", "/api/user/:id")
+        .response(UserSchema)
+        .handler(({ params, res }) => {
+          // Valid response matching UserSchema
+          return res.ok({
+            id: params.id,
+            name: "John Doe",
+            email: "john@example.com",
+          })
+        })
+
+      // This should not compile - handler returns incorrect type
+      createRoute("GET", "/api/invalid-user/:id")
+        .response(UserSchema)
+        .handler(({ params, res }) => {
+          // @ts-expect-error: I should be marked as `unused` if the return type validation does not work
+          return res.ok({
+            id: params.id,
+            name: "John Doe",
+            // Missing email field should cause TypeScript error
+          })
+        })
+
+      const routes = routeRegistry.getAll()
+      expect(routes.length).toBe(2)
+    })
+  })
 })

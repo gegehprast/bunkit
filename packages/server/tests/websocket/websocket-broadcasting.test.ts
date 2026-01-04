@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 import type { ServerWebSocket } from "bun"
 import { z } from "zod"
-import { createServer } from "../src/server"
-import type { WebSocketData } from "../src/websocket/types/websocket"
-import { webSocketRegistry } from "../src/websocket/websocket-handler"
-import { webSocketRouteRegistry } from "../src/websocket/websocket-registry"
-import { createWebSocketRoute } from "../src/websocket/websocket-route-builder"
+import { createServer } from "../../src/server"
+import type { WebSocketData } from "../../src/websocket/types/websocket"
+import { webSocketRegistry } from "../../src/websocket/websocket-handler"
+import { webSocketRouteRegistry } from "../../src/websocket/websocket-registry"
+import { createWebSocketRoute } from "../../src/websocket/websocket-route-builder"
 
 describe("WebSocket External Broadcasting (Phase 4)", () => {
   beforeEach(() => {

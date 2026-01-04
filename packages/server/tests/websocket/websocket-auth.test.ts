@@ -6,9 +6,9 @@ import {
   extractRequestInfo,
   extractToken,
   noAuth,
-} from "../src/websocket/websocket-auth"
-import { webSocketRouteRegistry } from "../src/websocket/websocket-registry"
-import { createWebSocketRoute } from "../src/websocket/websocket-route-builder"
+} from "../../src/websocket/websocket-auth"
+import { webSocketRouteRegistry } from "../../src/websocket/websocket-registry"
+import { createWebSocketRoute } from "../../src/websocket/websocket-route-builder"
 
 describe("WebSocket Authentication Utilities", () => {
   beforeEach(() => {
