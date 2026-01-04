@@ -1,7 +1,7 @@
 import {
+  afterAll,
   afterEach,
   beforeAll,
-  beforeEach,
   describe,
   expect,
   test,
@@ -29,22 +29,11 @@ beforeAll(async () => {
       `Failed to initialize database: ${initResult.error.message}`,
     )
   }
-})
-
-beforeEach(async () => {
-  const dbResult = getDatabase()
-  if (dbResult.isErr()) {
-    throw new Error("Failed to get database connection")
-  }
 
   todoRepo = getTodoRepository()
   userRepo = getUserRepository()
 
-  // Clean up
-  await dbResult.value.execute(drizzleSql`DELETE FROM todos`)
-  await dbResult.value.execute(drizzleSql`DELETE FROM users`)
-
-  // Create a test user for todos
+  // Create a test user once for all tests
   const userResult = await userRepo.create({
     email: `test-${Date.now()}@example.com`,
     passwordHash: "$2b$10$test",
@@ -52,13 +41,22 @@ beforeEach(async () => {
   })
 
   if (userResult.isErr()) {
-    throw new Error("Failed to create test user")
+    throw new Error(`Failed to create test user: ${userResult.error.message}`)
   }
 
   testUserId = userResult.value.id
 })
 
 afterEach(async () => {
+  // Clean up todos after each test
+  const dbResult = getDatabase()
+  if (dbResult.isOk()) {
+    await dbResult.value.execute(drizzleSql`DELETE FROM todos`)
+  }
+})
+
+afterAll(async () => {
+  // Clean up test user
   const dbResult = getDatabase()
   if (dbResult.isOk()) {
     await dbResult.value.execute(drizzleSql`DELETE FROM todos`)

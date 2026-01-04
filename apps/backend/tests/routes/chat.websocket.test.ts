@@ -9,10 +9,11 @@
  */
 
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
+import z from "zod"
 import { generateToken } from "@/auth/auth.service"
 import { config } from "@/config"
 import { server } from "@/core/server"
-import { closeDatabase, initDatabase } from "@/db/client"
+import { initDatabase } from "@/db/client"
 import { getUserRepository } from "@/db/repositories/user-repository"
 import { loadRoutes } from "@/routes"
 
@@ -22,6 +23,8 @@ describe("WebSocket Chat", () => {
 
   beforeAll(
     async () => {
+      z.globalRegistry.clear()
+
       // Initialize database
       await initDatabase()
 
@@ -53,17 +56,6 @@ describe("WebSocket Chat", () => {
       if (tokenResult.isOk()) {
         token = tokenResult.value
       }
-      console.log("Generated test token:", token)
-
-      // Check the health endpoint to ensure server is ready
-      const healthResponse = await fetch(
-        `http://localhost:${config.PORT}/api/health`,
-      )
-      if (!healthResponse.ok) {
-        throw new Error(
-          `Server health check failed with status ${healthResponse.status}`,
-        )
-      }
     },
     {
       timeout: 20000,
@@ -74,8 +66,9 @@ describe("WebSocket Chat", () => {
     // Cleanup
     const userRepo = getUserRepository()
     await userRepo.delete(userId)
-    await closeDatabase()
     await server.stop()
+
+    // Important: Do not close database connection here as it shared across test suites
   })
 
   test("should reject connection without token", async () => {
@@ -153,7 +146,6 @@ describe("WebSocket Chat", () => {
 
       ws.onopen = () => {
         // Send join room message
-        console.log("Sending join message...")
         ws.send(
           JSON.stringify({
             type: "join",
@@ -165,7 +157,6 @@ describe("WebSocket Chat", () => {
       }
 
       ws.onmessage = (event) => {
-        console.log("Received message:", event.data)
         const message = JSON.parse(event.data.toString())
 
         if (message.type === "room_joined") {

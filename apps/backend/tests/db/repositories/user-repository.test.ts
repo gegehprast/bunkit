@@ -1,11 +1,4 @@
-import {
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  test,
-} from "bun:test"
+import { afterEach, beforeAll, describe, expect, test } from "bun:test"
 import { sql as drizzleSql } from "drizzle-orm"
 import { getDatabase, initDatabase } from "@/db/client"
 import type { UserRepository } from "@/db/repositories/user-repository"
@@ -22,18 +15,13 @@ beforeAll(async () => {
       `Failed to initialize database: ${initResult.error.message}`,
     )
   }
-})
 
-beforeEach(async () => {
   const dbResult = getDatabase()
   if (dbResult.isErr()) {
     throw new Error("Failed to get database connection")
   }
 
   userRepo = getUserRepository()
-
-  // Clean up users table before each test
-  await dbResult.value.execute(drizzleSql`DELETE FROM users`)
 })
 
 afterEach(async () => {
