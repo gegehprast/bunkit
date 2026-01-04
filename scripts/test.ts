@@ -10,10 +10,17 @@ import { parseArgs } from "node:util"
  * Commands to run
  */
 const commands = [
-  { name: "Backend Test", cmd: "bun --env-file=./apps/backend/.env.test test" },
+  {
+    name: "Backend Test",
+    cmd: "bun --env-file=./apps/backend/.env.test test apps/backend",
+  },
+  {
+    name: "Server Test",
+    cmd: "bun test packages/server",
+  },
 ]
 
-function parseArguments() {
+function parseOptions() {
   const { values } = parseArgs({
     args: Bun.argv,
     options: {
@@ -26,10 +33,6 @@ function parseArguments() {
         type: "boolean",
         short: "c",
         default: false,
-      },
-      filter: {
-        type: "string",
-        short: "f",
       },
       "test-name-pattern": {
         type: "string",
@@ -58,7 +61,6 @@ Usage:
 Options:
   -h, --help       Show this help message
   -c, --coverage   Generate coverage report
-  -f, --filter <file|module>  Run tests only for the specified file or module
   -t, --test-name-pattern <pattern>   Run only tests with names matching the pattern
 `)
 }
@@ -77,42 +79,39 @@ function parseCommand(cmd: string): string[] {
 }
 
 async function runTests() {
-  const args = parseArguments()
+  const options = parseOptions()
 
-  if (args.help) {
+  if (options.help) {
     showHelp()
     process.exit(0)
   }
 
-  if (args.filter) {
-    // Modify commands to include filter
-    for (const command of commands) {
-      command.cmd += ` "${args.filter}"`
-    }
-  }
-
-  if (args["test-name-pattern"]) {
+  if (options["test-name-pattern"]) {
     // Modify commands to include test name pattern
     for (const command of commands) {
-      command.cmd += ` -t "${args["test-name-pattern"]}"`
+      command.cmd += ` -t "${options["test-name-pattern"]}"`
     }
   }
 
-  if (args.bail) {
+  if (options.bail) {
     // Modify commands to include bail flag
     for (const command of commands) {
       command.cmd += ` --bail`
     }
   }
 
-  if (args.coverage) {
+  if (options.coverage) {
     // Modify commands to include coverage flag
     for (const command of commands) {
       command.cmd += " --coverage"
     }
   }
 
-  let hasError = false
+  const results: Array<{
+    name: string
+    passed: boolean
+    totalTests?: number
+  }> = []
 
   for (const { name, cmd } of commands) {
     console.log(`\n🧪 Running: ${name}...`)
@@ -126,14 +125,36 @@ async function runTests() {
 
     if (exitCode !== 0) {
       console.error(`❌ ${name} failed with exit code ${exitCode}`)
-      hasError = true
-      // Continue to next command instead of breaking
+      results.push({
+        name,
+        passed: false,
+      })
     } else {
       console.log(`✅ ${name} passed`)
+      results.push({
+        name,
+        passed: true,
+      })
     }
   }
 
-  if (hasError) {
+  // Display summary
+  console.log(`\n${"=".repeat(60)}`)
+  console.log("📊 Test Results Summary")
+  console.log("=".repeat(60))
+
+  for (const { name, passed } of results) {
+    const status = passed ? "PASSED" : "FAILED"
+    const icon = passed ? "✅" : "❌"
+
+    console.log(`${icon} ${name}: ${status}`)
+  }
+
+  console.log("=".repeat(60))
+
+  const failedCount = results.filter((r) => !r.passed).length
+
+  if (failedCount > 0) {
     console.log("\n⚠️  Some tests failed!")
     process.exit(1)
   }
