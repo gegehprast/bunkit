@@ -82,6 +82,18 @@ export function notFound(
   })
 }
 
+export function conflict(
+  message: string,
+  code: string = ErrorCode.CONFLICT,
+  details?: unknown,
+): Response {
+  const body: ErrorResponse = { message, code, details }
+  return new Response(JSON.stringify(body), {
+    status: 409,
+    headers: { "Content-Type": "application/json" },
+  })
+}
+
 export function internalError(
   message: string,
   code: string = ErrorCode.INTERNAL_ERROR,
@@ -174,6 +186,7 @@ export function createResponseHelpers(): ResponseHelpers {
     unauthorized,
     forbidden,
     notFound,
+    conflict,
     internalError,
 
     // Other content types

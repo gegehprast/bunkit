@@ -23,6 +23,7 @@ export interface ResponseHelpers<TResponse = unknown> {
   unauthorized(message: string, code?: string, details?: unknown): Response
   forbidden(message: string, code?: string, details?: unknown): Response
   notFound(message: string, code?: string, details?: unknown): Response
+  conflict(message: string, code?: string, details?: unknown): Response
   internalError(message: string, code?: string, details?: unknown): Response
 
   // Other content types

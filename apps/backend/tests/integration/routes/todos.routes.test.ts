@@ -1,15 +1,23 @@
-import { beforeAll, describe, expect, test } from "bun:test"
+import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 import { hashPassword } from "@/auth/auth.service"
-import { initDatabase } from "@/db/client"
 import { UserRepository } from "@/db/repositories/user-repository"
+import { createTestServer, type TestServer } from "../test-server"
 
 describe("Todo Routes", () => {
-  const BASE_URL = `http://localhost:${process.env.PORT || 3099}`
+  let testServer: TestServer
+  let BASE_URL: string
   let userRepo: UserRepository
   let authToken: string
 
   beforeAll(async () => {
-    await initDatabase()
+    testServer = await createTestServer()
+    const startResult = await testServer.start()
+    if (startResult.isErr()) {
+      throw new Error(
+        `Failed to start test server: ${startResult.error.message}`,
+      )
+    }
+    BASE_URL = testServer.getBaseUrl()
     userRepo = new UserRepository()
 
     // Clean up and create test user
@@ -27,7 +35,7 @@ describe("Todo Routes", () => {
 
     if (userResult.isOk()) {
       // Login to get token
-      const loginResponse = await fetch(`${BASE_URL}/api/auth/login`, {
+      const loginResponse = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -36,9 +44,13 @@ describe("Todo Routes", () => {
         }),
       })
 
-      const { token } = (await loginResponse.json()) as { token: string }
-      authToken = token
+      const loginData = (await loginResponse.json()) as { token: string }
+      authToken = loginData.token
     }
+  })
+
+  afterAll(async () => {
+    await testServer.stop()
   })
 
   describe("POST /api/todos", () => {
@@ -95,10 +107,11 @@ describe("Todo Routes", () => {
       })
 
       expect(response.status).toBe(200)
-      const data = (await response.json()) as {
-        todos: Array<{ id: string; title: string }>
-      }
-      expect(Array.isArray(data.todos)).toBe(true)
+      const data = (await response.json()) as Array<{
+        id: string
+        title: string
+      }>
+      expect(Array.isArray(data)).toBe(true)
     })
 
     test("should require authentication", async () => {
@@ -122,20 +135,22 @@ describe("Todo Routes", () => {
         }),
       })
 
-      const { id } = (await createResponse.json()) as { id: string }
+      const createData = (await createResponse.json()) as { id: string }
 
-      const response = await fetch(`${BASE_URL}/api/todos/${id}`, {
+      const response = await fetch(`${BASE_URL}/api/todos/${createData.id}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       })
 
       expect(response.status).toBe(200)
       const data = (await response.json()) as { id: string; title: string }
-      expect(data.id).toBe(id)
+      expect(data.id).toBe(createData.id)
       expect(data.title).toBe("Get Test Todo")
     })
 
     test("should return 404 for non-existent todo", async () => {
-      const response = await fetch(`${BASE_URL}/api/todos/nonexistent-id`, {
+      // Use a valid UUID format that doesn't exist
+      const nonExistentId = "00000000-0000-0000-0000-000000000000"
+      const response = await fetch(`${BASE_URL}/api/todos/${nonExistentId}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       })
 
@@ -143,7 +158,7 @@ describe("Todo Routes", () => {
     })
   })
 
-  describe("PATCH /api/todos/:id", () => {
+  describe("PUT /api/todos/:id", () => {
     test("should update todo", async () => {
       // Create a todo first
       const createResponse = await fetch(`${BASE_URL}/api/todos`, {
@@ -157,10 +172,10 @@ describe("Todo Routes", () => {
         }),
       })
 
-      const { id } = (await createResponse.json()) as { id: string }
+      const createData = (await createResponse.json()) as { id: string }
 
-      const response = await fetch(`${BASE_URL}/api/todos/${id}`, {
-        method: "PATCH",
+      const response = await fetch(`${BASE_URL}/api/todos/${createData.id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authToken}`,
@@ -190,19 +205,24 @@ describe("Todo Routes", () => {
         }),
       })
 
-      const { id } = (await createResponse.json()) as { id: string }
+      const createData = (await createResponse.json()) as { id: string }
 
-      const response = await fetch(`${BASE_URL}/api/todos/${id}`, {
+      const response = await fetch(`${BASE_URL}/api/todos/${createData.id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${authToken}` },
       })
 
-      expect(response.status).toBe(204)
+      expect(response.status).toBe(200)
+      const data = (await response.json()) as { message: string }
+      expect(data.message).toBe("Todo deleted successfully")
 
       // Verify it's deleted
-      const getResponse = await fetch(`${BASE_URL}/api/todos/${id}`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      })
+      const getResponse = await fetch(
+        `${BASE_URL}/api/todos/${createData.id}`,
+        {
+          headers: { Authorization: `Bearer ${authToken}` },
+        },
+      )
 
       expect(getResponse.status).toBe(404)
     })

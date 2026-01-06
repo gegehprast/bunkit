@@ -1,17 +1,22 @@
-import { beforeAll, describe, expect, test } from "bun:test"
+import { afterAll, beforeAll, describe, expect, test } from "bun:test"
 import { hashPassword } from "@/auth/auth.service"
-import { initDatabase } from "@/db/client"
 import { UserRepository } from "@/db/repositories/user-repository"
+import { createTestServer, type TestServer } from "../test-server"
 
 describe("Auth Routes", () => {
-  const BASE_URL = `http://localhost:${process.env.PORT || 3099}`
+  let testServer: TestServer
+  let BASE_URL: string
   let userRepo: UserRepository
 
-  // Note: These tests require the server to be running
-  // Run with: bun run dev (in another terminal)
-
   beforeAll(async () => {
-    await initDatabase()
+    testServer = await createTestServer()
+    const startResult = await testServer.start()
+    if (startResult.isErr()) {
+      throw new Error(
+        `Failed to start test server: ${startResult.error.message}`,
+      )
+    }
+    BASE_URL = testServer.getBaseUrl()
     userRepo = new UserRepository()
 
     // Clean up test user
@@ -29,9 +34,13 @@ describe("Auth Routes", () => {
     })
   })
 
-  describe("POST /api/auth/login", () => {
-    test.skip("should login with valid credentials", async () => {
-      const response = await fetch(`${BASE_URL}/api/auth/login`, {
+  afterAll(async () => {
+    await testServer.stop()
+  })
+
+  describe("POST /auth/login", () => {
+    test("should login with valid credentials", async () => {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -43,15 +52,15 @@ describe("Auth Routes", () => {
       expect(response.status).toBe(200)
       const data = (await response.json()) as {
         token: string
-        user: { email: string }
+        user: { email: string; id: string; name: string | null }
       }
       expect(data).toHaveProperty("token")
       expect(data).toHaveProperty("user")
       expect(data.user.email).toBe("auth-test@example.com")
     })
 
-    test.skip("should reject invalid credentials", async () => {
-      const response = await fetch(`${BASE_URL}/api/auth/login`, {
+    test("should reject invalid credentials", async () => {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -63,8 +72,8 @@ describe("Auth Routes", () => {
       expect(response.status).toBe(401)
     })
 
-    test.skip("should reject non-existent user", async () => {
-      const response = await fetch(`${BASE_URL}/api/auth/login`, {
+    test("should reject non-existent user", async () => {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -76,8 +85,8 @@ describe("Auth Routes", () => {
       expect(response.status).toBe(401)
     })
 
-    test.skip("should validate email format", async () => {
-      const response = await fetch(`${BASE_URL}/api/auth/login`, {
+    test("should validate email format", async () => {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -90,15 +99,15 @@ describe("Auth Routes", () => {
     })
   })
 
-  describe("POST /api/auth/register", () => {
-    test.skip("should register new user", async () => {
+  describe("POST /auth/register", () => {
+    test("should register new user", async () => {
       // Clean up if exists
       const existing = await userRepo.findByEmail("newuser@example.com")
       if (existing.isOk() && existing.value) {
         await userRepo.delete(existing.value.id)
       }
 
-      const response = await fetch(`${BASE_URL}/api/auth/register`, {
+      const response = await fetch(`${BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -111,15 +120,15 @@ describe("Auth Routes", () => {
       expect(response.status).toBe(201)
       const data = (await response.json()) as {
         token: string
-        user: { email: string }
+        user: { email: string; id: string; name: string | null }
       }
       expect(data).toHaveProperty("token")
       expect(data).toHaveProperty("user")
       expect(data.user.email).toBe("newuser@example.com")
     })
 
-    test.skip("should reject duplicate email", async () => {
-      const response = await fetch(`${BASE_URL}/api/auth/register`, {
+    test("should reject duplicate email", async () => {
+      const response = await fetch(`${BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -132,8 +141,8 @@ describe("Auth Routes", () => {
       expect(response.status).toBe(409)
     })
 
-    test.skip("should validate email format", async () => {
-      const response = await fetch(`${BASE_URL}/api/auth/register`, {
+    test("should validate email format", async () => {
+      const response = await fetch(`${BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -146,8 +155,8 @@ describe("Auth Routes", () => {
       expect(response.status).toBe(400)
     })
 
-    test.skip("should require minimum password length", async () => {
-      const response = await fetch(`${BASE_URL}/api/auth/register`, {
+    test("should require minimum password length", async () => {
+      const response = await fetch(`${BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -161,10 +170,10 @@ describe("Auth Routes", () => {
     })
   })
 
-  describe("GET /api/auth/me", () => {
+  describe("GET /auth/me", () => {
     test("should return user data with valid token", async () => {
       // Login first to get token
-      const loginResponse = await fetch(`${BASE_URL}/api/auth/login`, {
+      const loginResponse = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -173,25 +182,30 @@ describe("Auth Routes", () => {
         }),
       })
 
-      const { token } = (await loginResponse.json()) as { token: string }
+      const loginData = (await loginResponse.json()) as { token: string }
 
-      const response = await fetch(`${BASE_URL}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await fetch(`${BASE_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${loginData.token}` },
       })
 
       expect(response.status).toBe(200)
-      const data = (await response.json()) as { email: string }
+      const data = (await response.json()) as {
+        email: string
+        id: string
+        name: string | null
+        createdAt: string
+      }
       expect(data.email).toBe("auth-test@example.com")
     })
 
     test("should reject request without token", async () => {
-      const response = await fetch(`${BASE_URL}/api/auth/me`)
+      const response = await fetch(`${BASE_URL}/auth/me`)
 
       expect(response.status).toBe(401)
     })
 
     test("should reject request with invalid token", async () => {
-      const response = await fetch(`${BASE_URL}/api/auth/me`, {
+      const response = await fetch(`${BASE_URL}/auth/me`, {
         headers: { Authorization: "Bearer invalid-token" },
       })
 

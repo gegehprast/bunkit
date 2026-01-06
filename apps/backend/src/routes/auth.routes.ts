@@ -98,7 +98,7 @@ createRoute("POST", "/auth/register")
     }
 
     if (existingUserResult.value) {
-      return res.badRequest("Email already registered")
+      return res.conflict("Email already registered")
     }
 
     // Hash password

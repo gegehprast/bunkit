@@ -7,10 +7,12 @@ import { type Database, getDatabase } from "@/db/client"
  * Base repository class with common database operation helpers
  */
 export abstract class BaseRepository {
-  protected db: Database
-
-  public constructor() {
-    this.db = getDatabase().unwrap()
+  protected get db(): Database {
+    const dbResult = getDatabase()
+    if (dbResult.isErr()) {
+      throw new Error(dbResult.error.message)
+    }
+    return dbResult.value
   }
 
   /**

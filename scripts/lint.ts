@@ -19,8 +19,8 @@ const commands = [
     cwd: "packages/server",
     cmd: "bun run typecheck",
   },
-  { name: "Typecheck Backend", cmd: "bun run typecheck:backend" },
-  { name: "Typecheck Frontend", cmd: "bun run typecheck:frontend" },
+  { name: "Typecheck Backend", cmd: "bun run backend:typecheck" },
+  { name: "Typecheck Frontend", cmd: "bun run frontend:typecheck" },
 ]
 
 async function runLint() {
