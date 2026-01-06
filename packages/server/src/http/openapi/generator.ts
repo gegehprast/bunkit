@@ -21,10 +21,12 @@ import type { OpenApiSpec } from "../../types/server"
 export interface GenerateOpenApiSpecOptions {
   title: ZodOpenApiObject["info"]["title"]
   version: ZodOpenApiObject["info"]["version"]
-  description?: ZodOpenApiObject["info"]["description"]
-  securitySchemes?: Record<string, ZodOpenApiSecuritySchemeObject>
-  servers?: ZodOpenApiObject["servers"]
+  description: ZodOpenApiObject["info"]["description"]
+  securitySchemes: Record<string, ZodOpenApiSecuritySchemeObject>
+  servers: ZodOpenApiObject["servers"]
 }
+
+const OPENAPI_SPEC_VERSION = "3.1.0"
 
 /**
  * Generate OpenAPI specification from registered routes
@@ -32,10 +34,7 @@ export interface GenerateOpenApiSpecOptions {
  * @param localRegistry - Optional local route registry (uses global if not provided)
  */
 export function generateOpenApiSpec(
-  options: GenerateOpenApiSpecOptions = {
-    title: "API",
-    version: "1.0.0",
-  },
+  options: GenerateOpenApiSpecOptions,
   localRegistry?: RouteRegistry,
 ): Result<OpenApiSpec, Error> {
   // Use local registry if provided, otherwise fall back to global
@@ -67,7 +66,7 @@ export function generateOpenApiSpec(
 
   // Create document using zod-openapi with standard error schema
   const document = createDocument({
-    openapi: "3.1.0",
+    openapi: OPENAPI_SPEC_VERSION,
     info: {
       title: options.title,
       version: options.version,
