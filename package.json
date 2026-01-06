@@ -15,14 +15,13 @@
         "backend:db:generate": "bun --filter @apps/backend --elide-lines=0 db:generate",
         "backend:db:migrate": "bun --filter @apps/backend --elide-lines=0 db:migrate",
         "backend:db:studio": "bun --filter @apps/backend --elide-lines=0 db:studio",
+        "backend:openapi:generate": "bun --filter @apps/backend --elide-lines=0 openapi:generate",
+        "backend:openapi:generate:to-frontend": "bun --filter @apps/backend --elide-lines=0 openapi:generate --types --output=../../apps/frontend/src/generated",
 
         "frontend:dev": "bun --filter @apps/frontend --elide-lines=0 dev",
         "frontend:build": "bun --filter @apps/frontend --elide-lines=0 build",
         "frontend:preview": "bun --filter @apps/frontend --elide-lines=0 preview",
-        "frontend:typecheck": "cd apps/frontend && bun run typecheck",
-
-        "openapi:generate:backend": "bun --filter @apps/backend --elide-lines=0 openapi:generate",
-        "openapi:generate:backend:to-frontend": "bun --filter @apps/backend --elide-lines=0 openapi:generate --types --output=../../apps/frontend/src/generated"
+        "frontend:typecheck": "cd apps/frontend && bun run typecheck"
     },
     "workspaces": {
         "packages": [

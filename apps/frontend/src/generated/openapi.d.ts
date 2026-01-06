@@ -303,7 +303,7 @@ export interface components {
              * @constant
              */
             status: "ok";
-            /** @example 2026-01-02T11:27:32.370Z */
+            /** @example 2026-01-06T08:47:45.194Z */
             timestamp: string;
             /** @example 123.456 */
             uptime: number;
@@ -345,9 +345,9 @@ export interface components {
             description: string | null;
             /** @example false */
             completed: boolean;
-            /** @example 2026-01-02T11:27:32.391Z */
+            /** @example 2026-01-06T08:47:45.227Z */
             createdAt: string;
-            /** @example 2026-01-02T11:27:32.391Z */
+            /** @example 2026-01-06T08:47:45.227Z */
             updatedAt: string;
         };
         /** @description Bad Request Error Response */

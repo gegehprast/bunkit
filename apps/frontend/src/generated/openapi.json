@@ -5,6 +5,12 @@
     "version": "1.0.0",
     "description": "Production-ready HTTP API built with BunKit"
   },
+  "servers": [
+    {
+      "url": "http://localhost:3001",
+      "description": "Development server"
+    }
+  ],
   "paths": {
     "/": {
       "get": {
@@ -962,7 +968,7 @@
             "const": "ok"
           },
           "timestamp": {
-            "example": "2026-01-02T11:27:32.370Z",
+            "example": "2026-01-06T08:47:45.194Z",
             "type": "string"
           },
           "uptime": {
@@ -1085,11 +1091,11 @@
             "type": "boolean"
           },
           "createdAt": {
-            "example": "2026-01-02T11:27:32.391Z",
+            "example": "2026-01-06T08:47:45.227Z",
             "type": "string"
           },
           "updatedAt": {
-            "example": "2026-01-02T11:27:32.391Z",
+            "example": "2026-01-06T08:47:45.227Z",
             "type": "string"
           }
         },
