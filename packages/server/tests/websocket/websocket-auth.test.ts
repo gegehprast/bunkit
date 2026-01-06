@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test"
+import { z } from "zod"
 import {
   createTokenAuth,
   extractBearerToken,
@@ -363,9 +364,14 @@ describe("WebSocket Route Builder Authentication", () => {
   it("should allow chaining after authenticate", () => {
     const authFn = () => ({ id: "user" })
 
+    const ServerMessageSchema = z.object({
+      type: z.literal("msg"),
+      text: z.string(),
+    })
+
     const route = createWebSocketRoute("/api/chat")
       .authenticate(authFn)
-      .serverMessages<{ type: "msg"; text: string }>()
+      .serverMessages(ServerMessageSchema)
       .onConnect(() => {})
       .onClose(() => {})
       .build()

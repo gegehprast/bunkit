@@ -13,7 +13,8 @@
         "db:generate": "drizzle-kit generate",
         "db:migrate": "bun run ./scripts/migrate.ts",
         "db:studio": "drizzle-kit studio",
-        "openapi:generate": "LOG_LEVEL=error bun run ./scripts/generate-openapi.ts"
+        "openapi:generate": "LOG_LEVEL=error bun run ./scripts/generate-openapi.ts",
+        "ws-types:generate": "LOG_LEVEL=error bun run ./scripts/generate-ws-types.ts"
     },
     "dependencies": {
         "@bunkit/result": "workspace:*",

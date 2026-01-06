@@ -17,6 +17,8 @@
         "backend:db:studio": "bun --filter @apps/backend --elide-lines=0 db:studio",
         "backend:openapi:generate": "bun --filter @apps/backend --elide-lines=0 openapi:generate",
         "backend:openapi:generate:to-frontend": "bun --filter @apps/backend --elide-lines=0 openapi:generate --types --output=../../apps/frontend/src/generated",
+        "backend:ws-types:generate": "bun --filter @apps/backend --elide-lines=0 ws-types:generate",
+        "backend:ws-types:generate:to-frontend": "bun --filter @apps/backend --elide-lines=0 ws-types:generate --output=../../apps/frontend/src/generated",
 
         "frontend:dev": "bun --filter @apps/frontend --elide-lines=0 dev",
         "frontend:build": "bun --filter @apps/frontend --elide-lines=0 build",

@@ -31,6 +31,7 @@ export class WebSocketRouteBuilder<
   private _connectHandler?: ConnectHandler<TServerMsg, TUser>
   private _closeHandler?: CloseHandler<TServerMsg, TUser>
   private _errorHandler?: ErrorHandler<TServerMsg, TUser>
+  private _serverMessageSchema?: z.ZodType<TServerMsg>
 
   public constructor(
     private readonly path: TPath,
@@ -38,10 +39,20 @@ export class WebSocketRouteBuilder<
   ) {}
 
   /**
-   * Define server message types for type-safe send/publish
+   * Define server message schema for type-safe send/publish
+   * The schema will be used for type generation and validation
    */
-  public serverMessages<T>(): WebSocketRouteBuilder<TPath, TParams, T, TUser> {
-    return this as unknown as WebSocketRouteBuilder<TPath, TParams, T, TUser>
+  public serverMessages<T extends z.ZodType>(
+    schema: T,
+  ): WebSocketRouteBuilder<TPath, TParams, z.infer<T>, TUser> {
+    const builder = this as unknown as WebSocketRouteBuilder<
+      TPath,
+      TParams,
+      z.infer<T>,
+      TUser
+    >
+    builder._serverMessageSchema = schema as z.ZodType<z.infer<T>>
+    return builder
   }
 
   /**
@@ -129,6 +140,7 @@ export class WebSocketRouteBuilder<
       connectHandler: this._connectHandler,
       closeHandler: this._closeHandler,
       errorHandler: this._errorHandler,
+      serverMessageSchema: this._serverMessageSchema,
     }
 
     // If server is provided, register to local registry

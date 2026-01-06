@@ -76,7 +76,11 @@ function zodSchemaToTypeString(schema: z.ZodType, indent = 2): string {
       return "Date"
     case "literal":
     case "ZodLiteral": {
-      const literalValue = typeDef.value
+      // Zod v4+ stores literal value in "values" array, v3 uses "value"
+      const literalValue = typeDef.value ?? (typeDef.values as unknown[])?.[0]
+      if (literalValue === undefined) {
+        return "undefined"
+      }
       return typeof literalValue === "string"
         ? `"${literalValue}"`
         : String(literalValue)
@@ -225,6 +229,30 @@ export async function generateWebSocketTypes(
     "/* eslint-disable */",
     "/* prettier-ignore */",
     "",
+    "/**",
+    " * WebSocket Type Definitions",
+    " * ",
+    " * This file contains auto-generated types for WebSocket communication.",
+    " * Both client->server and server->client message types are generated from Zod schemas.",
+    " * ",
+    " * Usage:",
+    " * ```typescript",
+    " * import { WsChatWebSocket } from './websocket-types'",
+    " * ",
+    " * // Client->server messages (auto-generated from .on() handlers)",
+    " * const clientMessage: WsChatWebSocket.ClientMessage = {",
+    " *   type: 'join',",
+    " *   data: { roomId: 'room-123' }",
+    " * }",
+    " * ",
+    " * // Server->client messages (auto-generated from .serverMessages() schema)",
+    " * ws.onmessage = (event) => {",
+    " *   const serverMessage: WsChatWebSocket.ServerMessage = JSON.parse(event.data)",
+    " *   // Handle message with full type safety",
+    " * }",
+    " * ```",
+    " */",
+    "",
   ]
 
   for (const route of filteredRoutes) {
@@ -240,15 +268,20 @@ export async function generateWebSocketTypes(
     lines.push(generateClientMessageType(route.messageHandlers, indent))
     lines.push("")
 
-    // Note: ServerMessage type would need to be stored on the route
-    // For now, we add a placeholder comment
-    lines.push(
-      `${indent}// ServerMessage type is defined via .serverMessages<T>() on the server`,
-    )
-    lines.push(
-      `${indent}// You should define it manually or use the type from your server code`,
-    )
-    lines.push(`${indent}export type ServerMessage = unknown`)
+    // Generate ServerMessage type from schema if available
+    if (route.serverMessageSchema) {
+      const serverMessageType = zodSchemaToTypeString(
+        route.serverMessageSchema,
+        2,
+      )
+      lines.push(`${indent}export type ServerMessage = ${serverMessageType}`)
+    } else {
+      // Fallback for routes without schema
+      lines.push(
+        `${indent}// ServerMessage schema not provided - define manually`,
+      )
+      lines.push(`${indent}export type ServerMessage = unknown`)
+    }
 
     lines.push(`}`)
     lines.push("")

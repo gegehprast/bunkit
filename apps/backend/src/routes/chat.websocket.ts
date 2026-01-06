@@ -33,47 +33,48 @@ const TypingSchema = z.object({
   isTyping: z.boolean(),
 })
 
-// Define server -> client message types
-type ServerMessage =
-  | {
-      type: "room_joined"
-      roomId: string
-      userId: string
-      userEmail: string
-      timestamp: number
-    }
-  | {
-      type: "room_left"
-      roomId: string
-      userId: string
-      userEmail: string
-      timestamp: number
-    }
-  | {
-      type: "message"
-      roomId: string
-      userId: string
-      userEmail: string
-      message: string
-      timestamp: number
-    }
-  | {
-      type: "typing"
-      roomId: string
-      userId: string
-      userEmail: string
-      isTyping: boolean
-    }
-  | {
-      type: "user_count"
-      roomId: string
-      count: number
-    }
-  | {
-      type: "error"
-      message: string
-      code?: string
-    }
+// Define server -> client message schemas
+const ServerMessageSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("room_joined"),
+    roomId: z.string(),
+    userId: z.string(),
+    userEmail: z.string(),
+    timestamp: z.number(),
+  }),
+  z.object({
+    type: z.literal("room_left"),
+    roomId: z.string(),
+    userId: z.string(),
+    userEmail: z.string(),
+    timestamp: z.number(),
+  }),
+  z.object({
+    type: z.literal("message"),
+    roomId: z.string(),
+    userId: z.string(),
+    userEmail: z.string(),
+    message: z.string(),
+    timestamp: z.number(),
+  }),
+  z.object({
+    type: z.literal("typing"),
+    roomId: z.string(),
+    userId: z.string(),
+    userEmail: z.string(),
+    isTyping: z.boolean(),
+  }),
+  z.object({
+    type: z.literal("user_count"),
+    roomId: z.string(),
+    count: z.number(),
+  }),
+  z.object({
+    type: z.literal("error"),
+    message: z.string(),
+    code: z.string().optional(),
+  }),
+])
 
 // Create WebSocket authentication using existing JWT verification
 const wsAuth = createTokenAuth(async (token: string) => {
@@ -92,7 +93,7 @@ const wsAuth = createTokenAuth(async (token: string) => {
 
 // Create WebSocket chat route
 createWebSocketRoute("/ws/chat", server)
-  .serverMessages<ServerMessage>()
+  .serverMessages(ServerMessageSchema)
   .authenticate(wsAuth)
   .onConnect((_ws, ctx) => {
     if (!ctx.user) {

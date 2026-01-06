@@ -158,6 +158,7 @@ export interface WebSocketRouteDefinition<
   connectHandler?: ConnectHandler<TServerMsg, TUser>
   closeHandler?: CloseHandler<TServerMsg, TUser>
   errorHandler?: ErrorHandler<TServerMsg, TUser>
+  serverMessageSchema?: z.ZodType<TServerMsg>
 }
 
 /**

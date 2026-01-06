@@ -63,10 +63,13 @@ describe("WebSocket Advanced Features (Phase 5)", () => {
     })
 
     it("should preserve type safety with binary handler", () => {
-      type ServerMessage = { type: "ack"; size: number }
+      const ServerMessageSchema = z.object({
+        type: z.literal("ack"),
+        size: z.number(),
+      })
 
       const route = createWebSocketRoute("/api/upload")
-        .serverMessages<ServerMessage>()
+        .serverMessages(ServerMessageSchema)
         .onBinary((ws, buffer, _ctx) => {
           // ws.send is typed to ServerMessage
           ws.send({ type: "ack", size: buffer.byteLength })
@@ -383,15 +386,16 @@ describe("WebSocket Advanced Features (Phase 5)", () => {
 
   describe("Server Message Types", () => {
     it("should enforce server message types across all handlers", () => {
-      type ServerMsg =
-        | { type: "connected"; connectionId: string }
-        | { type: "data"; payload: unknown }
-        | { type: "binary_ack"; size: number }
-        | { type: "error"; message: string }
-        | { type: "disconnecting"; reason: string }
+      const ServerMsgSchema = z.discriminatedUnion("type", [
+        z.object({ type: z.literal("connected"), connectionId: z.string() }),
+        z.object({ type: z.literal("data"), payload: z.unknown() }),
+        z.object({ type: z.literal("binary_ack"), size: z.number() }),
+        z.object({ type: z.literal("error"), message: z.string() }),
+        z.object({ type: z.literal("disconnecting"), reason: z.string() }),
+      ])
 
       const route = createWebSocketRoute("/api/typed")
-        .serverMessages<ServerMsg>()
+        .serverMessages(ServerMsgSchema)
         .onConnect((ws, ctx) => {
           ws.send({ type: "connected", connectionId: ctx.connectionId })
         })
