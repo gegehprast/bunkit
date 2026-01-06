@@ -42,7 +42,7 @@ bun add @bunkit/server
 
 ```typescript
 import { z } from "zod"
-import { createRoute, createServer, ErrorResponseSchema } from "@bunkit/server"
+import { createRoute, createServer } from "@bunkit/server"
 
 // Define schemas with OpenAPI metadata
 const TodoSchema = z.object({
@@ -55,7 +55,8 @@ const TodoSchema = z.object({
   description: "A todo list item"
 })
 
-// Create a route with automatic type inference
+// Create routes (will register to global registry)
+createRoute("GET", "/api/todos/:id")
 createRoute("GET", "/api/todos/:id")
   .openapi({ 
     operationId: "getTodo",
@@ -73,7 +74,6 @@ createRoute("GET", "/api/todos/:id")
     return res.ok(todo)
   })
 
-// Create POST endpoint with validation
 createRoute("POST", "/api/todos")
   .body(z.object({ 
     title: z.string().min(1),
@@ -109,7 +109,7 @@ See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for complete API referenc
 Path parameters are automatically extracted and typed:
 
 ```typescript
-createRoute("GET", "/api/users/:userId/posts/:postId")
+createRoute("GET", "/api/users/:userId/posts/:postId", server)
   .handler(({ params, res }) => {
     // params.userId and params.postId are automatically typed as string
     return res.ok({ userId: params.userId, postId: params.postId })
@@ -121,7 +121,7 @@ createRoute("GET", "/api/users/:userId/posts/:postId")
 ```typescript
 const TodoSchema = z.object({ id: z.string(), title: z.string() })
 
-createRoute("POST", "/api/todos")
+createRoute("POST", "/api/todos", server)
   .body(z.object({ title: z.string() }))
   .response(TodoSchema, { status: 201 })  // Single success response
   .errors([400])  // Standard error responses
@@ -136,7 +136,7 @@ createRoute("POST", "/api/todos")
 
 ```typescript
 // Add bearer authentication to a route
-createRoute("GET", "/api/protected")
+createRoute("GET", "/api/protected", server)
   .security()  // Defaults to bearerAuth
   .middlewares(authMiddleware())
   .response(DataSchema)
@@ -147,7 +147,7 @@ createRoute("GET", "/api/protected")
   })
 
 // Custom security schemes
-createRoute("GET", "/api/custom")
+createRoute("GET", "/api/custom", server)
   .security([{ apiKey: [] }])
   .handler(({ res }) => res.ok({ data: "protected" }))
 ```
@@ -155,10 +155,8 @@ createRoute("GET", "/api/custom")
 ### Standard Error Responses
 
 ```typescript
-import { ErrorResponseSchema } from "@bunkit/server"
-
 // Use .errors() for common error status codes
-createRoute("GET", "/api/todos/:id")
+createRoute("GET", "/api/todos/:id", server)
   .response(TodoSchema)
   .errors([400, 404])  // Auto-generates standard error schemas
   .handler(({ params, res }) => {
@@ -173,19 +171,28 @@ createRoute("GET", "/api/todos/:id")
   })
 
 // Or use .errorResponses() for custom error schemas
-createRoute("POST", "/api/todos")
+createRoute("POST", "/api/todos", server)
   .body(TodoBodySchema)
   .response(TodoSchema)
   .errorResponses({
     409: {
       description: "Todo already exists",
       content: {
-        "application/json": { schema: ErrorResponseSchema }
+        "application/json": { 
+          schema: z.object({
+            message: z.string(),
+            code: z.string(),
+          })
+        }
       }
     }
   })
   .handler(({ body, res }) => {
     // Custom error handling
+    if (todoExists(body.title)) {
+      return res.conflict("Todo already exists")
+    }
+    return res.created(createTodo(body))
   })
 ```
 
@@ -200,6 +207,55 @@ const logger: MiddlewareFn = async ({ req, next }) => {
 const server = createServer({
   globalMiddlewares: [logger]
 })
+```
+
+### Multi-Server Setup
+
+For advanced use cases, you can run multiple server instances with isolated route sets by passing the server instance to route builders:
+
+```typescript
+// Create two separate servers
+const publicServer = createServer({ 
+  port: 3000,
+  cors: { origin: ["*"] }
+})
+
+const adminServer = createServer({ 
+  port: 3001,
+  cors: { origin: ["https://admin.example.com"] }
+})
+
+// Public API routes - only available on publicServer
+createRoute("GET", "/api/todos", publicServer)
+  .response(TodoSchema)
+  .handler(({ res }) => res.ok(getTodos()))
+
+createRoute("POST", "/api/todos", publicServer)
+  .body(CreateTodoSchema)
+  .response(TodoSchema)
+  .handler(({ body, res }) => res.created(createTodo(body)))
+
+// Admin API routes - only available on adminServer
+createRoute("GET", "/admin/users", adminServer)
+  .security()
+  .middlewares(adminAuthMiddleware())
+  .response(UsersSchema)
+  .handler(({ res }) => res.ok(getAllUsers()))
+
+createRoute("DELETE", "/admin/users/:id", adminServer)
+  .security()
+  .middlewares(adminAuthMiddleware())
+  .response(z.object({ success: z.boolean() }))
+  .handler(({ params, res }) => {
+    deleteUser(params.id)
+    return res.ok({ success: true })
+  })
+
+// Start both servers
+await Promise.all([
+  publicServer.start(),
+  adminServer.start()
+])
 ```
 
 ### OpenAPI Generation
@@ -230,38 +286,59 @@ await server.http.exportOpenApiSpec("./openapi.json")
 ### WebSocket Support
 
 ```typescript
-import { createWebSocketRoute } from "@bunkit/server"
+import { createWebSocketRoute, createTokenAuth } from "@bunkit/server"
 
 // Define message schemas
-const ChatMessageSchema = z.object({
-  type: z.literal("chat"),
-  message: z.string(),
-  timestamp: z.number()
+const JoinRoomSchema = z.object({
+  roomId: z.string(),
 })
 
-// Create WebSocket route with path parameters
-createWebSocketRoute("/ws/chat/:roomId")
+const ChatMessageSchema = z.object({
+  roomId: z.string(),
+  message: z.string(),
+})
+
+// Define server -> client message types
+type ServerMessage =
+  | { type: "room_joined"; roomId: string; userId: string }
+  | { type: "message"; roomId: string; message: string; userId: string }
+
+// Create WebSocket route (with server parameter to bind to this server)
+createWebSocketRoute("/ws/chat", server)
+  .serverMessages<ServerMessage>()
   .authenticate(createTokenAuth((token) => verifyToken(token)))
-  .on("chat", ChatMessageSchema, ({ message, ws, user }) => {
+  .on("join", JoinRoomSchema, ({ message, ws, user }) => {
+    // Subscribe to room topic
+    ws.subscribe(`room:${message.data.roomId}`)
+    
     // Broadcast to room
-    server.ws.publish(`room:${ws.data.params.roomId}`, message)
+    server.ws.publish(`room:${message.data.roomId}`, {
+      type: "room_joined",
+      roomId: message.data.roomId,
+      userId: user?.id,
+    })
   })
-  .onOpen(({ ws, user }) => {
-    console.log(`User ${user?.id} joined room ${ws.data.params.roomId}`)
+  .on("chat", ChatMessageSchema, ({ message, ws, user }) => {
+    // Broadcast message to room
+    server.ws.publish(`room:${message.data.roomId}`, {
+      type: "message",
+      roomId: message.data.roomId,
+      message: message.data.message,
+      userId: user?.id,
+    })
+  })
+  .onConnect(({ ws, user }) => {
+    console.log(`User ${user?.id} connected`)
   })
   .build()
 
 // Publish from anywhere in your app
 server.ws.publish("room:123", { 
-  type: "notification",
-  message: "New user joined" 
+  type: "message",
+  roomId: "123",
+  message: "New user joined",
+  userId: "system"
 })
-
-// Generate client types
-const typesResult = await server.ws.generateWebSocketTypes()
-if (typesResult.isOk()) {
-  await Bun.write("./client-types.ts", typesResult.value)
-}
 ```
 
 ## Project Structure
@@ -314,13 +391,15 @@ src/
 
 See [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) for complete API documentation and implementation details.
 
-### Key Changes from Earlier Versions
+### Key Implementation Details
 
-- **Removed `.responses()`** - Routes now support only **one success response** via `.response()`. Use `.errors()` or `.errorResponses()` for error cases. This simplifies the API contract and improves type safety.
-- **Server method namespacing** - HTTP methods moved to `server.http.*` (e.g., `server.http.getOpenApiSpec()`), WebSocket methods to `server.ws.*` (e.g., `server.ws.publish()`)
-- **Security helper** - `.security()` method now defaults to `bearerAuth` when called without arguments
-- **Standard error schemas** - Built-in typed error schemas (`BadRequestErrorResponseSchema`, `UnauthorizedErrorResponseSchema`, etc.)
-- **Relative imports** - Using relative paths instead of path aliases for better TypeScript compatibility
+- **Route registration modes** - Routes can be registered in two ways:
+  - **Global registry** (recommended for simple apps): Omit server parameter from `createRoute()` or `createWebSocketRoute()`. Routes are available to all server instances.
+  - **Server-specific** (for multi-server setups): Pass a server instance to bind routes exclusively to that server. Useful when running multiple servers with different route sets (e.g., public API + admin API on different ports).
+- **Single success response** - Routes support only **one success response** via `.response()`. Use `.errors()` or `.errorResponses()` for error cases
+- **Namespaced methods** - HTTP methods are under `server.http.*` (e.g., `server.http.getOpenApiSpec()`), WebSocket methods under `server.ws.*` (e.g., `server.ws.publish()`)
+- **Standard error schemas** - Built-in typed error response schemas for common HTTP errors (400, 401, 403, 404, 409, 500, etc.)
+- **Type-safe WebSocket** - Define server message types with `.serverMessages<T>()` for compile-time validation of published messages
 
 ## Testing
 
