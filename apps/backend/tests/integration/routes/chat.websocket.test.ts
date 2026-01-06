@@ -1,38 +1,26 @@
-/**
- * WebSocket Chat Integration Tests
- *
- * Tests the real-time chat WebSocket functionality including:
- * - Authentication
- * - Room management
- * - Message broadcasting
- * - User presence
- */
-
 import { afterAll, beforeAll, describe, expect, test } from "bun:test"
-import z from "zod"
 import { generateToken } from "@/auth/auth.service"
-import { config } from "@/config"
-import { server } from "@/core/server"
-import { initDatabase } from "@/db/client"
 import { getUserRepository } from "@/db/repositories/user-repository"
-import { loadRoutes } from "@/routes"
+import { createTestServer, type TestServer } from "../test-server"
 
 describe("WebSocket Chat", () => {
+  let testServer: TestServer
+  let BASE_URL: string
   let token: string
   let userId: string
+  let wsUrl: string
 
   beforeAll(
     async () => {
-      z.globalRegistry.clear()
-
-      // Initialize database
-      await initDatabase()
-
-      // Load routes to register WebSocket handlers
-      await loadRoutes()
-
-      // Start server
-      await server.start()
+      testServer = await createTestServer()
+      const startResult = await testServer.start()
+      if (startResult.isErr()) {
+        throw new Error(
+          `Failed to start test server: ${startResult.error.message}`,
+        )
+      }
+      BASE_URL = testServer.getBaseUrl()
+      wsUrl = BASE_URL.replace("http://", "ws://")
 
       // Create test user
       const userRepo = getUserRepository()
@@ -66,14 +54,12 @@ describe("WebSocket Chat", () => {
     // Cleanup
     const userRepo = getUserRepository()
     await userRepo.delete(userId)
-    await server.stop()
-
-    // Important: Do not close database connection here as it shared across test suites
+    await testServer.stop()
   })
 
   test("should reject connection without token", async () => {
     return new Promise<void>((resolve) => {
-      const ws = new WebSocket(`ws://localhost:${config.PORT}/ws/chat`)
+      const ws = new WebSocket(`${wsUrl}/ws/chat`)
 
       ws.onerror = () => {
         // Connection should be rejected
@@ -95,9 +81,7 @@ describe("WebSocket Chat", () => {
 
   test("should connect with valid bearer token", async () => {
     return new Promise<void>((resolve, reject) => {
-      const ws = new WebSocket(
-        `ws://${config.HOST}:${config.PORT}/ws/chat?token=${token}`,
-      )
+      const ws = new WebSocket(`${wsUrl}/ws/chat?token=${token}`)
 
       ws.onopen = () => {
         ws.close()
@@ -118,9 +102,7 @@ describe("WebSocket Chat", () => {
 
   test("should connect with query parameter token", async () => {
     return new Promise<void>((resolve, reject) => {
-      const ws = new WebSocket(
-        `ws://${config.HOST}:${config.PORT}/ws/chat?token=${token}`,
-      )
+      const ws = new WebSocket(`${wsUrl}/ws/chat?token=${token}`)
 
       ws.onopen = () => {
         ws.close()
@@ -140,9 +122,7 @@ describe("WebSocket Chat", () => {
 
   test("should handle join room and receive confirmation", async () => {
     return new Promise<void>((resolve, reject) => {
-      const ws = new WebSocket(
-        `ws://localhost:${config.PORT}/ws/chat?token=${token}`,
-      )
+      const ws = new WebSocket(`${wsUrl}/ws/chat?token=${token}`)
 
       ws.onopen = () => {
         // Send join room message
@@ -187,13 +167,9 @@ describe("WebSocket Chat", () => {
       let ws2Joined = false
       let messageReceived = false
 
-      const ws1 = new WebSocket(
-        `ws://localhost:${config.PORT}/ws/chat?token=${token}`,
-      )
+      const ws1 = new WebSocket(`${wsUrl}/ws/chat?token=${token}`)
 
-      const ws2 = new WebSocket(
-        `ws://localhost:${config.PORT}/ws/chat?token=${token}`,
-      )
+      const ws2 = new WebSocket(`${wsUrl}/ws/chat?token=${token}`)
 
       ws1.onopen = () => {
         ws1.send(
@@ -283,12 +259,8 @@ describe("WebSocket Chat", () => {
 
   test("should handle typing indicators", async () => {
     return new Promise<void>((resolve, reject) => {
-      const ws1 = new WebSocket(
-        `ws://localhost:${config.PORT}/ws/chat?token=${token}`,
-      )
-      const ws2 = new WebSocket(
-        `ws://localhost:${config.PORT}/ws/chat?token=${token}`,
-      )
+      const ws1 = new WebSocket(`${wsUrl}/ws/chat?token=${token}`)
+      const ws2 = new WebSocket(`${wsUrl}/ws/chat?token=${token}`)
 
       let ws1Joined = false
       let ws2Joined = false
@@ -370,12 +342,8 @@ describe("WebSocket Chat", () => {
 
   test("should notify room when user leaves", async () => {
     return new Promise<void>((resolve, reject) => {
-      const ws1 = new WebSocket(
-        `ws://localhost:${config.PORT}/ws/chat?token=${token}`,
-      )
-      const ws2 = new WebSocket(
-        `ws://localhost:${config.PORT}/ws/chat?token=${token}`,
-      )
+      const ws1 = new WebSocket(`${wsUrl}/ws/chat?token=${token}`)
+      const ws2 = new WebSocket(`${wsUrl}/ws/chat?token=${token}`)
 
       let ws1Joined = false
       let ws2Joined = false
@@ -444,18 +412,12 @@ describe("WebSocket Chat", () => {
 
   test("should handle disconnection and notify rooms", async () => {
     return new Promise<void>((resolve) => {
-      let ws1Left = false
-
-      const ws1 = new WebSocket(
-        `ws://localhost:${config.PORT}/ws/chat?token=${token}`,
-      )
-
-      const ws2 = new WebSocket(
-        `ws://localhost:${config.PORT}/ws/chat?token=${token}`,
-      )
-
       let ws1Joined = false
       let ws2Joined = false
+      let ws1Left = false
+
+      const ws1 = new WebSocket(`${wsUrl}/ws/chat?token=${token}`)
+      const ws2 = new WebSocket(`${wsUrl}/ws/chat?token=${token}`)
 
       ws1.onopen = () => {
         ws1.send(
