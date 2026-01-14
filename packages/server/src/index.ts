@@ -44,9 +44,15 @@ export {
 export { webSocketRegistry } from "./websocket/websocket-handler"
 
 // WebSocket Type Generation
-export type { GenerateWebSocketTypesOptions } from "./websocket/websocket-type-generator"
+export {
+  type GenerateWebSocketTypesOptions,
+  generateWebSocketTypes,
+} from "./websocket/websocket-type-generator"
+
 // Middleware
 export type { MiddlewareArgs, MiddlewareFn } from "./types/middleware"
+
+// CORS
 export type { CorsOptions } from "./types/cors"
 
 // Responses & Error Handling
@@ -62,3 +68,4 @@ export { ValidationError } from "./core/validation"
 // OpenAPI
 export { SecuritySchemes } from "./http/openapi/security-schemes"
 export type { OpenApiSpec } from "./types/server"
+export { generateOpenApiSpec } from "./http/openapi/generator"

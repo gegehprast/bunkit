@@ -84,6 +84,9 @@ export interface OpenApiSpec {
   components?: Record<string, unknown>
 }
 
+/**
+ * HTTP-related methods for the server instance
+ */
 interface ServerHttpMethods {
   /**
    * Get the OpenAPI specification for this server
@@ -95,6 +98,9 @@ interface ServerHttpMethods {
   exportOpenApiSpec(path: string): Promise<Result<void, Error>>
 }
 
+/**
+ * WebSocket-related methods for the server instance
+ */
 interface ServerWebSocketMethods {
   /**
    * Publish a message to all WebSocket subscribers of a topic
