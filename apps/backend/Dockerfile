@@ -12,11 +12,15 @@ COPY packages/server/package.json ./packages/server/
 COPY packages/result/package.json ./packages/result/
 
 # Install ALL dependencies (including devDependencies needed for migrations)
+# Note: drizzle-kit is required for migrations (in devDependencies)
 RUN bun install --frozen-lockfile
 
 # Debug: Check if drizzle-kit is installed
 RUN ls -la node_modules/.bin/ || true
 RUN ls -la node_modules/drizzle-kit/ || true
+RUN ls -la apps/backend/node_modules/ || true
+RUN ls -la apps/backend/node_modules/drizzle-kit/ || true
+RUN cat package.json | grep -A 5 devDependencies
 
 # Build stage (if needed for packages)
 FROM base AS builder
