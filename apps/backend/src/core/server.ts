@@ -1,9 +1,11 @@
 import { createServer, SecuritySchemes } from "@bunkit/server"
 import { config } from "@/config"
+import { loggingMiddleware } from "@/middlewares/logging.middleware"
 
 export const server = createServer({
   port: config.PORT,
   host: config.HOST,
+  globalMiddlewares: [loggingMiddleware()],
   openapi: {
     title: "BunKit API",
     version: "1.0.0",
