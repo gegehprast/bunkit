@@ -6,9 +6,7 @@
     "private": true,
     "scripts": {
         "dev": "bun --env-file=.env.local --hot src/main.ts",
-        "build": "bun run ./scripts/build.ts",
         "start": "bun --env-file=.env src/main.ts",
-        "start:bundled": "bun --env-file=.env ./out/main.js",
         "typecheck": "tsc --noEmit",
         "db:generate": "drizzle-kit generate",
         "db:migrate": "bun run ./scripts/migrate.ts",
