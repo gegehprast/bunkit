@@ -15,13 +15,6 @@ COPY packages/result/package.json ./packages/result/
 # Note: drizzle-kit is required for migrations (in devDependencies)
 RUN bun install --frozen-lockfile
 
-# Debug: Check if drizzle-kit is installed
-RUN ls -la node_modules/.bin/ || true
-RUN ls -la node_modules/drizzle-kit/ || true
-RUN ls -la apps/backend/node_modules/ || true
-RUN ls -la apps/backend/node_modules/drizzle-kit/ || true
-RUN cat package.json | grep -A 5 devDependencies
-
 # Build stage (if needed for packages)
 FROM base AS builder
 WORKDIR /app
@@ -31,8 +24,9 @@ COPY package.json bun.lock tsconfig.json ./
 COPY apps/backend ./apps/backend
 COPY packages ./packages
 
-# Copy dependencies (Bun workspaces hoist to root node_modules)
+# Copy dependencies (both root and workspace node_modules for symlinks)
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/backend/node_modules ./apps/backend/node_modules
 
 # Production stage
 FROM base AS runner
@@ -48,6 +42,8 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/apps/backend ./apps/backend
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/node_modules ./node_modules
+# Copy workspace node_modules to preserve drizzle-kit symlinks
+COPY --from=builder /app/apps/backend/node_modules ./apps/backend/node_modules
 
 # Copy entrypoint script
 COPY apps/backend/docker-entrypoint.sh /usr/local/bin/
