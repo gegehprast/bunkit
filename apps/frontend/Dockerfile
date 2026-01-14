@@ -45,9 +45,6 @@ COPY --from=deps /app/apps/frontend/node_modules ./apps/frontend/node_modules
 WORKDIR /app/apps/frontend
 RUN bun run build
 
-# Debug: Verify build output
-RUN ls -la dist/ && echo "Build files:" && ls -la dist/assets/
-
 
 # ============================================================================
 # Production Stage - Serve with nginx
@@ -57,15 +54,15 @@ FROM nginx:alpine AS runner
 # Copy built static assets
 COPY --from=builder /app/apps/frontend/dist /usr/share/nginx/html
 
-# Debug: Verify files were copied
-RUN ls -la /usr/share/nginx/html/ && echo "=== index.html ===" && cat /usr/share/nginx/html/index.html
-
 # Copy nginx configuration for SPA routing
 COPY apps/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
 # Health check endpoint
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+  CMD curl -f http://localhost:80/ || exit 1
 
 # Expose HTTP port
 EXPOSE 80
