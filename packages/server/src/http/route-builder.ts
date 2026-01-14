@@ -15,8 +15,8 @@ import type {
 } from "./types/route"
 
 /**
- * Route builder with fluent API and type-safe generics
- * Automatically extracts path parameters and enforces handler type safety
+ * Route builder with fluent API and type-safe generics.
+ * Automatically extracts path parameters and enforces handler type safety.
  */
 export class RouteBuilder<
   TPath extends string,
@@ -40,7 +40,7 @@ export class RouteBuilder<
   ) {}
 
   /**
-   * Add OpenAPI metadata
+   * Add OpenAPI metadata.
    */
   public openapi(
     metadata: RouteMetadata,
@@ -50,7 +50,7 @@ export class RouteBuilder<
   }
 
   /**
-   * Add route-level middlewares
+   * Add route-level middlewares.
    */
   public middlewares(
     ...fns: MiddlewareFn[]
@@ -60,9 +60,13 @@ export class RouteBuilder<
   }
 
   /**
-   * Add security requirements for this route
+   * Add security requirements for this route.
+   *
+   * Bunkit will automatically add a 401 Unauthorized error response to the generated OpenAPI spec,
+   * but you can still override it on the `.errorResponses()` chain.
+   *
    * @example .security([{ bearerAuth: [] }])
-   * @default bearerAuth
+   * @default [{ bearerAuth: [] }]
    */
   public security(
     requirements?: Array<Record<string, string[]>>,
@@ -76,7 +80,13 @@ export class RouteBuilder<
   }
 
   /**
-   * Define query parameter schema
+   * Define query parameter schema. Use this for routes that accept query parameters.
+   *
+   * Bunkit will automatically add a 400 Bad Request error response to the generated OpenAPI spec,
+   * but you can still override it on the `.errorResponses()` chain.
+   *
+   * @example
+   * .query(z.object({ search: z.string().optional(), page: z.number().default(1) }))
    */
   public query<T extends z.ZodType>(
     schema: T,
@@ -92,7 +102,13 @@ export class RouteBuilder<
   }
 
   /**
-   * Define request body schema
+   * Define request body schema. Use this for routes that accept JSON request bodies.
+   *
+   * Bunkit will automatically add a 400 Bad Request error response to the generated OpenAPI spec,
+   * but you can still override it on the `.errorResponses()` chain.
+   *
+   * @example
+   * .body(z.object({ title: z.string(), description: z.string().optional() }))
    */
   public body<T extends z.ZodType>(
     schema: T,
@@ -110,6 +126,9 @@ export class RouteBuilder<
   /**
    * Define response schema.
    * Optionally provide description and status code (default 200).
+   *
+   * @example
+   * .response(SuccessResponseSchema, { description: "Successful response", status: 200 })
    */
   public response<T extends z.ZodType>(
     schema: T,
@@ -133,8 +152,11 @@ export class RouteBuilder<
   }
 
   /**
-   * Add standard error responses by status code
-   * Uses predefined error response schemas from CommonErrorResponses
+   * Add standard error responses by status code.
+   * Uses predefined error response schemas from CommonErrorResponses.
+   * Bunkit will automatically add some common error responses (400, 401, 500)
+   * depending on the route configuration, so you probably don't need to add them manually.
+   * @example .errors([400, 401, 422])
    */
   public errors(
     statusCodes: number[],
@@ -158,7 +180,20 @@ export class RouteBuilder<
   }
 
   /**
-   * Define custom error response schemas
+   * Define custom error response schemas.
+   * Use this to define or override error responses for specific status codes.
+   *
+   * @example
+   * .errorResponses({
+   *   422: {
+   *     description: "Unprocessable Entity",
+   *     content: {
+   *       "application/json": {
+   *         schema: CustomUnprocessableEntitySchema,
+   *       },
+   *     },
+   *   },
+   * })
    */
   public errorResponses(
     responses: ErrorResponseConfig,
@@ -168,7 +203,15 @@ export class RouteBuilder<
   }
 
   /**
-   * Define the route handler (terminal operation)
+   * Define the route handler. This is the final step in the route builder chain.
+   * The handler function receives typed context with request and response types inferred
+   * from the route definition (path params, query, body, response).
+   *
+   * @example
+   * .handler(async ({ ctx, query, res }) => {
+   *   const items = await getItems(query)
+   *   return res.ok(items)
+   * })
    */
   public handler(fn: RouteHandler<TQuery, TBody, TParams, TResponse>): void {
     const definition: RouteDefinition = {
@@ -196,32 +239,9 @@ export class RouteBuilder<
     }
   }
 
-  /**
-   * Get standard error description for status code
-   */
-  private getErrorDescription(status: number): string {
-    const descriptions: Record<number, string> = {
-      400: "Bad Request",
-      401: "Unauthorized",
-      403: "Forbidden",
-      404: "Not Found",
-      409: "Conflict",
-      422: "Unprocessable Entity",
-      500: "Internal Server Error",
-    }
-    return descriptions[status] ?? "Error"
-  }
-
   private getCommonErrorResponse(status: number) {
     return (
-      CommonErrorResponses[status as keyof typeof CommonErrorResponses] || {
-        description: this.getErrorDescription(status),
-        content: {
-          "application/json": {
-            // Will use standard ErrorResponse schema
-          },
-        },
-      }
+      CommonErrorResponses[status as keyof typeof CommonErrorResponses] || {}
     )
   }
 }
