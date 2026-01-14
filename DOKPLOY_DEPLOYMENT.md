@@ -135,7 +135,7 @@ JWT_REFRESH_EXPIRES_IN=30d
 CORS_ORIGIN=https://your-frontend-domain.com
 
 # Logging
-LOG_LEVEL=info
+LOG_LEVEL=debug
 ```
 
 **Generate secure secrets**:
