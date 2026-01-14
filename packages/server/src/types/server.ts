@@ -1,6 +1,7 @@
 import type { Result } from "@bunkit/result"
 import type { GenerateOpenApiSpecOptions } from "../http/openapi/generator"
 import type { RouteRegistry } from "../http/route-registry"
+import type { HttpMethod } from "../http/types/route"
 import type { CorsOptions } from "../types/cors"
 import type { MiddlewareFn } from "../types/middleware"
 import type { WebSocketRouteRegistry } from "../websocket/websocket-registry"
@@ -85,6 +86,50 @@ export interface OpenApiSpec {
 }
 
 /**
+ * Route information for inspection
+ */
+export interface RouteInfo {
+  /** HTTP method */
+  method: HttpMethod
+  /** Route path pattern (with :param syntax) */
+  path: string
+  /** Operation ID from OpenAPI metadata */
+  operationId?: string
+  /** Route tags */
+  tags?: string[]
+  /** Route summary */
+  summary?: string
+  /** Route description */
+  description?: string
+  /** Whether the route requires authentication */
+  requiresAuth: boolean
+  /** Whether the route has query parameters */
+  hasQueryParams: boolean
+  /** Whether the route has request body */
+  hasRequestBody: boolean
+}
+
+/**
+ * WebSocket route information for inspection
+ */
+export interface WebSocketRouteInfo {
+  /** Route path pattern (with :param syntax) */
+  path: string
+  /** Message types handled by this route */
+  messageTypes: string[]
+  /** Whether the route requires authentication */
+  requiresAuth: boolean
+  /** Whether the route has binary message handler */
+  hasBinaryHandler: boolean
+  /** Whether the route has connection handler */
+  hasConnectHandler: boolean
+  /** Whether the route has close handler */
+  hasCloseHandler: boolean
+  /** Whether the route has error handler */
+  hasErrorHandler: boolean
+}
+
+/**
  * HTTP-related methods for the server instance
  */
 interface ServerHttpMethods {
@@ -96,6 +141,10 @@ interface ServerHttpMethods {
    * Export the OpenAPI specification to a JSON file
    */
   exportOpenApiSpec(path: string): Promise<Result<void, Error>>
+  /**
+   * Get all registered HTTP routes for inspection
+   */
+  getRoutes(): Result<RouteInfo[], Error>
 }
 
 /**
@@ -116,6 +165,10 @@ interface ServerWebSocketMethods {
   getWebSocketTypes(
     options: GenerateWebSocketTypesOptions,
   ): Promise<Result<void, Error>>
+  /**
+   * Get all registered WebSocket routes for inspection
+   */
+  getRoutes(): Result<WebSocketRouteInfo[], Error>
 }
 
 /**

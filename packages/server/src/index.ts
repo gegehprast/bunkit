@@ -2,7 +2,14 @@
 
 // Core Server API
 export { createServer } from "./server"
-export type { Server, ServerOptions } from "./types/server"
+export type {
+  Server,
+  ServerOptions,
+  WebSocketOptions,
+  RouteInfo,
+  WebSocketRouteInfo,
+  OpenApiSpec,
+} from "./types/server"
 
 // HTTP Routes
 export { createRoute } from "./http/route-builder"
@@ -28,7 +35,6 @@ export type {
   WebSocketData,
   WebSocketRouteDefinition,
 } from "./websocket/types/websocket"
-export type { WebSocketOptions } from "./types/server"
 
 // WebSocket Authentication & Broadcasting
 export {
@@ -73,5 +79,4 @@ export { ValidationError } from "./core/validation"
 
 // OpenAPI
 export { SecuritySchemes } from "./http/openapi/security-schemes"
-export type { OpenApiSpec } from "./types/server"
 export { generateOpenApiSpec } from "./http/openapi/generator"

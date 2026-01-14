@@ -2,21 +2,26 @@ import { err, ok, type Result } from "@bunkit/result"
 import { createCorsMiddleware } from "./core/cors"
 import { generateOpenApiSpec } from "./http/openapi/generator"
 import { handleRequest } from "./http/request-handler"
-import type { RouteRegistry } from "./http/route-registry"
+import { type RouteRegistry, routeRegistry } from "./http/route-registry"
 import type { MiddlewareFn } from "./types/middleware"
 import type {
   Server as IServer,
   OpenApiSpec,
+  RouteInfo,
   ServerOptions,
   ServerStartError,
   ServerStopError,
+  WebSocketRouteInfo,
 } from "./types/server"
 import type { WebSocketData } from "./websocket/types/websocket"
 import {
   createWebSocketHandlersWithRegistry,
   handleWebSocketUpgrade,
 } from "./websocket/websocket-handler"
-import type { WebSocketRouteRegistry } from "./websocket/websocket-registry"
+import {
+  type WebSocketRouteRegistry,
+  webSocketRouteRegistry,
+} from "./websocket/websocket-registry"
 import {
   type GenerateWebSocketTypesOptions,
   generateWebSocketTypes,
@@ -202,6 +207,32 @@ export class Server implements IServer {
         )
       }
     },
+
+    getRoutes: (): Result<RouteInfo[], Error> => {
+      try {
+        // Get routes from local registry if available, otherwise global
+        const registry = this.localRouteRegistry ?? routeRegistry
+        const routes = registry.getAll()
+
+        const routeInfos: RouteInfo[] = routes.map((route) => ({
+          method: route.method,
+          path: route.path,
+          operationId: route.metadata?.operationId,
+          tags: route.metadata?.tags,
+          summary: route.metadata?.summary,
+          description: route.metadata?.description,
+          requiresAuth: Boolean(route.security && route.security.length > 0),
+          hasQueryParams: Boolean(route.querySchema),
+          hasRequestBody: Boolean(route.bodySchema),
+        }))
+
+        return ok(routeInfos)
+      } catch (error) {
+        return err(
+          error instanceof Error ? error : new Error("Failed to get routes"),
+        )
+      }
+    },
   }
 
   public readonly ws: IServer["ws"] = {
@@ -227,6 +258,32 @@ export class Server implements IServer {
       options: GenerateWebSocketTypesOptions,
     ): Promise<Result<void, Error>> => {
       return generateWebSocketTypes(options, this.localWsRouteRegistry)
+    },
+
+    getRoutes: (): Result<WebSocketRouteInfo[], Error> => {
+      try {
+        // Get routes from local registry if available, otherwise global
+        const registry = this.localWsRouteRegistry ?? webSocketRouteRegistry
+        const routes = registry.getAll()
+
+        const routeInfos: WebSocketRouteInfo[] = routes.map((route) => ({
+          path: route.path,
+          messageTypes: route.messageHandlers.map((handler) => handler.type),
+          requiresAuth: Boolean(route.authFn),
+          hasBinaryHandler: Boolean(route.binaryHandler),
+          hasConnectHandler: Boolean(route.connectHandler),
+          hasCloseHandler: Boolean(route.closeHandler),
+          hasErrorHandler: Boolean(route.errorHandler),
+        }))
+
+        return ok(routeInfos)
+      } catch (error) {
+        return err(
+          error instanceof Error
+            ? error
+            : new Error("Failed to get WebSocket routes"),
+        )
+      }
     },
   }
 }
