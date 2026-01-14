@@ -5,7 +5,7 @@ FROM base AS deps
 WORKDIR /app
 
 # Copy workspace files
-COPY package.json bun.lockb ./
+COPY package.json bun.lock ./
 COPY apps/frontend/package.json ./apps/frontend/
 
 # Install dependencies
@@ -16,7 +16,7 @@ FROM base AS builder
 WORKDIR /app
 
 # Copy workspace configuration
-COPY package.json bun.lockb tsconfig.json ./
+COPY package.json bun.lock tsconfig.json ./
 COPY apps/frontend ./apps/frontend
 
 # Copy dependencies

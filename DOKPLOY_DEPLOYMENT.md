@@ -72,6 +72,7 @@ This helps catch any Docker configuration issues before deployment.
 
 1. **Commit all Docker files** (already created):
    - `apps/backend/Dockerfile`
+   - `apps/backend/docker-entrypoint.sh`
    - `apps/backend/.dockerignore`
    - `apps/frontend/Dockerfile`
    - `apps/frontend/.dockerignore`

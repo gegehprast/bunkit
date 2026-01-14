@@ -5,7 +5,7 @@ FROM base AS deps
 WORKDIR /app
 
 # Copy workspace files
-COPY package.json bun.lockb ./
+COPY package.json bun.lock ./
 COPY apps/backend/package.json ./apps/backend/
 COPY packages/server/package.json ./packages/server/
 COPY packages/result/package.json ./packages/result/
@@ -18,7 +18,7 @@ FROM base AS builder
 WORKDIR /app
 
 # Copy workspace files
-COPY package.json bun.lockb tsconfig.json ./
+COPY package.json bun.lock tsconfig.json ./
 COPY apps/backend ./apps/backend
 COPY packages ./packages
 
