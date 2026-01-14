@@ -14,6 +14,10 @@ COPY packages/result/package.json ./packages/result/
 # Install ALL dependencies (including devDependencies needed for migrations)
 RUN bun install --frozen-lockfile
 
+# Debug: Check if drizzle-kit is installed
+RUN ls -la node_modules/.bin/ || true
+RUN ls -la node_modules/drizzle-kit/ || true
+
 # Build stage (if needed for packages)
 FROM base AS builder
 WORKDIR /app
