@@ -89,7 +89,7 @@ export function Chat() {
   }
 
   return (
-    <div className="flex h-full bg-gray-100">
+    <div className="flex h-full bg-gray-100 rounded-lg shadow-sm overflow-hidden">
       {/* Sidebar */}
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col shrink-0">
         {/* Header */}
@@ -117,7 +117,7 @@ export function Chat() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Chat Header */}
-        <div className="bg-white border-b border-gray-200 p-4">
+        <div className="bg-white shadow-sm border-b border-gray-200 p-4">
           <h3 className="text-lg font-semibold text-gray-800 capitalize">
             #{selectedRoom}
           </h3>

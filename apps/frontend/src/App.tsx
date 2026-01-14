@@ -24,8 +24,8 @@ const AppContent = () => {
   return (
     <div className="flex flex-col h-screen bg-linear-to-br from-gray-50 to-blue-50">
       <header className="bg-white shadow-sm border-b border-gray-200 shrink-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-4">
             <h1 className="text-2xl font-bold text-gray-900">BunStart App</h1>
             <div className="flex items-center gap-4">
               <span className="text-gray-700">
@@ -46,7 +46,7 @@ const AppContent = () => {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-4 mt-4 border-b border-gray-200">
+          <div className="flex gap-4 mt-4">
             <button
               type="button"
               onClick={() => setActiveTab("todos")}
@@ -81,7 +81,9 @@ const AppContent = () => {
         </main>
       ) : (
         <main className="flex-1 overflow-hidden">
-          <Chat />
+          <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <Chat />
+          </div>
         </main>
       )}
 
