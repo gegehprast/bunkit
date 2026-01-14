@@ -84,6 +84,34 @@ export interface OpenApiSpec {
   components?: Record<string, unknown>
 }
 
+interface ServerHttpMethods {
+  /**
+   * Get the OpenAPI specification for this server
+   */
+  getOpenApiSpec(): Promise<Result<OpenApiSpec, Error>>
+  /**
+   * Export the OpenAPI specification to a JSON file
+   */
+  exportOpenApiSpec(path: string): Promise<Result<void, Error>>
+}
+
+interface ServerWebSocketMethods {
+  /**
+   * Publish a message to all WebSocket subscribers of a topic
+   */
+  publish(topic: string, message: unknown): void
+  /**
+   * Publish binary data to all WebSocket subscribers of a topic
+   */
+  publishBinary(topic: string, data: Buffer): void
+  /**
+   * Generate TypeScript types for WebSocket routes
+   */
+  generateWebSocketTypes(
+    options: GenerateWebSocketTypesOptions,
+  ): Promise<Result<void, Error>>
+}
+
 /**
  * Server instance interface
  */
@@ -96,32 +124,14 @@ export interface Server {
    * Stop the server
    */
   stop(): Promise<Result<void, ServerError>>
-  http: {
-    /**
-     * Get the OpenAPI specification for this server
-     */
-    getOpenApiSpec(): Promise<Result<OpenApiSpec, Error>>
-    /**
-     * Export the OpenAPI specification to a JSON file
-     */
-    exportOpenApiSpec(path: string): Promise<Result<void, Error>>
-  }
-  ws: {
-    /**
-     * Publish a message to all WebSocket subscribers of a topic
-     */
-    publish(topic: string, message: unknown): void
-    /**
-     * Publish binary data to all WebSocket subscribers of a topic
-     */
-    publishBinary(topic: string, data: Buffer): void
-    /**
-     * Generate TypeScript types for WebSocket routes
-     */
-    generateWebSocketTypes(
-      options: GenerateWebSocketTypesOptions,
-    ): Promise<Result<void, Error>>
-  }
+  /**
+   * HTTP-related methods
+   */
+  http: ServerHttpMethods
+  /**
+   * WebSocket-related methods
+   */
+  ws: ServerWebSocketMethods
   /**
    * Internal: Local route registry for this server instance
    * Created lazily when a route is registered to this server

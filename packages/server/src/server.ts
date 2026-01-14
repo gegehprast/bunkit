@@ -5,8 +5,8 @@ import { handleRequest } from "./http/request-handler"
 import type { RouteRegistry } from "./http/route-registry"
 import type { MiddlewareFn } from "./types/middleware"
 import type {
+  Server as IServer,
   OpenApiSpec,
-  Server,
   ServerOptions,
   ServerStartError,
   ServerStopError,
@@ -25,7 +25,7 @@ import {
 /**
  * HTTP server with optional WebSocket support
  */
-export class ServerImpl implements Server {
+export class Server implements IServer {
   private readonly port: number
   private readonly host: string
   private readonly development: boolean
@@ -242,5 +242,5 @@ export class ServerImpl implements Server {
  * @returns Server instance
  */
 export function createServer(options: ServerOptions = {}): Server {
-  return new ServerImpl(options)
+  return new Server(options)
 }
