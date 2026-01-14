@@ -2,29 +2,6 @@
 
 Type-safe error handling using the Result pattern. Eliminates the need for try-catch blocks and makes error handling explicit and composable.
 
-## 📦 Installation
-
-This package is part of the BunKit monorepo and uses workspace dependencies:
-
-```json
-{
-  "dependencies": {
-    "@bunkit/result": "workspace:*"
-  }
-}
-```
-
-## 🎯 Why Result Pattern?
-
-Traditional error handling with try-catch has several problems:
-
-- **Hidden control flow**: Exceptions can be thrown from anywhere
-- **Not type-safe**: TypeScript doesn't track what errors a function can throw
-- **Easy to forget**: You might forget to catch errors
-- **Verbose**: Nested try-catch blocks are hard to read
-
-The Result pattern makes errors explicit, type-safe, and composable.
-
 ## 🚀 Basic Usage
 
 ### Creating Results
@@ -284,7 +261,7 @@ function getUser(id: string): Result<User, NotFoundError | DatabaseError> {
 }
 ```
 
-### 3. Don't use unwrap() in production code
+### 3. Prefer not to use unwrap()
 
 ```typescript
 // ❌ Bad: unwrap() can throw
@@ -296,52 +273,9 @@ if (userResult.isOk()) {
 } else {
   return resultToResponse(userResult, ctx)
 }
-```
 
-### 4. Use helper functions
-
-```typescript
-import { requireOr, assertOr, Errors } from '@/types/result-helpers'
-
-// Check if value exists
-const user = requireOr(
-  maybeUser,
-  new NotFoundError('User not found')
-)
-
-// Assert a condition
-const canEdit = assertOr(
-  user.id === currentUserId,
-  new ForbiddenError('Cannot edit other user\'s profile')
-)
-
-// Use error helpers
-if (!isValid) {
-  return Errors.validation('Invalid input')
-}
-```
-
-### 5. Keep error types consistent across layers
-
-```typescript
-// Service layer
-class UserService {
-  async getUser(id: string): Result<User, NotFoundError | DatabaseError> {
-    // ...
-  }
-}
-
-// Handler layer - same error types
-async function getUserHandler(req, ctx): Promise<Response> {
-  const result = await userService.getUser(userId)
-  // Result<User, NotFoundError | DatabaseError>
-  
-  if (result.isErr()) {
-    return resultToResponse(result, ctx) // Handles both error types
-  }
-  
-  return success(result.value)
-}
+// ✅ Good: Use unwrapOr with default
+const user = userResult.unwrapOr(defaultUser)
 ```
 
 ## 📚 API Reference
@@ -469,12 +403,6 @@ if (result.isErr()) {
   // Handle NotFoundError or DatabaseError
 }
 ```
-
-## 📖 Further Reading
-
-- [Railway Oriented Programming](https://fsharpforfunandprofit.com/rop/) - The inspiration for Result pattern
-- [Rust's Result Type](https://doc.rust-lang.org/std/result/) - Similar pattern in Rust
-- [Error Handling in TypeScript](https://www.totaltypescript.com/tips/use-the-result-pattern-for-better-error-handling)
 
 ## 🤝 Contributing
 
