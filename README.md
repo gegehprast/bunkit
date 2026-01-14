@@ -595,12 +595,10 @@ MIT
 
 - **Performance**: Bun runtime is significantly faster than Node.js
 - **Type Safety**: End-to-end types from database to UI
-- **Developer Experience**: Hot reload, auto-generated docs, type generation
+- **Developer Experience**: Hot reload, auto-generated API docs and types
 - **Production Ready**: Authentication, logging, error handling, graceful shutdown
 - **Maintainable**: Clean architecture, monorepo structure, comprehensive tests
-- **Modern Stack**: Latest versions of React, TypeScript, and tooling
 - **Framework Agnostic**: Use any frontend framework or build API-only backends
-- **Fully Documented**: Comprehensive READMEs with examples and best practices
 
 **Perfect for**:
 - Full-stack web applications
@@ -610,4 +608,3 @@ MIT
 - Rapid prototyping with type safety
 
 Start building your next project with BunKit today! 🚀
-
