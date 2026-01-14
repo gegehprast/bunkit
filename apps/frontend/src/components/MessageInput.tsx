@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-import { sanitizeMessage } from "../lib/chat-utils"
 
 interface MessageInputProps {
   onSendMessage: (message: string) => void
@@ -60,10 +59,10 @@ export function MessageInput({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const sanitized = sanitizeMessage(message)
-    if (!sanitized || disabled) return
+    const trimmed = message.trim()
+    if (!trimmed || disabled) return
 
-    onSendMessage(sanitized)
+    onSendMessage(trimmed)
     setMessage("")
 
     // Stop typing indicator

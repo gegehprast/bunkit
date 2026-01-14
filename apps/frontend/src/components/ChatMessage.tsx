@@ -1,5 +1,9 @@
 import type { ChatMessage } from "../hooks/useChat"
-import { formatTimestamp, getInitials, linkifyMessage } from "../lib/chat-utils"
+import {
+  formatTimestamp,
+  getInitials,
+  parseMessageParts,
+} from "../lib/chat-utils"
 
 interface ChatMessageComponentProps {
   message: ChatMessage
@@ -8,7 +12,7 @@ interface ChatMessageComponentProps {
 export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
   const initials = getInitials(message.userEmail)
   const timestamp = formatTimestamp(message.timestamp)
-  const messageHtml = linkifyMessage(message.message)
+  const messageParts = parseMessageParts(message.message)
 
   return (
     <div
@@ -49,10 +53,25 @@ export function ChatMessageComponent({ message }: ChatMessageComponentProps) {
               : "bg-white text-gray-800 border border-gray-200"
           }`}
         >
-          <p
-            className="wrap-break-word whitespace-pre-wrap"
-            dangerouslySetInnerHTML={{ __html: messageHtml }}
-          />
+          <p className="wrap-break-word whitespace-pre-wrap">
+            {messageParts.map((part, index) =>
+              part.type === "link" ? (
+                <a
+                  key={index}
+                  href={part.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`underline hover:opacity-80 ${
+                    message.isOwn ? "text-blue-100" : "text-blue-600"
+                  }`}
+                >
+                  {part.content}
+                </a>
+              ) : (
+                <span key={index}>{part.content}</span>
+              ),
+            )}
+          </p>
         </div>
       </div>
     </div>
