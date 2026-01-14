@@ -25,6 +25,7 @@ interface AuthContextType {
     name: string,
   ) => Promise<AuthResult>
   logout: () => void
+  getAuthToken: () => string | null
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -87,6 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         register,
         logout,
+        getAuthToken,
       }}
     >
       {children}
