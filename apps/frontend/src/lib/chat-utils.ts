@@ -140,25 +140,56 @@ export function groupMessagesByDate(
 }
 
 /**
- * Sanitize message content to prevent XSS
+ * Parse message text and return array of text/link parts for safe rendering
+ * This allows rendering links without using dangerouslySetInnerHTML
+ *
+ * @example
+ * parseMessageParts("Check https://example.com")
+ * // Returns: [
+ * //   { type: 'text', content: 'Check ' },
+ * //   { type: 'link', content: 'https://example.com', url: 'https://example.com' }
+ * // ]
  */
-export function sanitizeMessage(message: string): string {
-  return message
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#x27;")
-    .replace(/\//g, "&#x2F;")
-}
+export type MessagePart =
+  | { type: "text"; content: string }
+  | { type: "link"; content: string; url: string }
 
-/**
- * Detect and linkify URLs in message text
- */
-export function linkifyMessage(message: string): string {
+export function parseMessageParts(message: string): MessagePart[] {
   const urlRegex = /(https?:\/\/[^\s]+)/g
-  return sanitizeMessage(message).replace(
-    urlRegex,
-    '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">$1</a>',
-  )
+  const parts: MessagePart[] = []
+  let lastIndex = 0
+
+  for (const match of message.matchAll(urlRegex)) {
+    // Add text before the URL
+    if (match.index !== undefined && match.index > lastIndex) {
+      parts.push({
+        type: "text",
+        content: message.substring(lastIndex, match.index),
+      })
+    }
+
+    // Add the URL as a link
+    parts.push({
+      type: "link",
+      content: match[0],
+      url: match[0],
+    })
+
+    lastIndex = (match.index ?? 0) + match[0].length
+  }
+
+  // Add remaining text after last URL
+  if (lastIndex < message.length) {
+    parts.push({
+      type: "text",
+      content: message.substring(lastIndex),
+    })
+  }
+
+  // If no URLs found, return the whole message as text
+  if (parts.length === 0) {
+    parts.push({ type: "text", content: message })
+  }
+
+  return parts
 }

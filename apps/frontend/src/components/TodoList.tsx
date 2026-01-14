@@ -35,20 +35,22 @@ export const TodoList = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ff73a8]" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg">{error}</div>
+      <div className="bg-red-900/20 text-red-400 px-4 py-3 rounded-lg border border-red-800">
+        {error}
+      </div>
     )
   }
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">My Todos</h2>
+      <h2 className="text-2xl font-bold text-white mb-6">My Todos</h2>
 
       <form onSubmit={handleCreate} className="flex gap-2 mb-6">
         <input
@@ -56,18 +58,18 @@ export const TodoList = () => {
           placeholder="New todo..."
           value={newTodoTitle}
           onChange={(e) => setNewTodoTitle(e.target.value)}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          className="flex-1 px-4 py-2 bg-gray-900 border border-gray-700 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-[#ff73a8] focus:border-transparent outline-none"
         />
         <button
           type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition duration-200 shadow-md hover:shadow-lg"
+          className="bg-[#ff73a8] hover:bg-[#ff5a93] text-white font-semibold px-6 py-2 rounded-lg transition duration-200 shadow-md hover:shadow-lg"
         >
           Add
         </button>
       </form>
 
       {todos.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-gray-400">
           <p className="text-lg">No todos yet. Create one!</p>
         </div>
       ) : (
@@ -75,23 +77,23 @@ export const TodoList = () => {
           {todos.map((todo) => (
             <li
               key={todo.id}
-              className="flex items-center gap-3 bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition border border-gray-200"
+              className="flex items-center gap-3 bg-gray-900 p-4 rounded-lg shadow-sm hover:shadow-md transition border border-gray-800"
             >
               <input
                 type="checkbox"
                 checked={todo.completed}
                 onChange={() => handleToggle(todo)}
-                className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                className="w-5 h-5 text-[#ff73a8] rounded focus:ring-2 focus:ring-[#ff73a8] cursor-pointer"
               />
               <span
-                className={`flex-1 ${todo.completed ? "line-through text-gray-500" : "text-gray-900"}`}
+                className={`flex-1 ${todo.completed ? "line-through text-gray-500" : "text-white"}`}
               >
                 {todo.title}
               </span>
               <button
                 type="button"
                 onClick={() => handleDelete(todo.id)}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded transition font-medium"
+                className="text-red-400 hover:text-red-300 hover:bg-red-900/20 px-3 py-1 rounded transition font-medium"
               >
                 Delete
               </button>

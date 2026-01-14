@@ -11,8 +11,8 @@ const AppContent = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-950">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#ff73a8]" />
       </div>
     )
   }
@@ -22,15 +22,15 @@ const AppContent = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-linear-to-br from-gray-50 to-blue-50">
-      <header className="bg-white shadow-sm border-b border-gray-200 shrink-0">
+    <div className="flex flex-col h-screen bg-gray-950">
+      <header className="bg-gray-900 shadow-sm border-b border-gray-800 shrink-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
-            <h1 className="text-2xl font-bold text-gray-900">BunStart App</h1>
+            <h1 className="text-2xl font-bold text-white">BunKit Frontend</h1>
             <div className="flex items-center gap-4">
-              <span className="text-gray-700">
+              <span className="text-gray-300">
                 Welcome,{" "}
-                <span className="font-semibold">
+                <span className="font-semibold text-[#ff73a8]">
                   {user?.name || user?.email}
                 </span>
                 !
@@ -38,7 +38,7 @@ const AppContent = () => {
               <button
                 type="button"
                 onClick={logout}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg transition duration-200"
+                className="bg-gray-800 hover:bg-gray-700 text-gray-100 font-semibold px-4 py-2 rounded-lg transition duration-200"
               >
                 Logout
               </button>
@@ -52,8 +52,8 @@ const AppContent = () => {
               onClick={() => setActiveTab("todos")}
               className={`px-4 py-2 font-medium transition-colors border-b-2 ${
                 activeTab === "todos"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
+                  ? "border-[#ff73a8] text-[#ff73a8]"
+                  : "border-transparent text-gray-400 hover:text-gray-200"
               }`}
             >
               Todos
@@ -63,8 +63,8 @@ const AppContent = () => {
               onClick={() => setActiveTab("chat")}
               className={`px-4 py-2 font-medium transition-colors border-b-2 ${
                 activeTab === "chat"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
+                  ? "border-[#ff73a8] text-[#ff73a8]"
+                  : "border-transparent text-gray-400 hover:text-gray-200"
               }`}
             >
               Chat
@@ -87,11 +87,11 @@ const AppContent = () => {
         </main>
       )}
 
-      <footer className="bg-white border-t border-gray-200 shrink-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-600">
+      <footer className="bg-gray-900 border-t border-gray-800 shrink-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-400">
           <p>
             Built with{" "}
-            <span className="font-semibold text-blue-600">BunStart</span> -
+            <span className="font-semibold text-[#ff73a8]">BunKit</span> -
             Type-safe API client demo
           </p>
         </div>
