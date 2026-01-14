@@ -4,14 +4,15 @@ FROM oven/bun:1.3.5-alpine AS base
 FROM base AS deps
 WORKDIR /app
 
-# Copy workspace files
+# Copy workspace files (monorepo requires all package.json files)
 COPY package.json bun.lock ./
 COPY apps/backend/package.json ./apps/backend/
+COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/server/package.json ./packages/server/
 COPY packages/result/package.json ./packages/result/
 
 # Install dependencies
-RUN bun install --frozen-lockfile --production
+RUN bun install --frozen-lockfile
 
 # Build stage (if needed for packages)
 FROM base AS builder
