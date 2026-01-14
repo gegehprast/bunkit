@@ -34,8 +34,8 @@ export function ChatRoomSelector({
               onClick={() => onSelectRoom(room.id)}
               className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                 isSelected
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-gray-100 text-gray-700"
+                  ? "bg-[#ff73a8] text-white"
+                  : "hover:bg-gray-800 text-gray-300"
               }`}
             >
               <div className="flex items-center justify-between">
@@ -45,7 +45,7 @@ export function ChatRoomSelector({
                     <div className="font-medium">{room.name}</div>
                     <div
                       className={`text-xs ${
-                        isSelected ? "text-blue-100" : "text-gray-500"
+                        isSelected ? "text-pink-100" : "text-gray-500"
                       }`}
                     >
                       {room.description}

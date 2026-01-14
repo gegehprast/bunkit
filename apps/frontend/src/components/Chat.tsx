@@ -89,17 +89,17 @@ export function Chat() {
   }
 
   return (
-    <div className="flex h-full bg-gray-100 rounded-lg shadow-sm overflow-hidden">
+    <div className="flex h-full bg-gray-950 rounded-lg shadow-sm overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 flex flex-col shrink-0">
+      <div className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col shrink-0">
         {/* Header */}
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-800">Chat Rooms</h2>
+        <div className="p-4 border-b border-gray-800">
+          <h2 className="text-xl font-bold text-white">Chat Rooms</h2>
           <div className="flex items-center gap-2 mt-2">
             <div
               className={`w-2 h-2 rounded-full ${getConnectionStatusColor()}`}
             />
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-400">
               {getConnectionStatusText()}
             </span>
           </div>
@@ -117,12 +117,12 @@ export function Chat() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Chat Header */}
-        <div className="bg-white shadow-sm border-b border-gray-200 p-4">
-          <h3 className="text-lg font-semibold text-gray-800 capitalize">
+        <div className="bg-gray-900 shadow-sm border-b border-gray-800 p-4">
+          <h3 className="text-lg font-semibold text-white capitalize">
             #{selectedRoom}
           </h3>
           {currentRooms.includes(selectedRoom) && (
-            <p className="text-sm text-gray-500">Room joined</p>
+            <p className="text-sm text-gray-400">Room joined</p>
           )}
         </div>
 
@@ -171,17 +171,17 @@ export function Chat() {
         {/* Messages Area */}
         <div
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto p-4 space-y-4"
+          className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-950"
         >
           {connectionStatus === "disconnected" && (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-gray-400 py-8">
               <p>Not connected to chat server</p>
               <p className="text-sm mt-2">Please log in to start chatting</p>
             </div>
           )}
 
           {connectionStatus === "connected" && roomMessages.length === 0 && (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-gray-400 py-8">
               <p>No messages yet</p>
               <p className="text-sm mt-2">Be the first to send a message!</p>
             </div>
@@ -193,7 +193,7 @@ export function Chat() {
 
           {/* Typing Indicators */}
           {roomTyping.size > 0 && (
-            <div className="text-sm text-gray-500 italic pl-4">
+            <div className="text-sm text-gray-400 italic pl-4">
               {Array.from(roomTyping).join(", ")}{" "}
               {roomTyping.size === 1 ? "is" : "are"} typing...
             </div>

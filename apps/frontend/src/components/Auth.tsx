@@ -34,9 +34,9 @@ export const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gray-950 p-4">
+      <div className="bg-gray-900 rounded-2xl shadow-xl border border-gray-800 p-8 w-full max-w-md">
+        <h2 className="text-3xl font-bold text-white mb-8 text-center">
           {isLogin ? "Welcome Back" : "Create Account"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -47,7 +47,7 @@ export const Auth = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-[#ff73a8] focus:border-transparent outline-none transition"
             />
           )}
           <input
@@ -56,7 +56,7 @@ export const Auth = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-[#ff73a8] focus:border-transparent outline-none transition"
           />
           <input
             type="password"
@@ -64,10 +64,10 @@ export const Auth = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-[#ff73a8] focus:border-transparent outline-none transition"
           />
           {error && (
-            <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
+            <div className="bg-red-900/50 border border-red-800 text-red-200 px-4 py-3 rounded-lg text-sm">
               <div className="font-semibold mb-1">{error}</div>
               {validationErrors.length > 0 && (
                 <ul className="list-disc list-inside space-y-1 mt-2">
@@ -84,7 +84,7 @@ export const Auth = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md hover:shadow-lg"
+            className="w-full bg-[#ff73a8] hover:bg-[#ff5a93] disabled:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md hover:shadow-lg"
           >
             {isLoading ? "Loading..." : isLogin ? "Login" : "Register"}
           </button>
@@ -96,7 +96,7 @@ export const Auth = () => {
             setError("")
             setValidationErrors([])
           }}
-          className="w-full mt-4 text-blue-600 hover:text-blue-700 font-medium py-2 transition"
+          className="w-full mt-4 text-[#ff73a8] hover:text-[#ff5a93] font-medium py-2 transition"
         >
           {isLogin ? "Need an account? Register" : "Have an account? Login"}
         </button>
