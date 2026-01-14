@@ -529,44 +529,6 @@ If using the included React frontend:
 2. Add route in `apps/frontend/src/App.tsx`
 3. Use generated types from `src/generated/`
 
-## 🐛 Troubleshooting
-
-### Port Already in Use
-
-```bash
-# Kill process on port 3001
-lsof -ti:3001 | xargs kill -9
-
-# Or change PORT in .env.local
-```
-
-### Database Connection Issues
-
-```bash
-# Test connection
-psql $DATABASE_URL
-
-# Verify PostgreSQL is running
-pg_isready
-```
-
-### Type Generation Issues
-
-```bash
-# Clean and regenerate
-rm -rf apps/frontend/src/generated
-bun run backend:openapi:generate:to-frontend
-bun run backend:ws-types:generate:to-frontend
-```
-
-### Hot Reload Not Working
-
-```bash
-# Restart with clean slate
-rm -rf node_modules
-bun install
-```
-
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -585,10 +547,8 @@ MIT
 ## 🎓 Learning Resources
 
 - [Bun Documentation](https://bun.sh/docs)
-- [React 19 Docs](https://react.dev)
 - [Drizzle ORM](https://orm.drizzle.team)
 - [Zod](https://zod.dev)
-- [TailwindCSS 4](https://tailwindcss.com)
 - [OpenAPI Specification](https://swagger.io/specification/)
 
 ## 💡 Why BunKit?
