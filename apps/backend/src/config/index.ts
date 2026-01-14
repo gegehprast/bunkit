@@ -21,7 +21,7 @@ const configSchema = z.object({
   MAX_REQUEST_BODY_SIZE: z.coerce.number().default(10485760), // 10MB in bytes
 
   // Database
-  DATABASE_URL: z.string().default("postgresql://localhost:5432/bunkit"),
+  DATABASE_URL: z.string().default("postgresql://localhost:5432/bunkit_test"),
 
   // JWT
   JWT_SECRET: z.string().min(32).default(DEFAULT_JWT_SECRET),
