@@ -913,56 +913,6 @@ bun test tests/http/routes.test.ts
 bun test --coverage
 ```
 
-## Architecture
-
-```
-src/
-├── core/                   # Shared utilities
-│   ├── cors.ts             # CORS handling
-│   ├── middleware.ts       # Middleware execution
-│   ├── standard-errors.ts  # Standard error schemas
-│   └── validation.ts       # Zod validation utilities
-├── http/                   # HTTP functionality
-│   ├── request-handler.ts  # HTTP request routing
-│   ├── response-helpers.ts # Response builder methods
-│   ├── route-builder.ts    # HTTP route builder (fluent API)
-│   ├── route-registry.ts   # HTTP route storage & matching
-│   ├── openapi/
-│   │   ├── generator.ts    # OpenAPI spec generator
-│   │   └── security-schemes.ts
-│   └── types/
-│       ├── context.ts
-│       ├── response.ts
-│       └── route.ts
-├── websocket/              # WebSocket functionality
-│   ├── websocket-auth.ts   # Auth utilities
-│   ├── websocket-handler.ts
-│   ├── websocket-registry.ts
-│   ├── websocket-route-builder.ts
-│   ├── websocket-type-generator.ts
-│   └── types/
-│       └── websocket.ts
-├── types/                  # Shared types
-│   ├── cors.ts
-│   ├── middleware.ts
-│   └── server.ts
-├── server.ts               # Main server implementation
-└── index.ts                # Public API exports
-```
-
-**Design Principles:**
-- **Clear separation** between HTTP, WebSocket, and shared modules
-- **Namespaced API** - `server.http.*` for HTTP, `server.ws.*` for WebSocket
-- **Type-safe by default** - Full TypeScript inference
-- **Result pattern** - No exceptions in business logic
-- **Single responsibility** - Each module has a clear purpose
-
-## Requirements
-
-- **Bun** >= 1.3.3
-- **TypeScript** >= 5.0
-- **Zod** (peer dependency)
-
 ## License
 
 MIT
