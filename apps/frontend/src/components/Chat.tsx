@@ -171,7 +171,7 @@ export function Chat() {
         {/* Messages Area */}
         <div
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-950"
+          className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900/50"
         >
           {connectionStatus === "disconnected" && (
             <div className="text-center text-gray-400 py-8">

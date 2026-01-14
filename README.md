@@ -409,7 +409,7 @@ cd packages/result && bun test
 
 ### Backend Deployment
 
-1. Build for production (Bun compiles TypeScript directly)
+1. Build for production (Bun can run TypeScript directly)
 2. Set environment variables in production
 3. Run migrations: `bun run backend:db:migrate`
 4. Start server: `bun run backend:start`
@@ -469,7 +469,7 @@ The React frontend (`apps/frontend/`) is a **reference implementation** showing:
 - Typing indicators
 - User presence
 
-These backend features serve as reference implementations. See [Backend README](apps/backend/README.md) for removal instructions.
+These backend features serve as reference implementations. See [Backend README](apps/backend/README.md#removing-example-features) for removal instructions.
 
 ## 🛠️ Customization
 
