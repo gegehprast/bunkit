@@ -9,10 +9,16 @@ import {
  * Options for generating WebSocket types
  */
 export interface GenerateWebSocketTypesOptions {
-  /** Output file path */
-  outputPath: string
   /** Only generate for specific routes (optional) */
   routes?: string[]
+}
+/**
+ * Options for exporting WebSocket types
+ */
+export interface ExportWebSocketTypesOptions
+  extends GenerateWebSocketTypesOptions {
+  /** Output file path */
+  outputPath: string
 }
 
 /**
@@ -210,7 +216,7 @@ function generateClientMessageType(
 export async function generateWebSocketTypes(
   options: GenerateWebSocketTypesOptions,
   localRegistry?: WebSocketRouteRegistry,
-): Promise<Result<void, Error>> {
+): Promise<Result<string, Error>> {
   // Use local registry if provided, otherwise fall back to global
   const registry = localRegistry ?? webSocketRouteRegistry
   const routes = registry.getAll()
@@ -219,7 +225,7 @@ export async function generateWebSocketTypes(
     : routes
 
   if (filteredRoutes.length === 0) {
-    return ok(undefined)
+    return ok("")
   }
 
   const lines: string[] = [
@@ -289,10 +295,5 @@ export async function generateWebSocketTypes(
 
   const content = lines.join("\n")
 
-  try {
-    await Bun.write(options.outputPath, content)
-    return ok(undefined)
-  } catch (_error) {
-    return ok(undefined) // Silently succeed for now, error handling can be added
-  }
+  return ok(content)
 }

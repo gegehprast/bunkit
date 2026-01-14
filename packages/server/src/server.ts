@@ -23,6 +23,7 @@ import {
   webSocketRouteRegistry,
 } from "./websocket/websocket-registry"
 import {
+  type ExportWebSocketTypesOptions,
   type GenerateWebSocketTypesOptions,
   generateWebSocketTypes,
 } from "./websocket/websocket-type-generator"
@@ -256,8 +257,27 @@ export class Server implements IServer {
 
     getWebSocketTypes: async (
       options: GenerateWebSocketTypesOptions,
-    ): Promise<Result<void, Error>> => {
+    ): Promise<Result<string, Error>> => {
       return generateWebSocketTypes(options, this.localWsRouteRegistry)
+    },
+
+    exportWebSocketTypes: async (
+      options: ExportWebSocketTypesOptions,
+    ): Promise<Result<void, Error>> => {
+      try {
+        const typesResult = await this.ws.getWebSocketTypes(options)
+        if (typesResult.isErr()) {
+          return err(typesResult.error)
+        }
+        await Bun.write(options.outputPath, typesResult.value)
+        return ok(undefined)
+      } catch (error) {
+        return err(
+          error instanceof Error
+            ? error
+            : new Error("Failed to export WebSocket types"),
+        )
+      }
     },
 
     getRoutes: (): Result<WebSocketRouteInfo[], Error> => {

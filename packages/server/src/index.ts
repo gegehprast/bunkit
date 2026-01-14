@@ -52,6 +52,7 @@ export { webSocketRegistry } from "./websocket/websocket-handler"
 // WebSocket Type Generation
 export {
   type GenerateWebSocketTypesOptions,
+  type ExportWebSocketTypesOptions,
   generateWebSocketTypes,
 } from "./websocket/websocket-type-generator"
 
@@ -79,4 +80,7 @@ export { ValidationError } from "./core/validation"
 
 // OpenAPI
 export { SecuritySchemes } from "./http/openapi/security-schemes"
-export { generateOpenApiSpec } from "./http/openapi/generator"
+export {
+  type GenerateOpenApiSpecOptions,
+  generateOpenApiSpec,
+} from "./http/openapi/generator"

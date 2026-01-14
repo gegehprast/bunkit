@@ -5,7 +5,10 @@ import type { HttpMethod } from "../http/types/route"
 import type { CorsOptions } from "../types/cors"
 import type { MiddlewareFn } from "../types/middleware"
 import type { WebSocketRouteRegistry } from "../websocket/websocket-registry"
-import type { GenerateWebSocketTypesOptions } from "../websocket/websocket-type-generator"
+import type {
+  ExportWebSocketTypesOptions,
+  GenerateWebSocketTypesOptions,
+} from "../websocket/websocket-type-generator"
 
 /**
  * WebSocket server configuration
@@ -164,6 +167,12 @@ interface ServerWebSocketMethods {
    */
   getWebSocketTypes(
     options: GenerateWebSocketTypesOptions,
+  ): Promise<Result<string, Error>>
+  /**
+   * Export WebSocket types to a file
+   */
+  exportWebSocketTypes(
+    options: ExportWebSocketTypesOptions,
   ): Promise<Result<void, Error>>
   /**
    * Get all registered WebSocket routes for inspection
