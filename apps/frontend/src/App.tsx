@@ -26,7 +26,7 @@ const AppContent = () => {
       <header className="bg-white shadow-sm border-b border-gray-200 shrink-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4">
-            <h1 className="text-2xl font-bold text-gray-900">BunStart App</h1>
+            <h1 className="text-2xl font-bold text-gray-900">BunKit Frontend</h1>
             <div className="flex items-center gap-4">
               <span className="text-gray-700">
                 Welcome,{" "}
@@ -91,7 +91,7 @@ const AppContent = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-600">
           <p>
             Built with{" "}
-            <span className="font-semibold text-blue-600">BunStart</span> -
+            <span className="font-semibold text-blue-600">BunKit</span> -
             Type-safe API client demo
           </p>
         </div>
