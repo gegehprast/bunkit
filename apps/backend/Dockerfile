@@ -12,7 +12,7 @@ COPY packages/server/package.json ./packages/server/
 COPY packages/result/package.json ./packages/result/
 
 # Install dependencies
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --production
 
 # Build stage (if needed for packages)
 FROM base AS builder
