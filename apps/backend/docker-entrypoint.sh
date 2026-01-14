@@ -5,10 +5,11 @@ echo "🔄 Starting BunKit Backend..."
 
 # Wait for database to be ready
 echo "⏳ Waiting for database..."
-until bun run -e "await fetch('http://localhost:3001').catch(() => {}); const { sql } = await import('postgres'); const db = sql(process.env.DATABASE_URL); try { await db\`SELECT 1\`; console.log('✅ Database ready'); process.exit(0); } catch(e) { process.exit(1); }" 2>/dev/null; do
+until bun -e "import('postgres').then(m => m.default(process.env.DATABASE_URL)).then(db => db\`SELECT 1\`).then(() => process.exit(0)).catch(() => process.exit(1))" 2>/dev/null; do
   echo "   Database is unavailable - retrying in 2s..."
   sleep 2
 done
+echo "✅ Database ready"
 
 # Run database migrations
 echo "📦 Running database migrations..."
