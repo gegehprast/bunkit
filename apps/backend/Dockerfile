@@ -27,8 +27,8 @@ COPY packages ./packages
 # Copy dependencies (both root and workspace node_modules for symlinks)
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/backend/node_modules ./apps/backend/node_modules
-COPY --from=deps /app/packages/server/node_modules ./packages/server/node_modules
-COPY --from=deps /app/packages/result/node_modules ./packages/result/node_modules
+# Copy package workspace node_modules if they exist (may not exist depending on Bun version)
+COPY --from=deps /app/packages/ ./packages/
 
 # Production stage
 FROM base AS runner
@@ -46,8 +46,6 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/node_modules ./node_modules
 # Copy workspace node_modules to preserve symlinks
 COPY --from=builder /app/apps/backend/node_modules ./apps/backend/node_modules
-COPY --from=builder /app/packages/server/node_modules ./packages/server/node_modules
-COPY --from=builder /app/packages/result/node_modules ./packages/result/node_modules
 
 # Copy entrypoint script
 COPY apps/backend/docker-entrypoint.sh /usr/local/bin/
