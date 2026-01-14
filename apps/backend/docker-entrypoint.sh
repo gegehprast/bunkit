@@ -5,21 +5,16 @@ echo "🔄 Starting BunKit Backend..."
 
 # Wait for database to be ready (with timeout)
 echo "⏳ Waiting for database..."
-echo "   DATABASE_URL: $DATABASE_URL"
 RETRY_COUNT=0
 MAX_RETRIES=30  # 60 seconds total (30 * 2s)
 
 # Create a temporary test script
 cat > /tmp/db-test.js << 'EOF'
-import { Database } from "bun:sqlite";
 import { createConnection } from "node:net";
 
 const url = new URL(process.env.DATABASE_URL);
 const host = url.hostname;
 const port = url.port || 5432;
-const database = url.pathname.slice(1);
-const username = url.username;
-const password = url.password;
 
 try {
   // Simple TCP connection test

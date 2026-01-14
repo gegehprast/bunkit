@@ -11,8 +11,8 @@ COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/server/package.json ./packages/server/
 COPY packages/result/package.json ./packages/result/
 
-# Install dependencies
-RUN bun install --frozen-lockfile --production
+# Install ALL dependencies (including devDependencies needed for migrations)
+RUN bun install --frozen-lockfile
 
 # Build stage (if needed for packages)
 FROM base AS builder
