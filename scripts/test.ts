@@ -11,11 +11,15 @@ import { parseArgs } from "node:util"
  */
 const commands = [
   {
-    name: "Backend Test",
+    name: "apps/backend",
     cmd: "bun --env-file=./apps/backend/.env.test test apps/backend",
   },
   {
-    name: "Server Test",
+    name: "packages/result",
+    cmd: "bun test packages/result",
+  },
+  {
+    name: "packages/server",
     cmd: "bun test packages/server",
   },
 ]
