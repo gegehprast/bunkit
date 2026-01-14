@@ -5,7 +5,7 @@ import { webSocketRegistry } from "../../src/websocket/websocket-handler"
 import { webSocketRouteRegistry } from "../../src/websocket/websocket-registry"
 import { createWebSocketRoute } from "../../src/websocket/websocket-route-builder"
 
-describe("WebSocket Advanced Features (Phase 5)", () => {
+describe("WebSocket Advanced Features", () => {
   beforeEach(() => {
     webSocketRouteRegistry.clear()
     webSocketRegistry.clear()
