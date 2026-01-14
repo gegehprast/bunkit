@@ -144,11 +144,6 @@ export class Server implements IServer {
         },
       })
 
-      console.log(
-        `Server started at http://${this.host}:${this.port}`,
-        this.localWsRouteRegistry?.getAll()[0]?.path,
-      )
-
       return ok(undefined)
     } catch (error) {
       return err({

@@ -11,18 +11,18 @@ import { loadRoutes } from "./routes"
 z.globalRegistry.clear()
 
 async function main() {
+  logger.info("🚀 Starting BunKit Backend...")
+  logger.debug("Environment configuration", {
+    nodeEnv: config.NODE_ENV,
+    port: config.PORT,
+    host: config.HOST,
+    logLevel: config.LOG_LEVEL,
+  })
+
   // Import routes to register them with the route registry
   await loadRoutes()
 
   try {
-    logger.info("🚀 Starting BunKit Backend...")
-    logger.debug("Environment configuration", {
-      nodeEnv: config.NODE_ENV,
-      port: config.PORT,
-      host: config.HOST,
-      logLevel: config.LOG_LEVEL,
-    })
-
     logger.info("✅ Core services registered")
 
     // Setup graceful shutdown handlers
@@ -34,7 +34,9 @@ async function main() {
       logger.info("Stopping server...")
       const stopServerResult = await server.stop()
       if (stopServerResult.isErr()) {
-        logger.error("Error stopping server", { error: stopServerResult.error })
+        logger.error("Error stopping server", {
+          error: stopServerResult.error,
+        })
       }
 
       logger.debug("Closing database connection...")
