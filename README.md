@@ -409,7 +409,7 @@ cd packages/result && bun test
 
 ### Backend Deployment
 
-1. Build for production (Bun compiles TypeScript directly)
+1. Build for production (Bun can run TypeScript directly)
 2. Set environment variables in production
 3. Run migrations: `bun run backend:db:migrate`
 4. Start server: `bun run backend:start`
