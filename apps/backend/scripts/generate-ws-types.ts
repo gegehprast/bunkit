@@ -88,7 +88,7 @@ async function main() {
 
     const routeFilter = args.routes as string[] | undefined
 
-    const result = await server.ws.generateWebSocketTypes({
+    const result = await server.ws.getWebSocketTypes({
       outputPath,
       routes: routeFilter,
     })

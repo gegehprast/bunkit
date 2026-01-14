@@ -177,7 +177,7 @@ export class Server implements IServer {
     }
   }
 
-  public readonly http = {
+  public readonly http: IServer["http"] = {
     getOpenApiSpec: async (): Promise<Result<OpenApiSpec, Error>> => {
       return generateOpenApiSpec(
         {
@@ -209,7 +209,7 @@ export class Server implements IServer {
     },
   }
 
-  public readonly ws = {
+  public readonly ws: IServer["ws"] = {
     publish: (topic: string, message: unknown): void => {
       if (!this.server) {
         console.warn("Cannot publish: server not started")
@@ -228,7 +228,7 @@ export class Server implements IServer {
       this.server.publish(topic, data)
     },
 
-    generateWebSocketTypes: async (
+    getWebSocketTypes: async (
       options: GenerateWebSocketTypesOptions,
     ): Promise<Result<void, Error>> => {
       return generateWebSocketTypes(options, this.localWsRouteRegistry)

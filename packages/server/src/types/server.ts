@@ -105,9 +105,9 @@ interface ServerWebSocketMethods {
    */
   publishBinary(topic: string, data: Buffer): void
   /**
-   * Generate TypeScript types for WebSocket routes
+   * Get WebSocket types for this server
    */
-  generateWebSocketTypes(
+  getWebSocketTypes(
     options: GenerateWebSocketTypesOptions,
   ): Promise<Result<void, Error>>
 }
