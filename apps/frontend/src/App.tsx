@@ -91,8 +91,15 @@ const AppContent = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-400">
           <p>
             Built with{" "}
-            <span className="font-semibold text-[#ff73a8]">BunKit</span> -
-            Type-safe API client demo
+            <a
+              href="https://github.com/gegehprast/bunkit"
+              className="font-semibold text-[#ff73a8]"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              BunKit
+            </a>{" "}
+            - Type-safe API client demo
           </p>
         </div>
       </footer>
