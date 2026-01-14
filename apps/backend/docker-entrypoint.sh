@@ -9,7 +9,7 @@ echo "   DATABASE_URL: $DATABASE_URL"
 RETRY_COUNT=0
 MAX_RETRIES=30  # 60 seconds total (30 * 2s)
 
-until bun -e "import('postgres').then(m => m.default(process.env.DATABASE_URL)).then(db => db\`SELECT 1\`).then(() => process.exit(0)).catch(() => process.exit(1))" 2>/dev/null; do
+until bun -e "import('postgres').then(m => m.default(process.env.DATABASE_URL)).then(db => db\`SELECT 1\`).then(() => { console.log('Connection test successful'); process.exit(0); }).catch((e) => { console.error('Connection failed:', e.message); process.exit(1); })"; do
   RETRY_COUNT=$((RETRY_COUNT + 1))
   if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
     echo "❌ Database connection timeout after ${MAX_RETRIES} attempts"
