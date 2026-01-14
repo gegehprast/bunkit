@@ -469,7 +469,7 @@ The React frontend (`apps/frontend/`) is a **reference implementation** showing:
 - Typing indicators
 - User presence
 
-These backend features serve as reference implementations. See [Backend README](apps/backend/README.md) for removal instructions.
+These backend features serve as reference implementations. See [Backend README](apps/backend/README.md#removing-example-features) for removal instructions.
 
 ## 🛠️ Customization
 
