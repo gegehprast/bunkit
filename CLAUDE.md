@@ -7,7 +7,7 @@ BunKit is a project that aims to be a production-ready monorepo template for bui
 **You MUST use Bun, not Node.js:**
 
 - ✅ `bun <file>` — Never use `node` or `ts-node`
-- ✅ `bun test` — Never use `jest` or `vitest`
+- ✅ `bun run test` — Never use `jest` or `vitest`
 - ✅ `bun build` — Never use `webpack` or `esbuild`
 - ✅ `bun install` — Never use `npm`, `yarn`, or `pnpm`
 - ✅ `bun run <script>` — Use this for all package.json scripts

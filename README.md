@@ -112,7 +112,23 @@ bun run frontend:dev
 
 Visit `http://localhost:5173` to see your app!
 
-## 📦 Project Structure
+## � Documentation
+
+BunKit includes comprehensive documentation in the [`docs/`](docs/) folder:
+
+- **[Quick Reference](docs/00-quick-reference.md)** - Fast lookup for common patterns
+- **[Introduction](docs/01-introduction.md)** - Overview and key features
+- **[Installation & Setup](docs/02-installation.md)** - Detailed setup guide
+- **[Project Structure](docs/03-project-structure.md)** - Understanding the codebase
+- **[@bunkit/server Package](docs/04-server-package.md)** - Complete framework API reference
+- **[@bunkit/result Package](docs/05-result-package.md)** - Type-safe error handling
+- **[WebSocket Guide](docs/07-websocket-guide.md)** - Real-time features
+- **[Deployment Guide](docs/11-deployment.md)** - Docker and cloud deployment
+- **[Development Workflow](docs/12-development-workflow.md)** - Best practices
+
+**Start here**: If you're new to BunKit, begin with the [Introduction](docs/01-introduction.md) and [Installation](docs/02-installation.md).
+
+## �📦 Project Structure
 
 ```
 bunkit/
@@ -403,6 +419,12 @@ Individual test suites:
 cd apps/backend && bun test
 cd packages/server && bun test
 cd packages/result && bun test
+```
+
+or you can refer to the custom test script help with:
+
+```bash
+bun run test --help
 ```
 
 ## 🚀 Deployment
