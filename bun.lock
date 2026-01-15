@@ -78,7 +78,8 @@
   },
   "catalog": {
     "@tailwindcss/vite": "^4.1.18",
-    "@tanstack/react-query": "^5.90.12",
+    "@tanstack/react-query": "^5.90.17",
+    "@tanstack/react-query-devtools": "^5.91.2",
     "@types/bun": "latest",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.0",
