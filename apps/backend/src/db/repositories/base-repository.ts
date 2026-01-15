@@ -34,6 +34,8 @@ export abstract class BaseRepository {
         new DatabaseError(errorMessage, {
           error: details,
           stack: error instanceof Error ? error.stack : undefined,
+          // biome-ignore lint/suspicious/noExplicitAny: We want to capture cause if present
+          cause: (error as any).cause?.toString(),
         }),
       )
     }
@@ -56,6 +58,8 @@ export abstract class BaseRepository {
         new DatabaseError(errorMessage, {
           error: details,
           stack: error instanceof Error ? error.stack : undefined,
+          // biome-ignore lint/suspicious/noExplicitAny: We want to capture cause if present
+          cause: (error as any).cause?.toString(),
         }),
       )
     }
