@@ -29,7 +29,7 @@ export function primaryId() {
 /**
  * Timestamp columns for tracking creation and updates
  *
- * Automatically sets created_at and updated_at with proper defaults
+ * Automatically sets createdAt and updatedAt with proper defaults
  *
  * @example
  * ```ts
