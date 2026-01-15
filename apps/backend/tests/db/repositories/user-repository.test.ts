@@ -37,7 +37,7 @@ afterEach(async () => {
  */
 function createUserData(overrides: Partial<NewUser> = {}): NewUser {
   return {
-    email: `test-${Date.now()}@example.com`,
+    email: `test-${Date.now()}${Math.random().toString(36).substring(2, 9)}@example.com`,
     passwordHash: "$2b$10$test.hash.value",
     name: "Test User",
     ...overrides,
