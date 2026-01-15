@@ -9,7 +9,7 @@ import type { RouteContext } from "./context"
  */
 export type ExtractParams<T extends string> =
   T extends `${infer _Start}:${infer Param}/${infer Rest}`
-    ? { [K in Param | keyof ExtractParams<`/${Rest}`>]: string }
+    ? { [K in Param]: string } & ExtractParams<`/${Rest}`>
     : T extends `${infer _Start}:${infer Param}`
       ? { [K in Param]: string }
       : Record<string, never>
