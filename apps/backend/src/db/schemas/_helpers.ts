@@ -4,7 +4,12 @@
  * Reusable column definitions for common patterns
  */
 
-import { type PgColumn, timestamp, uuid } from "drizzle-orm/pg-core"
+import {
+  type PgColumn,
+  type PgTimestampConfig,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core"
 
 /**
  * Primary key UUID column with automatic random generation
@@ -24,21 +29,21 @@ export function primaryId() {
 /**
  * Timestamp columns for tracking creation and updates
  *
- * Automatically sets createdAt and updatedAt with proper defaults
+ * Automatically sets created_at and updated_at with proper defaults
  *
  * @example
  * ```ts
  * export const myTable = pgTable("my_table", {
  *   id: primaryId(),
  *   // ... other columns
- *   ...timestamps(),
+ *   ...timestamps({ withTimezone: true }),
  * })
  * ```
  */
-export function timestamps() {
+export function timestamps(config?: PgTimestampConfig<"date">) {
   return {
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", config).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", config).notNull().defaultNow(),
   }
 }
 

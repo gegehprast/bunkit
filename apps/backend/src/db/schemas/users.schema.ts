@@ -5,7 +5,7 @@
  */
 
 import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core"
-import { primaryId, timestamps } from "./helpers"
+import { primaryId, timestamps } from "./_helpers"
 
 /**
  * Users table
