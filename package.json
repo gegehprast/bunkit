@@ -9,6 +9,7 @@
         "lint": "bun run scripts/lint.ts",
         "test": "bun run scripts/test.ts",
 
+        "backend:test": "cd apps/backend && bun test",
         "backend:dev": "bun --filter @apps/backend --elide-lines=0 dev",
         "backend:start": "bun --filter @apps/backend --elide-lines=0 start",
         "backend:typecheck": "cd apps/backend && bun run typecheck",
@@ -20,10 +21,17 @@
         "backend:ws-types:generate": "bun --filter @apps/backend --elide-lines=0 ws-types:generate",
         "backend:ws-types:generate:to-frontend": "bun --filter @apps/backend --elide-lines=0 ws-types:generate --output=../../apps/frontend/src/generated",
 
+        "frontend:test": "cd apps/frontend && bun test",
         "frontend:dev": "bun --filter @apps/frontend --elide-lines=0 dev",
         "frontend:build": "bun --filter @apps/frontend --elide-lines=0 build",
         "frontend:preview": "bun --filter @apps/frontend --elide-lines=0 preview",
-        "frontend:typecheck": "cd apps/frontend && bun run typecheck"
+        "frontend:typecheck": "cd apps/frontend && bun run typecheck",
+
+        "result:test": "cd packages/result && bun test",
+        "result:typecheck": "cd packages/result && bun run typecheck",
+
+        "server:test": "cd packages/server && bun test",
+        "server:typecheck": "cd packages/server && bun run typecheck"
     },
     "workspaces": {
         "packages": [

@@ -11,13 +11,11 @@ const commands = [
   { name: "Biome Lint", cmd: "bunx --bun biome lint --write" },
   {
     name: "Typecheck @bunkit/result",
-    cwd: "packages/result",
-    cmd: "bun run typecheck",
+    cmd: "bun run result:typecheck",
   },
   {
     name: "Typecheck @bunkit/server",
-    cwd: "packages/server",
-    cmd: "bun run typecheck",
+    cmd: "bun run server:typecheck",
   },
   { name: "Typecheck Backend", cmd: "bun run backend:typecheck" },
   { name: "Typecheck Frontend", cmd: "bun run frontend:typecheck" },
@@ -26,11 +24,10 @@ const commands = [
 async function runLint() {
   let hasError = false
 
-  for (const { name, cmd, cwd } of commands) {
+  for (const { name, cmd } of commands) {
     console.log(`\n🔍 Running: ${name}...`)
 
     const proc = Bun.spawn(cmd.split(" "), {
-      cwd: cwd,
       stdout: "inherit",
       stderr: "inherit",
     })
