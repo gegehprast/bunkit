@@ -71,5 +71,5 @@ export function foreignId(
     onUpdate?: "cascade" | "set null" | "restrict" | "no action"
   },
 ) {
-  return uuid(columnName).notNull().references(reference, options)
+  return uuid(columnName).references(reference, options)
 }

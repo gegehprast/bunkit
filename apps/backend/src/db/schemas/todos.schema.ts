@@ -15,7 +15,9 @@ import { users } from "./users.schema"
  */
 export const todos = pgTable("todos", {
   id: primaryId(),
-  userId: foreignId("user_id", () => users.id, { onDelete: "cascade" }),
+  userId: foreignId("user_id", () => users.id, {
+    onDelete: "cascade",
+  }).notNull(),
   title: text("title").notNull(),
   description: text("description"),
   completed: boolean("completed").notNull().default(false),
