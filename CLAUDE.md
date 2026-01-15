@@ -7,7 +7,7 @@ BunKit is a project that aims to be a production-ready monorepo template for bui
 **You MUST use Bun, not Node.js:**
 
 - ✅ `bun <file>` — Never use `node` or `ts-node`
-- ✅ `bun run test` — Never use `jest` or `vitest`
+- ✅ `bun test` — Never use `jest` or `vitest`
 - ✅ `bun build` — Never use `webpack` or `esbuild`
 - ✅ `bun install` — Never use `npm`, `yarn`, or `pnpm`
 - ✅ `bun run <script>` — Use this for all package.json scripts
@@ -139,22 +139,10 @@ describe('Feature Name', () => {
 
 ### Running Tests
 
-**IMPORTANT:** All tests must be run from the root project directory using the test script:
+**IMPORTANT:** Tests must be run from the each app or package directory:
 
 ```bash
 # From project root
-bun run test
+cd apps/backend
+bun test
 ```
-
-Note it is `bun run test` from the root, not `bun test`.
-
-The test script (`scripts/test.ts`) automatically:
-- Loads environment variables from `apps/backend/.env.test`
-- Uses isolated test database and configuration
-- Runs all backend tests with proper environment setup
-
-**Test Environment:**
-- Test database (separate from development)
-- Test port (3099 by default, configured in .env.test)
-- Minimal logging (error level only)
-- All environment variables loaded from `.env.test` before tests run

@@ -166,8 +166,7 @@ bunkit/
 │       └── tests/
 │
 ├── scripts/                  # Workspace-level scripts
-│   ├── lint.ts              # Run linting across workspace
-│   └── test.ts              # Run tests across workspace
+│   └── lint.ts              # Run linting across workspace
 │
 ├── package.json             # Root workspace configuration
 ├── biome.json              # Biome linter/formatter config
@@ -182,7 +181,6 @@ bunkit/
 |---------|-------------|
 | `bun install` | Install all dependencies |
 | `bun run lint` | Lint all packages |
-| `bun run test` | Run all tests |
 | `bun run check` | Run Biome checks and auto-fix |
 | `bun run format` | Format all code with Biome |
 
@@ -402,29 +400,12 @@ Opens at `https://local.drizzle.studio`
 
 ## 🧪 Testing
 
-Run all tests:
-
-```bash
-bun run test
-```
-
-Test structure:
-- Backend: Unit tests for services, repositories, and routes
-- Packages: Framework and utility tests
-- Integration: End-to-end API tests
-
-Individual test suites:
+**IMPORTANT:** Tests must be run from the each app or package directory.
 
 ```bash
 cd apps/backend && bun test
 cd packages/server && bun test
 cd packages/result && bun test
-```
-
-or you can refer to the custom test script help with:
-
-```bash
-bun run test --help
 ```
 
 ## 🚀 Deployment
@@ -556,7 +537,7 @@ If using the included React frontend:
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Run tests: `bun run test`
+4. Run tests: `cd <package/path> && bun test`
 5. Run linting: `bun run lint`
 6. Submit a pull request
 

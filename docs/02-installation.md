@@ -327,21 +327,18 @@ bun run lint
 
 ### Testing
 
-```bash
-# Run all tests (uses custom script that handles .env correctly)
-bun run test
+**IMPORTANT:** Tests must be run from each app/package directory.
 
+```bash
 # Run specific package tests
 cd apps/backend && bun test
 
 # Run specific test file in specific package
-cd apps/backend && bun run test apps/backend/tests/auth/auth.service.test.ts
+cd apps/backend && bun test apps/backend/tests/auth/auth.service.test.ts
 
 # Run tests in watch mode in specific package
-cd apps/backend && bun run test --watch
+cd apps/backend && bun test --watch
 ```
-
-The `bun run test` uses a custom script that ensures the correct environment variables are loaded for each packages. If you want to use `bun test` directly, you have to go into the package folder.
 
 ### Database Management
 

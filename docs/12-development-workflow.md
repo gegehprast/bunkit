@@ -52,7 +52,7 @@ Create `.git/hooks/pre-commit`:
 #!/bin/sh
 bun run check
 bun run backend:typecheck
-bun run test
+bun run backend:test
 ```
 
 Make executable:
@@ -64,24 +64,15 @@ chmod +x .git/hooks/pre-commit
 
 ### Running Tests
 
+**IMPORTANT:** Tests must be run from each app/package directory.
+
 ```bash
-# All tests (uses custom script that handles .env correctly)
-bun run test
-
-# With coverage
-bun run test --coverage
-
-# Match pattern
-bun run test -t "should create user"
-
 # Specific package
 cd apps/frontend && bun test
 
 # Specific file of specific package
 cd apps/backend && bun test tests/auth/auth.service.test.ts
 ```
-
-The `bun run test` uses a custom script that ensures the correct environment variables are loaded for each packages. If you want to use `bun test` directly, you have to go into the package folder.
 
 ### Writing Tests
 
@@ -256,7 +247,7 @@ bun run backend:db:studio
 ```bash
 # 1. Create route with tests
 # 2. Run backend tests
-bun run test apps/backend/tests/routes/products.test.ts
+cd apps/backend && bun test apps/backend/tests/routes/products.test.ts
 
 # 3. Test manually with curl or Postman
 curl http://localhost:3001/api/products
@@ -266,7 +257,7 @@ open http://localhost:3001/docs
 
 # 5. Generate types and test frontend
 bun run backend:openapi:generate:to-frontend
-cd apps/frontend && bun run test
+cd apps/frontend && bun test
 ```
 
 ## Frontend Development
@@ -382,7 +373,7 @@ git checkout -b feature/new-feature
 # ... code changes ...
 
 # 3. Test
-bun run test
+cd <package/path> && bun test
 bun run check
 
 # 4. Commit
@@ -408,29 +399,6 @@ logger.debug("Debug info", { userId: "123" })
 logger.info("User logged in", { email: user.email })
 logger.warn("Slow query", { duration: 1000 })
 logger.error("Failed to process", { error: err.message })
-```
-
-### VS Code Debugging
-
-Create `.vscode/launch.json`:
-
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Debug Backend",
-      "type": "bun",
-      "request": "launch",
-      "program": "${workspaceFolder}/apps/backend/src/main.ts",
-      "cwd": "${workspaceFolder}/apps/backend",
-      "env": {
-        "NODE_ENV": "development"
-      },
-      "watchMode": true
-    }
-  ]
-}
 ```
 
 ### Database Debugging
@@ -494,9 +462,6 @@ bun add <package-name>
 # To frontend
 cd apps/frontend
 bun add <package-name>
-
-# To workspace (shared)
-bun add -w <package-name>
 ```
 
 ### Update Dependencies

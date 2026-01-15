@@ -7,8 +7,6 @@
         "check": "bunx --bun biome check --write",
         "format": "bunx --bun biome format --write",
         "lint": "bun run scripts/lint.ts",
-        "test": "bun run scripts/test.ts",
-
         "backend:test": "cd apps/backend && bun test",
         "backend:dev": "bun --filter @apps/backend --elide-lines=0 dev",
         "backend:start": "bun --filter @apps/backend --elide-lines=0 start",
@@ -20,16 +18,13 @@
         "backend:openapi:generate:to-frontend": "bun --filter @apps/backend --elide-lines=0 openapi:generate --types --output=../../apps/frontend/src/generated",
         "backend:ws-types:generate": "bun --filter @apps/backend --elide-lines=0 ws-types:generate",
         "backend:ws-types:generate:to-frontend": "bun --filter @apps/backend --elide-lines=0 ws-types:generate --output=../../apps/frontend/src/generated",
-
         "frontend:test": "cd apps/frontend && bun test",
         "frontend:dev": "bun --filter @apps/frontend --elide-lines=0 dev",
         "frontend:build": "bun --filter @apps/frontend --elide-lines=0 build",
         "frontend:preview": "bun --filter @apps/frontend --elide-lines=0 preview",
         "frontend:typecheck": "cd apps/frontend && bun run typecheck",
-
         "result:test": "cd packages/result && bun test",
         "result:typecheck": "cd packages/result && bun run typecheck",
-
         "server:test": "cd packages/server && bun test",
         "server:typecheck": "cd packages/server && bun run typecheck"
     },
@@ -73,9 +68,9 @@
     },
     "devDependencies": {
         "@biomejs/biome": "2.3.10",
-        "@types/bun": "catalog:",
-        "@types/node": "catalog:",
-        "typescript": "catalog:"
+        "@types/bun": "^1.3.6",
+        "@types/node": "^24.10.9",
+        "typescript": "^5.9.3"
     },
     "description": "BunKit - A production-ready fullstack monorepo starter kit for building modern web applications with Bun, featuring type-safe HTTP APIs, real-time WebSocket support, and automatic OpenAPI documentation generation.",
     "keywords": [
