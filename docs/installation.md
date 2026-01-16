@@ -425,7 +425,7 @@ bun run backend:start
 
 ### Docker Deployment
 
-See [Deployment Guide](./11-deployment.md) for complete Docker setup.
+See [Deployment Guide](./08-deployment.md) for complete Docker setup.
 
 Quick start:
 
@@ -556,4 +556,4 @@ Now that you're set up:
 1. Explore [Project Structure](./03-project-structure.md) to understand the codebase
 2. Read [@bunkit/server Package](./04-server-package.md) to learn the framework
 3. Study [Backend Application](./06-backend-application.md) for patterns and examples
-4. Check [Development Workflow](./12-development-workflow.md) for best practices
+4. Check [Development Workflow](./09-development-workflow.md) for best practices

@@ -260,4 +260,4 @@ Ready to get started?
 Or jump directly to:
 - [WebSocket Development](./07-websocket-guide.md)
 - [Authentication & Security](./09-authentication.md)
-- [Deployment Guide](./11-deployment.md)
+- [Deployment Guide](./08-deployment.md)

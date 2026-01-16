@@ -469,4 +469,4 @@ await adminServer.start()
 For more help:
 - Check [full documentation](./04-server-package.md)
 - Review [example code](../apps/backend/src/routes/)
-- See [development workflow](./12-development-workflow.md)
+- See [development workflow](./09-development-workflow.md)

@@ -545,4 +545,3 @@ See how Result is used throughout BunKit:
 
 - See [Server Package](./04-server-package.md) for integrating with routes
 - Check [Backend Application](./06-backend-application.md) for patterns
-- Read [Testing Guide](./13-testing.md) for testing Result-based code

@@ -820,5 +820,3 @@ describe("WebSocket Chat", () => {
 ## Next Steps
 
 - Review the [Chat WebSocket example](../apps/backend/src/routes/chat.websocket.ts)
-- Learn [Type Generation](./10-type-generation.md)
-- Read [Testing Guide](./13-testing.md) for WebSocket testing

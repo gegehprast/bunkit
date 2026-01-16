@@ -627,6 +627,5 @@ const MAX_RETRY_COUNT = 3
 
 ## Next Steps
 
-- Review [Testing Guide](./13-testing.md)
-- Learn [Deployment Guide](./11-deployment.md)
+- Learn [Deployment Guide](./08-deployment.md)
 - Check [Backend Application](./06-backend-application.md) for patterns

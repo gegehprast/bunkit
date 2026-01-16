@@ -1090,4 +1090,3 @@ See the [Backend Application Guide](./06-backend-application.md) for complete wo
 
 - [WebSocket Development Guide](./07-websocket-guide.md)
 - [Backend Application Guide](./06-backend-application.md)
-- [Testing Guide](./13-testing.md)

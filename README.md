@@ -116,17 +116,17 @@ Visit `http://localhost:5173` to see your app!
 
 BunKit includes comprehensive documentation in the [`docs/`](docs/) folder:
 
-- **[Quick Reference](docs/00-quick-reference.md)** - Fast lookup for common patterns
-- **[Introduction](docs/01-introduction.md)** - Overview and key features
-- **[Installation & Setup](docs/02-installation.md)** - Detailed setup guide
-- **[Project Structure](docs/03-project-structure.md)** - Understanding the codebase
-- **[@bunkit/server Package](docs/04-server-package.md)** - Complete framework API reference
-- **[@bunkit/result Package](docs/05-result-package.md)** - Type-safe error handling
-- **[WebSocket Guide](docs/07-websocket-guide.md)** - Real-time features
-- **[Deployment Guide](docs/11-deployment.md)** - Docker and cloud deployment
-- **[Development Workflow](docs/12-development-workflow.md)** - Best practices
+- **[Quick Reference](docs/quick-reference.md)** - Fast lookup for common patterns
+- **[Introduction](docs/introduction.md)** - Overview and key features
+- **[Installation & Setup](docs/installation.md)** - Detailed setup guide
+- **[Project Structure](docs/project-structure.md)** - Understanding the codebase
+- **[@bunkit/server Package](docs/server-package.md)** - Complete framework API reference
+- **[@bunkit/result Package](docs/result-package.md)** - Type-safe error handling
+- **[WebSocket Guide](docs/websocket-guide.md)** - Real-time features
+- **[Deployment Guide](docs/deployment.md)** - Docker and cloud deployment
+- **[Development Workflow](docs/development-workflow.md)** - Best practices
 
-**Start here**: If you're new to BunKit, begin with the [Introduction](docs/01-introduction.md) and [Installation](docs/02-installation.md).
+**Start here**: If you're new to BunKit, begin with the [Introduction](docs/introduction.md) and [Installation](docs/installation.md).
 
 ## �📦 Project Structure
 
