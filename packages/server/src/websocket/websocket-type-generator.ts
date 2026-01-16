@@ -24,13 +24,20 @@ export interface ExportWebSocketTypesOptions
 /**
  * Convert a route path to a TypeScript namespace name
  * e.g., "/api/chat" -> "ApiChatWebSocket", "/notifications" -> "NotificationsWebSocket"
+ * Handles special characters like hyphens: "/api/room-small" -> "ApiRoomSmallWebSocket"
  */
 function pathToNamespace(path: string): string {
   return path
     .split("/")
     .filter(Boolean)
     .filter((segment) => !segment.startsWith(":")) // Skip path parameters
-    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .map((segment) => {
+      // Convert kebab-case or snake_case to PascalCase
+      return segment
+        .split(/[-_]/)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join("")
+    })
     .join("")
     .concat("WebSocket")
 }
