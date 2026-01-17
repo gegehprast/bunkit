@@ -137,6 +137,9 @@ export class Server implements IServer {
         },
         error: (error: Error): Response => {
           console.error("Server error:", error)
+          const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+          }
           return new Response(
             JSON.stringify({
               message: "Internal Server Error",
@@ -144,7 +147,7 @@ export class Server implements IServer {
             }),
             {
               status: 500,
-              headers: { "Content-Type": "application/json" },
+              headers,
             },
           )
         },

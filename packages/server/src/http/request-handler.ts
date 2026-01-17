@@ -1,4 +1,4 @@
-import { createPreflightResponse } from "../core/cors"
+import { addCorsHeaders, createPreflightResponse } from "../core/cors"
 import {
   createMiddlewareArgs,
   executeMiddlewareChain,
@@ -7,7 +7,12 @@ import { ErrorCode } from "../core/standard-errors"
 import { parseBody, parseQueryParams, validateSchema } from "../core/validation"
 import type { MiddlewareFn } from "../types/middleware"
 import type { ServerOptions } from "../types/server"
-import { badRequest, createResponseHelpers, notFound } from "./response-helpers"
+import {
+  badRequest,
+  createResponseHelpers,
+  internalError,
+  notFound,
+} from "./response-helpers"
 import { type RouteRegistry, routeRegistry } from "./route-registry"
 import type { HttpMethod } from "./types/route"
 
@@ -41,7 +46,11 @@ export async function handleRequest(
   const match = registry.match(method, url.pathname)
 
   if (!match) {
-    return notFound("Route not found", ErrorCode.NOT_FOUND)
+    return createResponseWithCors(
+      serverOptions,
+      request,
+      notFound("Route not found", ErrorCode.NOT_FOUND),
+    )
   }
 
   const { definition, params } = match
@@ -52,10 +61,14 @@ export async function handleRequest(
   // Parse request body
   const bodyResult = await parseBody(request)
   if (bodyResult.isErr()) {
-    return badRequest(
-      "Failed to parse request body",
-      ErrorCode.BAD_REQUEST,
-      bodyResult.error.message,
+    return createResponseWithCors(
+      serverOptions,
+      request,
+      badRequest(
+        "Failed to parse request body",
+        ErrorCode.BAD_REQUEST,
+        bodyResult.error.message,
+      ),
     )
   }
 
@@ -66,10 +79,14 @@ export async function handleRequest(
   if (definition.querySchema) {
     const queryResult = validateSchema(definition.querySchema, queryParams)
     if (queryResult.isErr()) {
-      return badRequest(
-        "Query validation failed",
-        ErrorCode.BAD_REQUEST,
-        queryResult.error.issues,
+      return createResponseWithCors(
+        serverOptions,
+        request,
+        badRequest(
+          "Query validation failed",
+          ErrorCode.BAD_REQUEST,
+          queryResult.error.issues,
+        ),
       )
     }
     query = queryResult.value
@@ -79,10 +96,14 @@ export async function handleRequest(
   if (definition.bodySchema) {
     const bodyValidationResult = validateSchema(definition.bodySchema, body)
     if (bodyValidationResult.isErr()) {
-      return badRequest(
-        "Body validation failed",
-        ErrorCode.BAD_REQUEST,
-        bodyValidationResult.error.issues,
+      return createResponseWithCors(
+        serverOptions,
+        request,
+        badRequest(
+          "Body validation failed",
+          ErrorCode.BAD_REQUEST,
+          bodyValidationResult.error.issues,
+        ),
       )
     }
     body = bodyValidationResult.value
@@ -113,11 +134,14 @@ export async function handleRequest(
       })
       return response
     } catch (error) {
-      console.error("Handler error:", error)
-      return res.internalError(
-        "Internal Server Error",
-        ErrorCode.INTERNAL_ERROR,
-        error instanceof Error ? error.message : "Unknown error",
+      return createResponseWithCors(
+        serverOptions,
+        request,
+        internalError(
+          "Internal Server Error",
+          ErrorCode.INTERNAL_ERROR,
+          error instanceof Error ? error.message : "Unknown error",
+        ),
       )
     }
   }
@@ -144,4 +168,19 @@ export async function handleRequest(
 
   // No middlewares, execute handler directly
   return handlerFn()
+}
+
+function createResponseWithCors(
+  serverOptions: ServerOptions,
+  request: Request,
+  response: Response,
+) {
+  if (serverOptions.cors) {
+    const origin = request.headers.get("origin")
+    if (origin) {
+      addCorsHeaders(response, origin, serverOptions.cors)
+    }
+  }
+
+  return response
 }

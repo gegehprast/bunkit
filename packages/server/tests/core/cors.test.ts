@@ -307,16 +307,143 @@ describe("CORS", () => {
     })
   })
 
+  describe("CORS headers on error responses", () => {
+    test("should add CORS headers to 404 responses", async () => {
+      server = createServer({
+        port: 3415,
+        cors: {
+          origin: "*",
+        },
+      })
+      await server.start()
+
+      const response = await fetch("http://localhost:3415/api/nonexistent", {
+        headers: { Origin: "http://example.com" },
+      })
+
+      expect(response.status).toBe(404)
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
+        "http://example.com",
+      )
+    })
+
+    test("should add CORS headers to validation error responses", async () => {
+      const { z } = await import("zod")
+
+      createRoute("POST", "/api/data")
+        .body(z.object({ name: z.string().min(1) }))
+        .handler(({ res }) => res.ok({}))
+
+      server = createServer({
+        port: 3416,
+        cors: {
+          origin: "*",
+        },
+      })
+      await server.start()
+
+      // Send invalid body (missing required field)
+      const response = await fetch("http://localhost:3416/api/data", {
+        method: "POST",
+        headers: {
+          Origin: "http://example.com",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      })
+
+      expect(response.status).toBe(400)
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
+        "http://example.com",
+      )
+    })
+
+    test("should add CORS headers to query validation error responses", async () => {
+      const { z } = await import("zod")
+
+      createRoute("GET", "/api/data")
+        .query(z.object({ page: z.coerce.number().min(1) }))
+        .handler(({ res }) => res.ok({}))
+
+      server = createServer({
+        port: 3417,
+        cors: {
+          origin: "*",
+        },
+      })
+      await server.start()
+
+      // Send invalid query parameter
+      const response = await fetch(
+        "http://localhost:3417/api/data?page=invalid",
+        {
+          headers: { Origin: "http://example.com" },
+        },
+      )
+
+      expect(response.status).toBe(400)
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
+        "http://example.com",
+      )
+    })
+
+    test("should add CORS headers to handler error responses", async () => {
+      createRoute("GET", "/api/error").handler(() => {
+        throw new Error("Something went wrong")
+      })
+
+      server = createServer({
+        port: 3418,
+        cors: {
+          origin: "*",
+        },
+      })
+      await server.start()
+
+      const response = await fetch("http://localhost:3418/api/error", {
+        headers: { Origin: "http://example.com" },
+      })
+
+      expect(response.status).toBe(500)
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
+        "http://example.com",
+      )
+    })
+
+    test("should add CORS headers with credentials on error responses", async () => {
+      server = createServer({
+        port: 3419,
+        cors: {
+          origin: "http://example.com",
+          credentials: true,
+        },
+      })
+      await server.start()
+
+      const response = await fetch("http://localhost:3419/api/notfound", {
+        headers: { Origin: "http://example.com" },
+      })
+
+      expect(response.status).toBe(404)
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
+        "http://example.com",
+      )
+      expect(response.headers.get("Access-Control-Allow-Credentials")).toBe(
+        "true",
+      )
+    })
+  })
+
   describe("No CORS configuration", () => {
     test("should work without CORS enabled", async () => {
       createRoute("GET", "/api/data").handler(({ res }) =>
         res.ok({ message: "no cors" }),
       )
 
-      server = createServer({ port: 3413 })
+      server = createServer({ port: 3420 })
       await server.start()
 
-      const response = await fetch("http://localhost:3413/api/data")
+      const response = await fetch("http://localhost:3420/api/data")
       const data = await json(response)
 
       expect(response.status).toBe(200)
@@ -328,10 +455,10 @@ describe("CORS", () => {
     test("should not handle OPTIONS preflight without CORS", async () => {
       createRoute("GET", "/api/data").handler(({ res }) => res.ok({}))
 
-      server = createServer({ port: 3414 })
+      server = createServer({ port: 3421 })
       await server.start()
 
-      const response = await fetch("http://localhost:3414/api/data", {
+      const response = await fetch("http://localhost:3421/api/data", {
         method: "OPTIONS",
       })
 

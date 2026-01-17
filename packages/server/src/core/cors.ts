@@ -93,7 +93,7 @@ export function createPreflightResponse(
 /**
  * Add CORS headers to response
  */
-function addCorsHeaders(
+export function addCorsHeaders(
   response: Response,
   origin: string,
   options: CorsOptions,
