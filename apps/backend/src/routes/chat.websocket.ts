@@ -190,7 +190,7 @@ createWebSocketRoute("/ws/chat", server)
 
     const { roomId, isTyping } = data
 
-    // Broadcast typing indicator to room (excluding sender would require filtering)
+    // Broadcast typing indicator to room
     ws.publish(`room:${roomId}`, {
       type: "typing",
       roomId,
