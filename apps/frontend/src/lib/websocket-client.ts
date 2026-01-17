@@ -24,14 +24,26 @@ export interface WebSocketClientOptions {
   debug?: boolean
 }
 
-type MessageHandler<TMessage> = (message: TMessage) => void
+type Message = { type: string }
+type MessageHandler<TMessage extends Message> = (message: TMessage) => void
 type ConnectionHandler = (status: ConnectionStatus) => void
 type Unsubscribe = () => void
 
 /**
+ * Extract message type from TServerMessage where type matches T
+ */
+type ExtractMessage<
+  TServerMessage extends Message,
+  T,
+> = TServerMessage extends { type: T } ? TServerMessage : never
+
+/**
  * Type-safe WebSocket client with automatic reconnection
  */
-export class WebSocketClient<TClientMessage, TServerMessage> {
+export class WebSocketClient<
+  TClientMessage extends Message,
+  TServerMessage extends Message,
+> {
   private ws: WebSocket | null = null
   private url: string = ""
   private token: string = ""
@@ -39,8 +51,10 @@ export class WebSocketClient<TClientMessage, TServerMessage> {
   private reconnectAttempts: number = 0
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
   private messageQueue: TClientMessage[] = []
-  private messageHandlers: Map<string, Set<MessageHandler<TServerMessage>>> =
-    new Map()
+  private messageHandlers: Map<
+    TServerMessage["type"],
+    Set<MessageHandler<TServerMessage>>
+  > = new Map()
   private connectionHandlers: Set<ConnectionHandler> = new Set()
   private options: Required<WebSocketClientOptions>
 
@@ -119,19 +133,19 @@ export class WebSocketClient<TClientMessage, TServerMessage> {
   /**
    * Subscribe to messages of a specific type
    */
-  public on(
-    messageType: string,
-    handler: MessageHandler<TServerMessage>,
+  public on<T extends TServerMessage["type"]>(
+    messageType: T,
+    handler: MessageHandler<ExtractMessage<TServerMessage, T>>,
   ): Unsubscribe {
     const handlers = this.messageHandlers.get(messageType) || new Set()
-    handlers.add(handler)
+    handlers.add(handler as MessageHandler<TServerMessage>)
     this.messageHandlers.set(messageType, handlers)
 
     // Return unsubscribe function
     return () => {
       const currentHandlers = this.messageHandlers.get(messageType)
       if (currentHandlers) {
-        currentHandlers.delete(handler)
+        currentHandlers.delete(handler as MessageHandler<TServerMessage>)
         if (currentHandlers.size === 0) {
           this.messageHandlers.delete(messageType)
         }
