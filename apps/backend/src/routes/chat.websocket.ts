@@ -34,35 +34,32 @@ const TypingSchema = z.object({
 })
 
 // Define server -> client message schemas
+const SharedMessageBodySchema = z.object({
+  roomId: z.string(),
+  userId: z.string(),
+  userEmail: z.string(),
+})
 const ServerMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("room_joined"),
-    roomId: z.string(),
-    userId: z.string(),
-    userEmail: z.string(),
     timestamp: z.number(),
+    ...SharedMessageBodySchema.shape,
   }),
   z.object({
     type: z.literal("room_left"),
-    roomId: z.string(),
-    userId: z.string(),
-    userEmail: z.string(),
     timestamp: z.number(),
+    ...SharedMessageBodySchema.shape,
   }),
   z.object({
     type: z.literal("message"),
-    roomId: z.string(),
-    userId: z.string(),
-    userEmail: z.string(),
     message: z.string(),
     timestamp: z.number(),
+    ...SharedMessageBodySchema.shape,
   }),
   z.object({
     type: z.literal("typing"),
-    roomId: z.string(),
-    userId: z.string(),
-    userEmail: z.string(),
     isTyping: z.boolean(),
+    ...SharedMessageBodySchema.shape,
   }),
   z.object({
     type: z.literal("user_count"),
