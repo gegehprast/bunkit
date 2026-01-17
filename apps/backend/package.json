@@ -11,8 +11,10 @@
         "db:generate": "drizzle-kit generate",
         "db:migrate": "bun run ./scripts/migrate.ts",
         "db:studio": "drizzle-kit studio",
-        "openapi:generate": "LOG_LEVEL=error bun run ./scripts/generate-openapi.ts",
-        "ws-types:generate": "LOG_LEVEL=error bun run ./scripts/generate-ws-types.ts"
+        "openapi-types:generate": "LOG_LEVEL=error bun run ./scripts/generate-openapi.ts --types",
+        "ws-types:generate": "LOG_LEVEL=error bun run ./scripts/generate-ws-types.ts",
+        "openapi-types:generate:to-frontend": "LOG_LEVEL=error bun run ./scripts/generate-openapi.ts --types --output=../../apps/frontend/src/generated",
+        "ws-types:generate:to-frontend": "LOG_LEVEL=error bun run ./scripts/generate-ws-types.ts --output=../../apps/frontend/src/generated"
     },
     "dependencies": {
         "@bunkit/result": "workspace:*",
