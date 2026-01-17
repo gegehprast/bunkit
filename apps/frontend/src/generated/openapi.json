@@ -855,24 +855,184 @@
           }
         }
       }
+    },
+    "/api/todos/{id}/comments": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/todos/{id}/comments/{userid}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/todos/{id}/comments/{userid}/{teamId}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "teamId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/todos/{id}/{userid}/{teamId}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "teamId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error - Unexpected server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Internal server error",
+                  "code": "INTERNAL_ERROR",
+                  "details": "Stack trace or error details for debugging"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
       "RegisterBody": {
-        "title": "Register Request",
-        "description": "User registration data",
         "type": "object",
         "properties": {
           "email": {
-            "example": "john@doe.com",
             "type": "string",
             "format": "email",
-            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "example": "john@doe.com"
           },
           "password": {
-            "description": "User password (min 12 characters, must include uppercase, lowercase, number, and special character)",
-            "example": "qwer1234",
             "type": "string",
             "minLength": 8,
             "maxLength": 128,
@@ -883,7 +1043,9 @@
               {
                 "pattern": "[0-9]"
               }
-            ]
+            ],
+            "description": "User password (min 12 characters, must include uppercase, lowercase, number, and special character)",
+            "example": "qwer1234"
           },
           "name": {
             "example": "John Doe",
@@ -893,39 +1055,39 @@
         "required": [
           "email",
           "password"
-        ]
+        ],
+        "title": "Register Request",
+        "description": "User registration data"
       },
       "LoginBody": {
-        "title": "Login Request",
-        "description": "User login credentials",
         "type": "object",
         "properties": {
           "email": {
-            "example": "john@doe.com",
             "type": "string",
             "format": "email",
-            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "example": "john@doe.com"
           },
           "password": {
-            "example": "qwer1234",
-            "type": "string"
+            "type": "string",
+            "example": "qwer1234"
           }
         },
         "required": [
           "email",
           "password"
-        ]
+        ],
+        "title": "Login Request",
+        "description": "User login credentials"
       },
       "CreateTodoBody": {
-        "title": "Create Todo Body",
-        "description": "Schema for creating a new todo item",
         "type": "object",
         "properties": {
           "title": {
-            "example": "Buy groceries",
             "type": "string",
             "minLength": 1,
-            "maxLength": 100
+            "maxLength": 100,
+            "example": "Buy groceries"
           },
           "description": {
             "example": "Milk, Bread, Eggs",
@@ -934,11 +1096,11 @@
         },
         "required": [
           "title"
-        ]
+        ],
+        "title": "Create Todo Body",
+        "description": "Schema for creating a new todo item"
       },
       "UpdateTodoBody": {
-        "title": "Update Todo Body",
-        "description": "Schema for updating a todo item",
         "type": "object",
         "properties": {
           "title": {
@@ -955,25 +1117,25 @@
             "example": false,
             "type": "boolean"
           }
-        }
+        },
+        "title": "Update Todo Body",
+        "description": "Schema for updating a todo item"
       },
       "HealthResponse": {
-        "title": "Health Check Response",
-        "description": "Health check response indicating service status",
         "type": "object",
         "properties": {
           "status": {
-            "example": "ok",
             "type": "string",
-            "const": "ok"
+            "const": "ok",
+            "example": "ok"
           },
           "timestamp": {
-            "example": "2026-01-06T08:47:45.194Z",
-            "type": "string"
+            "type": "string",
+            "example": "2026-01-17T17:29:02.351Z"
           },
           "uptime": {
-            "example": 123.456,
-            "type": "number"
+            "type": "number",
+            "example": 123.456
           }
         },
         "required": [
@@ -981,11 +1143,11 @@
           "timestamp",
           "uptime"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "title": "Health Check Response",
+        "description": "Health check response indicating service status"
       },
       "AuthResponse": {
-        "title": "Auth Response",
-        "description": "Authentication response with user data and JWT token",
         "type": "object",
         "properties": {
           "user": {
@@ -1023,11 +1185,11 @@
           "user",
           "token"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "title": "Auth Response",
+        "description": "Authentication response with user data and JWT token"
       },
       "UserResponse": {
-        "title": "User Response",
-        "description": "User profile data",
         "type": "object",
         "properties": {
           "id": {
@@ -1056,27 +1218,26 @@
           "name",
           "createdAt"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "title": "User Response",
+        "description": "User profile data"
       },
       "Todo": {
-        "title": "Todo Item",
-        "description": "Schema representing a todo item",
         "type": "object",
         "properties": {
           "id": {
-            "example": "1",
-            "type": "string"
+            "type": "string",
+            "example": "1"
           },
           "userId": {
-            "example": "user-123",
-            "type": "string"
+            "type": "string",
+            "example": "user-123"
           },
           "title": {
-            "example": "Buy groceries",
-            "type": "string"
+            "type": "string",
+            "example": "Buy groceries"
           },
           "description": {
-            "example": "Milk, Bread, Eggs",
             "anyOf": [
               {
                 "type": "string"
@@ -1084,19 +1245,20 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "example": "Milk, Bread, Eggs"
           },
           "completed": {
-            "example": false,
-            "type": "boolean"
+            "type": "boolean",
+            "example": false
           },
           "createdAt": {
-            "example": "2026-01-06T08:47:45.227Z",
-            "type": "string"
+            "type": "string",
+            "example": "2026-01-17T17:29:02.378Z"
           },
           "updatedAt": {
-            "example": "2026-01-06T08:47:45.227Z",
-            "type": "string"
+            "type": "string",
+            "example": "2026-01-17T17:29:02.378Z"
           }
         },
         "required": [
@@ -1108,33 +1270,33 @@
           "createdAt",
           "updatedAt"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "title": "Todo Item",
+        "description": "Schema representing a todo item"
       },
       "BadRequestErrorResponse": {
-        "description": "Bad Request Error Response",
         "type": "object",
         "properties": {
           "message": {
-            "description": "Error message",
-            "type": "string"
+            "type": "string",
+            "description": "Error message"
           },
           "code": {
             "type": "string",
             "const": "BAD_REQUEST"
           },
           "details": {
-            "description": "List of validation errors",
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
                 "field": {
-                  "description": "Field with validation error",
-                  "type": "string"
+                  "type": "string",
+                  "description": "Field with validation error"
                 },
                 "message": {
-                  "description": "Validation error message",
-                  "type": "string"
+                  "type": "string",
+                  "description": "Validation error message"
                 }
               },
               "required": [
@@ -1142,7 +1304,8 @@
                 "message"
               ],
               "additionalProperties": false
-            }
+            },
+            "description": "List of validation errors"
           }
         },
         "required": [
@@ -1150,15 +1313,15 @@
           "code",
           "details"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Bad Request Error Response"
       },
       "UnauthorizedErrorResponse": {
-        "description": "Unauthorized Error Response",
         "type": "object",
         "properties": {
           "message": {
-            "description": "Error message",
-            "type": "string"
+            "type": "string",
+            "description": "Error message"
           },
           "code": {
             "type": "string",
@@ -1172,15 +1335,15 @@
           "message",
           "code"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Unauthorized Error Response"
       },
       "ConflictErrorResponse": {
-        "description": "Conflict Error Response",
         "type": "object",
         "properties": {
           "message": {
-            "description": "Error message",
-            "type": "string"
+            "type": "string",
+            "description": "Error message"
           },
           "code": {
             "type": "string",
@@ -1204,15 +1367,15 @@
           "message",
           "code"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Conflict Error Response"
       },
       "InternalServerErrorResponse": {
-        "description": "Internal Server Error Response",
         "type": "object",
         "properties": {
           "message": {
-            "description": "Error message",
-            "type": "string"
+            "type": "string",
+            "description": "Error message"
           },
           "code": {
             "type": "string",
@@ -1227,18 +1390,19 @@
           "message",
           "code"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Internal Server Error Response"
       },
       "ErrorResponse": {
         "type": "object",
         "properties": {
           "message": {
-            "description": "Error message",
-            "type": "string"
+            "type": "string",
+            "description": "Error message"
           },
           "code": {
-            "description": "Error code",
-            "type": "string"
+            "type": "string",
+            "description": "Error code"
           },
           "details": {
             "description": "Additional error details"
@@ -1251,12 +1415,11 @@
         "additionalProperties": false
       },
       "ForbiddenErrorResponse": {
-        "description": "Forbidden Error Response",
         "type": "object",
         "properties": {
           "message": {
-            "description": "Error message",
-            "type": "string"
+            "type": "string",
+            "description": "Error message"
           },
           "code": {
             "type": "string",
@@ -1270,15 +1433,15 @@
           "message",
           "code"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Forbidden Error Response"
       },
       "NotFoundErrorResponse": {
-        "description": "Not Found Error Response",
         "type": "object",
         "properties": {
           "message": {
-            "description": "Error message",
-            "type": "string"
+            "type": "string",
+            "description": "Error message"
           },
           "code": {
             "type": "string",
@@ -1292,7 +1455,8 @@
           "message",
           "code"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "description": "Not Found Error Response"
       }
     },
     "securitySchemes": {

@@ -50,29 +50,29 @@ export namespace WsChatWebSocket {
 
   export type ServerMessage = {
   type: "room_joined"
+  timestamp: number
   roomId: string
   userId: string
   userEmail: string
-  timestamp: number
 } | {
   type: "room_left"
+  timestamp: number
   roomId: string
   userId: string
   userEmail: string
-  timestamp: number
 } | {
   type: "message"
-  roomId: string
-  userId: string
-  userEmail: string
   message: string
   timestamp: number
-} | {
-  type: "typing"
   roomId: string
   userId: string
   userEmail: string
+} | {
+  type: "typing"
   isTyping: boolean
+  roomId: string
+  userId: string
+  userEmail: string
 } | {
   type: "user_count"
   roomId: string

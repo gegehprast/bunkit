@@ -236,6 +236,187 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/todos/{id}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Internal Server Error - Unexpected server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "message": "Internal server error",
+                         *       "code": "INTERNAL_ERROR",
+                         *       "details": "Stack trace or error details for debugging"
+                         *     }
+                         */
+                        "application/json": components["schemas"]["InternalServerErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/todos/{id}/comments/{userid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    userid: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Internal Server Error - Unexpected server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "message": "Internal server error",
+                         *       "code": "INTERNAL_ERROR",
+                         *       "details": "Stack trace or error details for debugging"
+                         *     }
+                         */
+                        "application/json": components["schemas"]["InternalServerErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/todos/{id}/comments/{userid}/{teamId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    userid: string;
+                    teamId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Internal Server Error - Unexpected server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "message": "Internal server error",
+                         *       "code": "INTERNAL_ERROR",
+                         *       "details": "Stack trace or error details for debugging"
+                         *     }
+                         */
+                        "application/json": components["schemas"]["InternalServerErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/todos/{id}/{userid}/{teamId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                    userid: string;
+                    teamId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Internal Server Error - Unexpected server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "message": "Internal server error",
+                         *       "code": "INTERNAL_ERROR",
+                         *       "details": "Stack trace or error details for debugging"
+                         *     }
+                         */
+                        "application/json": components["schemas"]["InternalServerErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -303,7 +484,7 @@ export interface components {
              * @constant
              */
             status: "ok";
-            /** @example 2026-01-06T08:47:45.194Z */
+            /** @example 2026-01-17T17:29:02.351Z */
             timestamp: string;
             /** @example 123.456 */
             uptime: number;
@@ -345,9 +526,9 @@ export interface components {
             description: string | null;
             /** @example false */
             completed: boolean;
-            /** @example 2026-01-06T08:47:45.227Z */
+            /** @example 2026-01-17T17:29:02.378Z */
             createdAt: string;
-            /** @example 2026-01-06T08:47:45.227Z */
+            /** @example 2026-01-17T17:29:02.378Z */
             updatedAt: string;
         };
         /** @description Bad Request Error Response */
