@@ -47,7 +47,7 @@ function pathToNamespace(path: string): string {
  * Handles both Zod v3 (typeName) and Zod v4+ (type) conventions
  */
 function getZodTypeName(schema: z.ZodType): string {
-  const def = schema._def as unknown as Record<string, unknown>
+  const def = schema.def as unknown as Record<string, unknown>
   // Zod v4+ uses "type", v3 uses "typeName"
   return (def.type as string) || (def.typeName as string) || "unknown"
 }
@@ -56,7 +56,7 @@ function getZodTypeName(schema: z.ZodType): string {
  * Convert a Zod schema to TypeScript type string
  */
 function zodSchemaToTypeString(schema: z.ZodType, indent = 2): string {
-  const typeDef = schema._def as unknown as Record<string, unknown>
+  const typeDef = schema.def as unknown as Record<string, unknown>
   const typeName = getZodTypeName(schema)
 
   switch (typeName) {
