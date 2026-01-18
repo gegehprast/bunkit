@@ -21,7 +21,7 @@ export class Ok<T> {
     return this.value
   }
 
-  public unwrapOr(_defaultValue: T): T {
+  public unwrapOr<U>(_defaultValue: U): T | U {
     return this.value
   }
 
