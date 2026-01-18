@@ -1,8 +1,10 @@
 import { z } from "zod"
 import packageJson from "../../package.json"
 
-const DEFAULT_JWT_SECRET = "supersecretdevelopmentkey"
-const DEFAULT_JWT_REFRESH_SECRET = "supersecretdevelopmentkey"
+const DEFAULT_JWT_SECRET =
+  "your-super-secret-jwt-key-min-32-chars-please-change-this-in-production"
+const DEFAULT_JWT_REFRESH_SECRET =
+  "your-super-secret-refresh-key-min-32-chars-please-change-this-in-production"
 
 /**
  * Environment configuration schema with validation
