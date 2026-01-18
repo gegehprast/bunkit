@@ -1,6 +1,7 @@
 import type { Result } from "@bunkit/result"
 import { err, ok } from "@bunkit/result"
 import { DatabaseError } from "@/core/errors"
+import { logger } from "@/core/logger"
 import { type Database, getDatabase } from "@/db/client"
 
 /**
@@ -29,15 +30,16 @@ export abstract class BaseRepository {
       return ok(result)
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error)
+      const errorData = {
+        error: details,
+        stack: error instanceof Error ? error.stack : undefined,
+        // biome-ignore lint/suspicious/noExplicitAny: We want to capture cause if present
+        cause: (error as any).cause?.toString(),
+      }
 
-      return err(
-        new DatabaseError(errorMessage, {
-          error: details,
-          stack: error instanceof Error ? error.stack : undefined,
-          // biome-ignore lint/suspicious/noExplicitAny: We want to capture cause if present
-          cause: (error as any).cause?.toString(),
-        }),
-      )
+      logger.error(`Database operation failed: ${errorMessage}`, errorData)
+
+      return err(new DatabaseError(errorMessage, errorData))
     }
   }
 
@@ -53,15 +55,16 @@ export abstract class BaseRepository {
       return ok(result)
     } catch (error) {
       const details = error instanceof Error ? error.message : String(error)
+      const errorData = {
+        error: details,
+        stack: error instanceof Error ? error.stack : undefined,
+        // biome-ignore lint/suspicious/noExplicitAny: We want to capture cause if present
+        cause: (error as any).cause?.toString(),
+      }
 
-      return err(
-        new DatabaseError(errorMessage, {
-          error: details,
-          stack: error instanceof Error ? error.stack : undefined,
-          // biome-ignore lint/suspicious/noExplicitAny: We want to capture cause if present
-          cause: (error as any).cause?.toString(),
-        }),
-      )
+      logger.error(`Database operation failed: ${errorMessage}`, errorData)
+
+      return err(new DatabaseError(errorMessage, errorData))
     }
   }
 
