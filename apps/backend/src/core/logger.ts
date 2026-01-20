@@ -1,6 +1,29 @@
 import { config, isDevelopment } from "@/config"
 
 /**
+ * Structured Logger
+ *
+ * Features:
+ * - Configurable log levels (NONE, ERROR, WARN, INFO, DEBUG, TRACE)
+ * - Context-aware child loggers
+ * - Selective component disabling via LOG_DISABLED_COMPONENTS env variable
+ * - Pretty console output in development, JSON in production
+ * - Automatic Error serialization
+ *
+ * Usage:
+ * ```typescript
+ * const logger = createLogger()
+ * const componentLogger = logger.child({ component: "MyService" })
+ * componentLogger.info("Processing request", { userId: "123" })
+ * ```
+ *
+ * To disable specific components, set LOG_DISABLED_COMPONENTS:
+ * ```
+ * LOG_DISABLED_COMPONENTS=WarmupRunner,CampaignRunner
+ * ```
+ */
+
+/**
  * Log levels
  */
 export enum LogLevel {
@@ -30,7 +53,7 @@ const LOG_LEVEL_COLORS: Record<LogLevel, string> = {
   [LogLevel.TRACE]: "\x1b[37m", // White
 }
 
-const RESET_COLOR = "\x1b[0m"
+const RESET_COLOR = LOG_LEVEL_COLORS[LogLevel.NONE]
 
 /**
  * Log entry structure
@@ -87,23 +110,50 @@ function parseLogLevel(level: string): LogLevel {
 export class Logger implements ILogger {
   private currentLevel: LogLevel
   private contextData: Record<string, unknown>
+  private disabledComponents: Set<string>
+  private isDisabled: boolean
 
   public constructor(
     level: LogLevel = LogLevel.INFO,
     context: Record<string, unknown> = {},
+    disabledComponents: Set<string> = new Set(),
   ) {
     this.currentLevel = level
     this.contextData = context
+    this.disabledComponents = disabledComponents
+    this.isDisabled = this.checkIfDisabled()
+  }
+
+  /**
+   * Check if this logger instance should be disabled based on its context
+   */
+  private checkIfDisabled(): boolean {
+    if (this.disabledComponents.size === 0) {
+      return false
+    }
+
+    // Check if any context value matches a disabled component
+    for (const value of Object.values(this.contextData)) {
+      if (typeof value === "string" && this.disabledComponents.has(value)) {
+        return true
+      }
+    }
+
+    return false
   }
 
   /**
    * Create a child logger with additional context
    */
   public child(context: Record<string, unknown>): ILogger {
-    return new Logger(this.currentLevel, {
-      ...this.contextData,
-      ...context,
-    })
+    return new Logger(
+      this.currentLevel,
+      {
+        ...this.contextData,
+        ...context,
+      },
+      this.disabledComponents,
+    )
   }
 
   /**
@@ -149,6 +199,11 @@ export class Logger implements ILogger {
     message: string,
     context?: Record<string, unknown>,
   ): void {
+    // Skip logging if this logger instance is disabled
+    if (this.isDisabled) {
+      return
+    }
+
     if (level > this.currentLevel) {
       return
     }
@@ -282,11 +337,28 @@ export class Logger implements ILogger {
 }
 
 /**
+ * Parse disabled components from config
+ */
+function parseDisabledComponents(): Set<string> {
+  const disabled = config.LOG_DISABLED_COMPONENTS || ""
+  if (!disabled.trim()) {
+    return new Set()
+  }
+  return new Set(
+    disabled
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0),
+  )
+}
+
+/**
  * Create a logger instance
  */
 export function createLogger(context?: Record<string, unknown>): ILogger {
   const level = parseLogLevel(config.LOG_LEVEL)
-  return new Logger(level, context)
+  const disabledComponents = parseDisabledComponents()
+  return new Logger(level, context, disabledComponents)
 }
 
 /**

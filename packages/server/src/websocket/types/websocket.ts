@@ -54,8 +54,8 @@ export interface TypedWebSocket<TServerMsg = unknown, TUser = unknown> {
   send(message: TServerMsg): void
   /**
    * Publish a type-safe message to all subscribers of a topic.
-   * 
-   * Note: The publisher will NOT receive the message itself. 
+   *
+   * Note: The publisher will NOT receive the message itself.
    * If you want to send to self as well, use `server.ws.publish` instead.
    */
   publish(topic: string, message: TServerMsg): void

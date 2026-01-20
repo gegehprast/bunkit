@@ -46,6 +46,7 @@ const configSchema = z.object({
   LOG_LEVEL: z
     .enum(["none", "error", "warn", "info", "debug", "trace"])
     .default("info"),
+  LOG_DISABLED_COMPONENTS: z.string().default(""),
 
   // Shutdown
   SHUTDOWN_TIMEOUT_MS: z.coerce.number().default(10000), // 10 seconds
