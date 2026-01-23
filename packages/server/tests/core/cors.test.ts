@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
 import { createRoute, createServer, type Server } from "src"
 import { routeRegistry } from "../../src/http/route-registry"
+import z from "zod"
 
 // Helper to parse JSON response with type assertion
 const json = <T = Record<string, unknown>>(response: Response): Promise<T> =>
@@ -328,8 +329,6 @@ describe("CORS", () => {
     })
 
     test("should add CORS headers to validation error responses", async () => {
-      const { z } = await import("zod")
-
       createRoute("POST", "/api/data")
         .body(z.object({ name: z.string().min(1) }))
         .handler(({ res }) => res.ok({}))
@@ -359,8 +358,6 @@ describe("CORS", () => {
     })
 
     test("should add CORS headers to query validation error responses", async () => {
-      const { z } = await import("zod")
-
       createRoute("GET", "/api/data")
         .query(z.object({ page: z.coerce.number().min(1) }))
         .handler(({ res }) => res.ok({}))
