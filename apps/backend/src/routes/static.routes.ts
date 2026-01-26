@@ -3,8 +3,9 @@ import { createRoute } from "@bunkit/server"
 
 /**
  * Static file serving
+ * Supports nested paths like /public/images/logo.png
  */
-createRoute("GET", "/public/:filename")
+createRoute("GET", "/public/:path*")
   .openapi({
     operationId: "getStaticFile",
     summary: "Get static file",
@@ -13,7 +14,7 @@ createRoute("GET", "/public/:filename")
   })
   .handler(async ({ params, res }) => {
     const publicDir = join(import.meta.dir, "../../public")
-    const filePath = join(publicDir, params.filename)
+    const filePath = join(publicDir, params.path)
 
     // Prevent directory traversal
     if (!filePath.startsWith(publicDir)) {

@@ -297,4 +297,130 @@ describe("RouteRegistry", () => {
     test("should handle OPTIONS method", () => testMethod("OPTIONS"))
     test("should handle HEAD method", () => testMethod("HEAD"))
   })
+
+  describe("wildcard path parameters", () => {
+    test("should match wildcard parameter capturing single segment", () => {
+      registry.register({
+        method: "GET",
+        path: "/public/:path*",
+        handler: mockHandler,
+      })
+
+      const match = registry.match("GET", "/public/logo.png")
+      expect(match).not.toBeNull()
+      expect(match?.params.path).toBe("logo.png")
+    })
+
+    test("should match wildcard parameter capturing multiple segments", () => {
+      registry.register({
+        method: "GET",
+        path: "/public/:path*",
+        handler: mockHandler,
+      })
+
+      const match = registry.match("GET", "/public/images/logo.png")
+      expect(match).not.toBeNull()
+      expect(match?.params.path).toBe("images/logo.png")
+    })
+
+    test("should match wildcard parameter capturing deeply nested path", () => {
+      registry.register({
+        method: "GET",
+        path: "/files/:filepath*",
+        handler: mockHandler,
+      })
+
+      const match = registry.match("GET", "/files/docs/2024/reports/annual.pdf")
+      expect(match).not.toBeNull()
+      expect(match?.params.filepath).toBe("docs/2024/reports/annual.pdf")
+    })
+
+    test("should match wildcard with static prefix segments", () => {
+      registry.register({
+        method: "GET",
+        path: "/api/v1/static/:asset*",
+        handler: mockHandler,
+      })
+
+      const match = registry.match("GET", "/api/v1/static/css/main.css")
+      expect(match).not.toBeNull()
+      expect(match?.params.asset).toBe("css/main.css")
+    })
+
+    test("should match wildcard with regular param before wildcard", () => {
+      registry.register({
+        method: "GET",
+        path: "/repos/:owner/:rest*",
+        handler: mockHandler,
+      })
+
+      const match = registry.match("GET", "/repos/bunkit/packages/server/src")
+      expect(match).not.toBeNull()
+      expect(match?.params.owner).toBe("bunkit")
+      expect(match?.params.rest).toBe("packages/server/src")
+    })
+
+    test("should not match wildcard if prefix does not match", () => {
+      registry.register({
+        method: "GET",
+        path: "/public/:path*",
+        handler: mockHandler,
+      })
+
+      const match = registry.match("GET", "/private/images/logo.png")
+      expect(match).toBeNull()
+    })
+
+    test("should not match wildcard with no remaining segments", () => {
+      registry.register({
+        method: "GET",
+        path: "/public/:path*",
+        handler: mockHandler,
+      })
+
+      const match = registry.match("GET", "/public")
+      expect(match).toBeNull()
+    })
+
+    test("should prefer exact match over wildcard when registered first", () => {
+      registry.register({
+        method: "GET",
+        path: "/public/favicon.ico",
+        handler: mockHandler,
+      })
+      registry.register({
+        method: "GET",
+        path: "/public/:path*",
+        handler: mockHandler,
+      })
+
+      const match = registry.match("GET", "/public/favicon.ico")
+      expect(match).not.toBeNull()
+      expect(match?.definition.path).toBe("/public/favicon.ico")
+    })
+
+    test("should handle URL-encoded segments in wildcard", () => {
+      registry.register({
+        method: "GET",
+        path: "/files/:path*",
+        handler: mockHandler,
+      })
+
+      const match = registry.match("GET", "/files/my%20folder/my%20file.txt")
+      expect(match).not.toBeNull()
+      expect(match?.params.path).toBe("my%20folder/my%20file.txt")
+    })
+
+    test("should handle special characters in wildcard path", () => {
+      registry.register({
+        method: "GET",
+        path: "/assets/:path*",
+        handler: mockHandler,
+      })
+
+      const match = registry.match("GET", "/assets/styles/main-v1.2.3_beta.css")
+      expect(match).not.toBeNull()
+      expect(match?.params.path).toBe("styles/main-v1.2.3_beta.css")
+    })
+  })
 })

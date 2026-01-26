@@ -35,6 +35,11 @@ export class RouteRegistry {
   /**
    * Match a route path pattern against an actual path
    * Returns extracted parameters or null if no match
+   *
+   * Supports:
+   * - Static segments: /api/users
+   * - Path parameters: /api/users/:id
+   * - Wildcard parameters: /public/:path* (captures remaining segments)
    */
   private matchPath(
     pattern: string,
@@ -43,28 +48,53 @@ export class RouteRegistry {
     const patternParts = pattern.split("/").filter(Boolean)
     const pathParts = path.split("/").filter(Boolean)
 
-    if (patternParts.length !== pathParts.length) {
-      return null
-    }
-
     const params: Record<string, string> = {}
 
     for (let i = 0; i < patternParts.length; i++) {
       const patternPart = patternParts[i]
       const pathPart = pathParts[i]
 
-      if (!patternPart || !pathPart) {
+      if (!patternPart) {
+        return null
+      }
+
+      // Check for wildcard parameter (e.g., :path*)
+      if (patternPart.startsWith(":") && patternPart.endsWith("*")) {
+        // Extract wildcard parameter name (remove : prefix and * suffix)
+        const paramName = patternPart.slice(1, -1)
+
+        // Capture all remaining path segments
+        const remainingParts = pathParts.slice(i)
+
+        // Wildcard must match at least one segment
+        if (remainingParts.length === 0) {
+          return null
+        }
+
+        params[paramName] = remainingParts.join("/")
+
+        // Wildcard consumes all remaining segments, so we're done
+        return params
+      }
+
+      // For non-wildcard patterns, path part must exist
+      if (!pathPart) {
         return null
       }
 
       if (patternPart.startsWith(":")) {
-        // Extract parameter
+        // Extract regular parameter
         const paramName = patternPart.slice(1)
         params[paramName] = pathPart
       } else if (patternPart !== pathPart) {
         // Static segment doesn't match
         return null
       }
+    }
+
+    // Ensure all path parts were consumed (no extra segments)
+    if (patternParts.length !== pathParts.length) {
+      return null
     }
 
     return params

@@ -5,14 +5,26 @@ import type { RouteContext } from "./context"
 
 /**
  * Extract path parameters from a route path string
- * Example: "/users/:userId/posts/:postId" -> { userId: string, postId: string }
+ * Supports both regular params (:param) and wildcard params (:param*)
+ *
+ * Examples:
+ * - "/users/:userId/posts/:postId" -> { userId: string, postId: string }
+ * - "/public/:path*" -> { path: string } (captures remaining path segments)
  */
 export type ExtractParams<T extends string> =
-  T extends `${infer _Start}:${infer Param}/${infer Rest}`
-    ? { [K in Param]: string } & ExtractParams<`/${Rest}`>
-    : T extends `${infer _Start}:${infer Param}`
+  // Wildcard param with more path after (invalid, but handle gracefully)
+  T extends `${infer _Start}:${infer Param}*/${infer _Rest}`
+    ? { [K in Param]: string }
+    : // Wildcard param at end (e.g., :path*)
+      T extends `${infer _Start}:${infer Param}*`
       ? { [K in Param]: string }
-      : Record<string, never>
+      : // Regular param with more path
+        T extends `${infer _Start}:${infer Param}/${infer Rest}`
+        ? { [K in Param]: string } & ExtractParams<`/${Rest}`>
+        : // Regular param at end
+          T extends `${infer _Start}:${infer Param}`
+          ? { [K in Param]: string }
+          : Record<string, never>
 
 /**
  * HTTP methods supported by the server
