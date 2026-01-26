@@ -12,6 +12,7 @@ const DEFAULT_JWT_REFRESH_SECRET =
 const configSchema = z.object({
   // Application
   APP_NAME: z.string().default("Bunkit"),
+  APP_URL: z.string().default("https://bunkit.dev"),
   VERSION: z.string(),
 
   // Server
@@ -20,7 +21,16 @@ const configSchema = z.object({
     .default("development"),
   PORT: z.coerce.number().default(3001),
   HOST: z.string().default("0.0.0.0"),
-  MAX_REQUEST_BODY_SIZE: z.coerce.number().default(10485760), // 10MB in bytes
+
+  // HTTP Server
+  HTTP_MAX_REQUEST_BODY_SIZE: z.coerce.number().default(10485760), // 10MB in bytes
+
+  // CORS
+  CORS_ORIGIN: z
+    .string()
+    .default(
+      "http://localhost:3000,http://localhost:5173,http://localhost:4173,http://localhost:8080",
+    ),
 
   // Database
   DATABASE_URL: z.string().default("postgresql://localhost:5432/bunkit_test"),
@@ -34,13 +44,6 @@ const configSchema = z.object({
   // Rate Limiting
   RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000), // 1 minute
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
-
-  // CORS
-  CORS_ORIGIN: z
-    .string()
-    .default(
-      "http://localhost:3000,http://localhost:5173,http://localhost:4173,http://localhost:8080",
-    ),
 
   // Logging
   LOG_LEVEL: z
