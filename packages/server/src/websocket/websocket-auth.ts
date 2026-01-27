@@ -14,10 +14,14 @@ export interface TokenExtractionOptions {
   headerName?: string
   /** Query parameter name for token (default: "token") */
   queryParamName?: string
+  /** Cookie name for token (default: "token") */
+  cookieName?: string
   /** Whether to check header (default: true) */
   checkHeader?: boolean
   /** Whether to check query params (default: true) */
   checkQuery?: boolean
+  /** Whether to check cookies (default: true) */
+  checkCookie?: boolean
 }
 
 /**
@@ -27,7 +31,7 @@ export interface ExtractedToken {
   /** The extracted token value */
   token: string
   /** Where the token was found */
-  source: "header" | "query"
+  source: "header" | "query" | "cookie"
 }
 
 /**
@@ -78,21 +82,54 @@ export function extractQueryToken(
 }
 
 /**
- * Extract authentication token from request (checks header first, then query params)
+ * Extract a token from HTTP cookies
+ * @param req - The request object
+ * @param cookieName - Cookie name (default: "token")
+ * @returns The token string or null if not found
+ */
+export function extractCookieToken(
+  req: Request,
+  cookieName = "token",
+): string | null {
+  const cookieHeader = req.headers.get("cookie")
+  if (!cookieHeader) {
+    return null
+  }
+
+  // Parse cookies (simple parser for standard cookie format)
+  const cookies = cookieHeader.split(";").reduce(
+    (acc, cookie) => {
+      const [name, ...valueParts] = cookie.trim().split("=")
+      if (name && valueParts.length > 0) {
+        acc[name] = valueParts.join("=") // Handle values with = in them
+      }
+      return acc
+    },
+    {} as Record<string, string>,
+  )
+
+  return cookies[cookieName] || null
+}
+
+/**
+ * Extract authentication token from request (checks header first, then cookies, then query params)
  * @param req - The request object
  * @param options - Extraction options
  * @returns ExtractedToken with token and source, or null if not found
  *
  * @example
  * ```typescript
- * // Default behavior: check Authorization header, then ?token query param
+ * // Default behavior: check Authorization header, then cookies, then ?token query param
  * const token = extractToken(req)
  *
- * // Custom query param name
- * const token = extractToken(req, { queryParamName: "auth" })
+ * // Custom cookie name
+ * const token = extractToken(req, { cookieName: "auth_token" })
+ *
+ * // Only check cookies (useful for HTTP-only cookie authentication)
+ * const token = extractToken(req, { checkHeader: false, checkQuery: false })
  *
  * // Only check query params (useful for WebSocket clients that can't set headers)
- * const token = extractToken(req, { checkHeader: false })
+ * const token = extractToken(req, { checkHeader: false, checkCookie: false })
  * ```
  */
 export function extractToken(
@@ -102,11 +139,13 @@ export function extractToken(
   const {
     headerName = "authorization",
     queryParamName = "token",
+    cookieName = "token",
     checkHeader = true,
     checkQuery = true,
+    checkCookie = true,
   } = options
 
-  // Check header first (more secure)
+  // Check header first
   if (checkHeader) {
     const headerToken = extractBearerToken(req, headerName)
     if (headerToken) {
@@ -114,7 +153,15 @@ export function extractToken(
     }
   }
 
-  // Fall back to query parameter (useful for WebSocket which may not support custom headers)
+  // Check HTTP-only cookies
+  if (checkCookie) {
+    const cookieToken = extractCookieToken(req, cookieName)
+    if (cookieToken) {
+      return { token: cookieToken, source: "cookie" }
+    }
+  }
+
+  // Fall back to query parameter
   if (checkQuery) {
     const queryToken = extractQueryToken(req, queryParamName)
     if (queryToken) {
@@ -129,7 +176,7 @@ export function extractToken(
  * Create a WebSocket authentication function from a token verification function
  *
  * This helper makes it easy to create WebSocket auth from existing JWT/token
- * verification logic, with support for both header and query parameter tokens.
+ * verification logic, with support for header, cookie, and query parameter tokens.
  *
  * @param verifyToken - Function that verifies a token and returns user data (or throws/returns null on failure)
  * @param options - Token extraction options
@@ -151,6 +198,12 @@ export function extractToken(
  *     console.log(`User ${ctx.user.id} connected`)
  *   })
  *   .build()
+ *
+ * // Using with HTTP-only cookies
+ * const cookieAuth = createTokenAuth(
+ *   async (token) => verifyJWT(token),
+ *   { cookieName: "auth_token" }
+ * )
  * ```
  */
 export function createTokenAuth<TUser>(
