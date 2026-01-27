@@ -1,5 +1,50 @@
 import { ErrorCode } from "../core/standard-errors"
-import type { ErrorResponse, ResponseHelpers } from "./types/response"
+import type {
+  Cookie,
+  CookieOptions,
+  ErrorResponse,
+  ResponseHelpers,
+} from "./types/response"
+
+/**
+ * Serializes a cookie into a Set-Cookie header value
+ */
+function serializeCookie(cookie: Cookie): string {
+  let result = `${encodeURIComponent(cookie.name)}=${encodeURIComponent(cookie.value)}`
+
+  if (cookie.options) {
+    const opts = cookie.options
+    if (opts.domain) result += `; Domain=${opts.domain}`
+    if (opts.path) result += `; Path=${opts.path}`
+    if (opts.expires) result += `; Expires=${opts.expires.toUTCString()}`
+    if (opts.maxAge !== undefined) result += `; Max-Age=${opts.maxAge}`
+    if (opts.httpOnly) result += "; HttpOnly"
+    if (opts.secure) result += "; Secure"
+    if (opts.sameSite) result += `; SameSite=${opts.sameSite}`
+  }
+
+  return result
+}
+
+/**
+ * Adds cookies to a Response object
+ */
+function addCookiesToResponse(response: Response, cookies: Cookie[]): Response {
+  if (cookies.length === 0) {
+    return response
+  }
+
+  const headers = new Headers(response.headers)
+  for (const cookie of cookies) {
+    headers.append("Set-Cookie", serializeCookie(cookie))
+  }
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  })
+}
 
 // JSON responses
 export function ok<T>(data: T, status = 200): Response {
@@ -174,27 +219,59 @@ export function custom(
  * These helpers ensure type-safe response construction
  */
 export function createResponseHelpers(): ResponseHelpers {
+  const cookies: Cookie[] = []
+
+  // Helper to apply cookies to any response
+  const withCookies = (response: Response): Response => {
+    return addCookiesToResponse(response, cookies)
+  }
+
   return {
+    // Cookie management
+    setCookie(
+      nameOrCookie: string | Cookie,
+      value?: string,
+      options?: CookieOptions,
+    ): ResponseHelpers {
+      if (typeof nameOrCookie === "string") {
+        if (value === undefined) {
+          throw new Error("Cookie value is required when name is provided")
+        }
+        cookies.push({ name: nameOrCookie, value, options })
+      } else {
+        cookies.push(nameOrCookie)
+      }
+      return this
+    },
+
     // JSON responses
-    ok,
-    created,
-    accepted,
-    noContent,
+    ok: (data, status) => withCookies(ok(data, status)),
+    created: (data, location) => withCookies(created(data, location)),
+    accepted: (data) => withCookies(accepted(data)),
+    noContent: () => withCookies(noContent()),
 
     // Error responses
-    badRequest,
-    unauthorized,
-    forbidden,
-    notFound,
-    conflict,
-    internalError,
+    badRequest: (message, code, details) =>
+      withCookies(badRequest(message, code, details)),
+    unauthorized: (message, code, details) =>
+      withCookies(unauthorized(message, code, details)),
+    forbidden: (message, code, details) =>
+      withCookies(forbidden(message, code, details)),
+    notFound: (message, code, details) =>
+      withCookies(notFound(message, code, details)),
+    conflict: (message, code, details) =>
+      withCookies(conflict(message, code, details)),
+    internalError: (message, code, details) =>
+      withCookies(internalError(message, code, details)),
 
     // Other content types
-    text,
-    html,
-    file,
-    stream,
-    redirect,
-    custom,
+    text: (content, status) => withCookies(text(content, status)),
+    html: (content, status) => withCookies(html(content, status)),
+    file: async (path, contentType) =>
+      withCookies(await file(path, contentType)),
+    stream: (readable, contentType) =>
+      withCookies(stream(readable, contentType)),
+    redirect: (url, status) => withCookies(redirect(url, status)),
+    custom: (body, options) => withCookies(custom(body, options)),
   }
 }

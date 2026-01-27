@@ -63,7 +63,12 @@ export type { MiddlewareArgs, MiddlewareFn } from "./types/middleware"
 export type { CorsOptions } from "./types/cors"
 
 // Responses & Error Handling
-export type { ErrorResponse, ResponseHelpers } from "./http/types/response"
+export type {
+  Cookie,
+  CookieOptions,
+  ErrorResponse,
+  ResponseHelpers,
+} from "./http/types/response"
 export {
   ErrorCode,
   type ErrorCode as ErrorCodeType,
