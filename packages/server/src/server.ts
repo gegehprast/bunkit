@@ -4,14 +4,14 @@ import { generateOpenApiSpec } from "./http/openapi/generator"
 import { handleRequest } from "./http/request-handler"
 import { type RouteRegistry, routeRegistry } from "./http/route-registry"
 import type { MiddlewareFn } from "./types/middleware"
-import type {
-  Server as IServer,
-  OpenApiSpec,
-  RouteInfo,
-  ServerOptions,
+import {
+  type Server as IServer,
+  type OpenApiSpec,
+  type RouteInfo,
+  type ServerOptions,
   ServerStartError,
   ServerStopError,
-  WebSocketRouteInfo,
+  type WebSocketRouteInfo,
 } from "./types/server"
 import type { WebSocketData } from "./websocket/types/websocket"
 import {
@@ -155,12 +155,12 @@ export class Server implements IServer {
 
       return ok(undefined)
     } catch (error) {
-      return err({
-        name: "ServerStartError",
-        message: `Failed to start server: ${error instanceof Error ? error.message : "Unknown error"}`,
-        code: "SERVER_START_ERROR",
-        cause: error instanceof Error ? error : undefined,
-      } as ServerStartError)
+      return err(
+        new ServerStartError(
+          `Failed to start server: ${error instanceof Error ? error.message : "Unknown error"}`,
+          error instanceof Error ? error : undefined,
+        ),
+      )
     }
   }
 
@@ -172,12 +172,12 @@ export class Server implements IServer {
       }
       return ok(undefined)
     } catch (error) {
-      return err({
-        name: "ServerStopError",
-        message: `Failed to stop server: ${error instanceof Error ? error.message : "Unknown error"}`,
-        code: "SERVER_STOP_ERROR",
-        cause: error instanceof Error ? error : undefined,
-      } as ServerStopError)
+      return err(
+        new ServerStopError(
+          `Failed to stop server: ${error instanceof Error ? error.message : "Unknown error"}`,
+          error instanceof Error ? error : undefined,
+        ),
+      )
     }
   }
 
