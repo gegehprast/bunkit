@@ -13,7 +13,11 @@ export const server = createServer({
     description: "Production-ready HTTP API built with BunKit",
     securitySchemes: {
       bearerAuth: SecuritySchemes.bearerAuth(),
-      basicAuth: SecuritySchemes.basicAuth(),
+      basicAuth: SecuritySchemes.basicAuth(), // Example only, not used
+      cookieAuth: SecuritySchemes.apiKeyCookie(
+        "access_token",
+        "HTTP-only cookie authentication",
+      ), // Example only, not used
     },
     servers: [
       {
