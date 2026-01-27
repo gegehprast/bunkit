@@ -843,11 +843,20 @@ createWebSocketRoute(path: string, server?: Server)
 
 ### Response Helpers
 
+The `res` object provides convenient methods for building responses:
+
 ```typescript
 interface ResponseHelpers {
+  // Cookie management (chainable)
+  setCookie(name: string, value: string, options?: CookieOptions): this
+  setCookie(cookie: Cookie): this
+  
+  // JSON responses
   ok<T>(data: T): Response                    // 200
   created<T>(data: T): Response               // 201
   noContent(): Response                       // 204
+  
+  // Error responses
   badRequest(message: string, details?): Response      // 400
   unauthorized(message: string): Response     // 401
   forbidden(message: string): Response        // 403
@@ -856,6 +865,60 @@ interface ResponseHelpers {
   internalServerError(message: string): Response // 500
 }
 ```
+
+#### Setting Cookies
+
+You can set cookies using the `setCookie()` method, which is chainable:
+
+```typescript
+createRoute("POST", "/api/login")
+  .body(z.object({ username: z.string(), password: z.string() }))
+  .response(z.object({ success: z.boolean() }))
+  .handler(({ body, res }) => {
+    // Authenticate user...
+    const token = generateToken(body.username)
+    
+    // Set multiple cookies (chainable)
+    return res
+      .setCookie("session", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+        maxAge: 3600, // 1 hour in seconds
+        path: "/",
+      })
+      .setCookie("user", body.username, {
+        maxAge: 3600,
+        path: "/",
+      })
+      .ok({ success: true })
+  })
+
+// Alternative object syntax
+createRoute("POST", "/api/logout")
+  .response(z.object({ success: z.boolean() }))
+  .handler(({ res }) => {
+    return res
+      .setCookie({
+        name: "session",
+        value: "",
+        options: {
+          maxAge: 0, // Delete cookie
+          path: "/",
+        },
+      })
+      .ok({ success: true })
+  })
+```
+
+Cookie options:
+- `domain` - Cookie domain
+- `path` - Cookie path (default: none)
+- `expires` - Expiration date
+- `maxAge` - Max age in seconds
+- `httpOnly` - HTTP-only flag (recommended for security)
+- `secure` - Secure flag (requires HTTPS)
+- `sameSite` - SameSite policy: `'Strict'`, `'Lax'`, or `'None'`
 
 ### TypeScript Types
 
@@ -877,6 +940,8 @@ import type {
   ExtractParams,
   ResponseHelpers,
   ErrorResponse,
+  Cookie,
+  CookieOptions,
   
   // WebSocket
   WebSocketContext,

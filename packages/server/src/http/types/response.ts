@@ -1,4 +1,26 @@
 /**
+ * Cookie options for Set-Cookie header
+ */
+export interface CookieOptions {
+  domain?: string
+  path?: string
+  expires?: Date
+  maxAge?: number
+  httpOnly?: boolean
+  secure?: boolean
+  sameSite?: "Strict" | "Lax" | "None"
+}
+
+/**
+ * Cookie to be set in response
+ */
+export interface Cookie {
+  name: string
+  value: string
+  options?: CookieOptions
+}
+
+/**
  * Standard error response format
  */
 export interface ErrorResponse {
@@ -12,6 +34,10 @@ export interface ErrorResponse {
  * @template TResponse - The expected response data type from the route schema
  */
 export interface ResponseHelpers<TResponse = unknown> {
+  // Cookie management
+  setCookie(name: string, value: string, options?: CookieOptions): this
+  setCookie(cookie: Cookie): this
+
   // JSON responses - constrained to TResponse type
   ok(data: TResponse, status?: number): Response
   created(data: TResponse, location?: string): Response

@@ -3,6 +3,7 @@ import { z } from "zod"
 import {
   createTokenAuth,
   extractBearerToken,
+  extractCookieToken,
   extractQueryToken,
   extractRequestInfo,
   extractToken,
@@ -111,10 +112,105 @@ describe("WebSocket Authentication Utilities", () => {
     })
   })
 
+  describe("extractCookieToken", () => {
+    it("should extract token from cookie", () => {
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: "token=cookietoken123" },
+      })
+
+      const token = extractCookieToken(req)
+
+      expect(token).toBe("cookietoken123")
+    })
+
+    it("should extract token from multiple cookies", () => {
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: "session=abc; token=mytoken; user=john" },
+      })
+
+      const token = extractCookieToken(req)
+
+      expect(token).toBe("mytoken")
+    })
+
+    it("should return null when no cookie header", () => {
+      const req = new Request("http://localhost/ws")
+
+      const token = extractCookieToken(req)
+
+      expect(token).toBeNull()
+    })
+
+    it("should return null when token cookie not found", () => {
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: "session=abc; other=value" },
+      })
+
+      const token = extractCookieToken(req)
+
+      expect(token).toBeNull()
+    })
+
+    it("should support custom cookie name", () => {
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: "auth_token=customcookie" },
+      })
+
+      const token = extractCookieToken(req, "auth_token")
+
+      expect(token).toBe("customcookie")
+    })
+
+    it("should handle cookies with spaces after trimming", () => {
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: "token=spaced-token; other=value" },
+      })
+
+      const token = extractCookieToken(req)
+
+      expect(token).toBe("spaced-token")
+    })
+
+    it("should trim cookie pairs before parsing", () => {
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: " token=mytoken ; other=value " },
+      })
+
+      const token = extractCookieToken(req)
+
+      expect(token).toBe("mytoken")
+    })
+
+    it("should handle cookie values with equals signs", () => {
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: "token=base64==; other=value" },
+      })
+
+      const token = extractCookieToken(req)
+
+      expect(token).toBe("base64==")
+    })
+
+    it("should handle JWT tokens in cookies", () => {
+      const jwtToken =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: `token=${jwtToken}` },
+      })
+
+      const token = extractCookieToken(req)
+
+      expect(token).toBe(jwtToken)
+    })
+  })
+
   describe("extractToken", () => {
-    it("should prefer header over query parameter", () => {
+    it("should prefer header over cookie and query parameter", () => {
       const req = new Request("http://localhost/ws?token=querytoken", {
-        headers: { Authorization: "Bearer headertoken" },
+        headers: {
+          Authorization: "Bearer headertoken",
+          Cookie: "token=cookietoken",
+        },
       })
 
       const result = extractToken(req)
@@ -124,7 +220,19 @@ describe("WebSocket Authentication Utilities", () => {
       expect(result?.source).toBe("header")
     })
 
-    it("should fall back to query parameter when no header", () => {
+    it("should prefer cookie over query parameter when no header", () => {
+      const req = new Request("http://localhost/ws?token=querytoken", {
+        headers: { Cookie: "token=cookietoken" },
+      })
+
+      const result = extractToken(req)
+
+      expect(result).not.toBeNull()
+      expect(result?.token).toBe("cookietoken")
+      expect(result?.source).toBe("cookie")
+    })
+
+    it("should fall back to query parameter when no header or cookie", () => {
       const req = new Request("http://localhost/ws?token=fallbacktoken")
 
       const result = extractToken(req)
@@ -132,6 +240,18 @@ describe("WebSocket Authentication Utilities", () => {
       expect(result).not.toBeNull()
       expect(result?.token).toBe("fallbacktoken")
       expect(result?.source).toBe("query")
+    })
+
+    it("should extract from cookie only", () => {
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: "token=onlycookie" },
+      })
+
+      const result = extractToken(req)
+
+      expect(result).not.toBeNull()
+      expect(result?.token).toBe("onlycookie")
+      expect(result?.source).toBe("cookie")
     })
 
     it("should return null when no token found", () => {
@@ -142,38 +262,89 @@ describe("WebSocket Authentication Utilities", () => {
       expect(result).toBeNull()
     })
 
-    it("should only check query when checkHeader is false", () => {
+    it("should only check query when checkHeader and checkCookie are false", () => {
       const req = new Request("http://localhost/ws?token=queryonly", {
-        headers: { Authorization: "Bearer headertoken" },
+        headers: {
+          Authorization: "Bearer headertoken",
+          Cookie: "token=cookietoken",
+        },
       })
 
-      const result = extractToken(req, { checkHeader: false })
+      const result = extractToken(req, {
+        checkHeader: false,
+        checkCookie: false,
+      })
 
       expect(result).not.toBeNull()
       expect(result?.token).toBe("queryonly")
       expect(result?.source).toBe("query")
     })
 
-    it("should only check header when checkQuery is false", () => {
-      const req = new Request("http://localhost/ws?token=querytoken")
+    it("should only check cookie when checkHeader and checkQuery are false", () => {
+      const req = new Request("http://localhost/ws?token=querytoken", {
+        headers: {
+          Authorization: "Bearer headertoken",
+          Cookie: "token=cookieonly",
+        },
+      })
 
-      const result = extractToken(req, { checkQuery: false })
+      const result = extractToken(req, {
+        checkHeader: false,
+        checkQuery: false,
+      })
 
-      expect(result).toBeNull()
+      expect(result).not.toBeNull()
+      expect(result?.token).toBe("cookieonly")
+      expect(result?.source).toBe("cookie")
     })
 
-    it("should use custom header and query param names", () => {
+    it("should only check header when checkQuery and checkCookie are false", () => {
+      const req = new Request("http://localhost/ws?token=querytoken", {
+        headers: {
+          Authorization: "Bearer headeronly",
+          Cookie: "token=cookietoken",
+        },
+      })
+
+      const result = extractToken(req, {
+        checkQuery: false,
+        checkCookie: false,
+      })
+
+      expect(result).not.toBeNull()
+      expect(result?.token).toBe("headeronly")
+      expect(result?.source).toBe("header")
+    })
+
+    it("should use custom header, cookie, and query param names", () => {
       const req = new Request("http://localhost/ws?auth=customquery", {
-        headers: { "X-Token": "Bearer customheader" },
+        headers: {
+          "X-Token": "Bearer customheader",
+          Cookie: "session=customcookie",
+        },
       })
 
       const result = extractToken(req, {
         headerName: "x-token",
         queryParamName: "auth",
+        cookieName: "session",
       })
 
       expect(result?.token).toBe("customheader")
       expect(result?.source).toBe("header")
+    })
+
+    it("should use custom cookie name when header not present", () => {
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: "auth_token=customcookietoken" },
+      })
+
+      const result = extractToken(req, {
+        cookieName: "auth_token",
+      })
+
+      expect(result?.token).toBe("customcookietoken")
+      expect(result?.source).toBe("cookie")
     })
   })
 
@@ -273,6 +444,100 @@ describe("WebSocket Authentication Utilities", () => {
       const user = await auth(req)
 
       expect(user).toEqual({ token: "session-token" })
+    })
+
+    it("should extract token from cookie", async () => {
+      const verifyToken = (token: string) => {
+        if (token === "cookie-token") {
+          return { id: "user-cookie", name: "Cookie User" }
+        }
+        return null
+      }
+
+      const auth = createTokenAuth(verifyToken)
+
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: "token=cookie-token" },
+      })
+
+      const user = await auth(req)
+
+      expect(user).toEqual({ id: "user-cookie", name: "Cookie User" })
+    })
+
+    it("should use custom cookie name", async () => {
+      const verifyToken = (token: string) => ({ token })
+
+      const auth = createTokenAuth(verifyToken, {
+        cookieName: "auth_token",
+      })
+
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: "auth_token=custom-cookie-token" },
+      })
+
+      const user = await auth(req)
+
+      expect(user).toEqual({ token: "custom-cookie-token" })
+    })
+
+    it("should prefer header over cookie", async () => {
+      const verifyToken = (token: string) => ({ token })
+
+      const auth = createTokenAuth(verifyToken)
+
+      const req = new Request("http://localhost/ws", {
+        headers: {
+          Authorization: "Bearer header-token",
+          Cookie: "token=cookie-token",
+        },
+      })
+
+      const user = await auth(req)
+
+      expect(user).toEqual({ token: "header-token" })
+    })
+
+    it("should only check cookies when header and query disabled", async () => {
+      const verifyToken = (token: string) => ({ token })
+
+      const auth = createTokenAuth(verifyToken, {
+        checkHeader: false,
+        checkQuery: false,
+      })
+
+      const req = new Request("http://localhost/ws?token=query-token", {
+        headers: {
+          Authorization: "Bearer header-token",
+          Cookie: "token=cookie-only",
+        },
+      })
+
+      const user = await auth(req)
+
+      expect(user).toEqual({ token: "cookie-only" })
+    })
+
+    it("should handle JWT tokens in cookies", async () => {
+      const jwtToken =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIn0.Gfx6VO9tcxwk6xqx9yYzSfebfeakZp5JYIgP_edcw_A"
+
+      const verifyToken = (token: string) => {
+        if (token === jwtToken) {
+          return { id: "1234567890", name: "John Doe" }
+        }
+        return null
+      }
+
+      const auth = createTokenAuth(verifyToken)
+
+      const req = new Request("http://localhost/ws", {
+        headers: { Cookie: `token=${jwtToken}` },
+      })
+
+      const user = await auth(req)
+
+      expect(user).toEqual({ id: "1234567890", name: "John Doe" })
     })
   })
 
