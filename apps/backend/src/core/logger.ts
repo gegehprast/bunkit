@@ -1,14 +1,6 @@
-import { config, isDevelopment } from "@/config"
-
 /**
- * Structured Logger
- *
- * Features:
- * - Configurable log levels (NONE, ERROR, WARN, INFO, DEBUG, TRACE)
- * - Context-aware child loggers
- * - Selective component disabling via LOG_DISABLED_COMPONENTS env variable
- * - Pretty console output in development, JSON in production
- * - Automatic Error serialization
+ * Simple Structured Logger Implementation.
+ * You might want to use more robust logging solution such as Winston or Pino.
  *
  * Usage:
  * ```typescript
@@ -17,11 +9,13 @@ import { config, isDevelopment } from "@/config"
  * componentLogger.info("Processing request", { userId: "123" })
  * ```
  *
- * To disable specific components, set LOG_DISABLED_COMPONENTS:
+ * To disable specific components, set LOG_DISABLED_COMPONENTS env variable:
  * ```
  * LOG_DISABLED_COMPONENTS=WarmupRunner,CampaignRunner
  * ```
  */
+
+import { config, isDevelopment } from "@/config"
 
 /**
  * Log levels
@@ -70,9 +64,6 @@ export interface LogEntry {
   }
 }
 
-/**
- * Logger interface
- */
 export interface ILogger {
   error(message: string, context?: Record<string, unknown>): void
   warn(message: string, context?: Record<string, unknown>): void
@@ -104,9 +95,6 @@ function parseLogLevel(level: string): LogLevel {
   }
 }
 
-/**
- * Structured logger implementation
- */
 export class Logger implements ILogger {
   private currentLevel: LogLevel
   private contextData: Record<string, unknown>
@@ -354,6 +342,18 @@ function parseDisabledComponents(): Set<string> {
 
 /**
  * Create a logger instance
+ *
+ * Usage:
+ * ```typescript
+ * const logger = createLogger()
+ * const componentLogger = logger.child({ component: "MyService" })
+ * componentLogger.info("Processing request", { userId: "123" })
+ * ```
+ *
+ * To disable specific components, set LOG_DISABLED_COMPONENTS env variable:
+ * ```
+ * LOG_DISABLED_COMPONENTS=WarmupRunner,CampaignRunner
+ * ```
  */
 export function createLogger(context?: Record<string, unknown>): ILogger {
   const level = parseLogLevel(config.LOG_LEVEL)
@@ -363,5 +363,17 @@ export function createLogger(context?: Record<string, unknown>): ILogger {
 
 /**
  * Global logger instance
+ *
+ * Usage:
+ * ```typescript
+ * const logger = createLogger()
+ * const componentLogger = logger.child({ component: "MyService" })
+ * componentLogger.info("Processing request", { userId: "123" })
+ * ```
+ *
+ * To disable specific components, set LOG_DISABLED_COMPONENTS env variable:
+ * ```
+ * LOG_DISABLED_COMPONENTS=WarmupRunner,CampaignRunner
+ * ```
  */
 export const logger = createLogger()

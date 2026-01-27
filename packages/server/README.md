@@ -306,6 +306,19 @@ const server = createServer({
 })
 ```
 
+### Request Body Size Limit
+
+Protect your server from large payload attacks by setting a maximum request body size:
+
+```typescript
+const server = createServer({
+  port: 3000,
+  maxRequestBodySize: 10 * 1024 * 1024, // 10MB (default)
+})
+```
+
+The server will reject requests with a body larger than this limit with a 400 Bad Request error. This is checked via the `Content-Length` header before parsing the body, preventing memory exhaustion attacks.
+
 ### OpenAPI Generation
 
 ```typescript

@@ -5,6 +5,7 @@ import { loggingMiddleware } from "@/middlewares/logging.middleware"
 export const server = createServer({
   port: config.PORT,
   host: config.HOST,
+  maxRequestBodySize: config.HTTP_MAX_REQUEST_BODY_SIZE,
   globalMiddlewares: [loggingMiddleware()],
   openapi: {
     title: "BunKit API",

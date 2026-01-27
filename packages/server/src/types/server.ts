@@ -37,6 +37,8 @@ export interface ServerOptions {
   openapi?: Partial<GenerateOpenApiSpecOptions>
   /** WebSocket configuration */
   websocket?: WebSocketOptions
+  /** Maximum request body size in bytes (default: 10MB) */
+  maxRequestBodySize?: number
 }
 
 /**

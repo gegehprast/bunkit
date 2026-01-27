@@ -1,10 +1,3 @@
-/**
- * Todo Repository
- *
- * Database operations for the todos table
- * All operations return Result<T, DatabaseError> for type-safe error handling
- */
-
 import type { Result } from "@bunkit/result"
 import { and, asc, desc, eq, sql } from "drizzle-orm"
 import type { DatabaseError } from "@/core/errors"

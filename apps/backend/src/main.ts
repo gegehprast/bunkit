@@ -23,8 +23,6 @@ async function main() {
   await loadRoutes()
 
   try {
-    logger.info("✅ Core services registered")
-
     // Setup graceful shutdown handlers
     shutdownManager.setupSignalHandlers()
     shutdownManager.setupErrorHandlers()

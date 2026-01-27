@@ -1,9 +1,3 @@
-/**
- * Todos Schema
- *
- * Database schema for todos table
- */
-
 import { boolean, pgTable, text } from "drizzle-orm/pg-core"
 import { foreignId, primaryId, timestamps } from "./_helpers"
 import { users } from "./users.schema"

@@ -58,8 +58,9 @@ export async function handleRequest(
   // Parse query parameters
   const queryParams = parseQueryParams(url)
 
-  // Parse request body
-  const bodyResult = await parseBody(request)
+  // Parse request body with size limit
+  const maxBodySize = serverOptions.maxRequestBodySize ?? 10 * 1024 * 1024 // 10MB default
+  const bodyResult = await parseBody(request, maxBodySize)
   if (bodyResult.isErr()) {
     return createResponseWithCors(
       serverOptions,

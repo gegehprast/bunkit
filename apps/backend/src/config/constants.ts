@@ -1,8 +1,4 @@
 /**
- * Application-wide constants
- */
-
-/**
  * HTTP Status Codes
  */
 export const HTTP_STATUS = {

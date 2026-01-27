@@ -64,10 +64,26 @@ export function parseQueryParams(url: URL): Record<string, string | string[]> {
 
 /**
  * Parse request body based on content type
+ * @param request - The incoming request
+ * @param maxBodySize - Maximum body size in bytes (default: 10MB)
  */
 export async function parseBody(
   request: Request,
+  maxBodySize = 10 * 1024 * 1024, // 10MB default
 ): Promise<Result<unknown, Error>> {
+  // Check Content-Length header to enforce size limit before parsing
+  const contentLength = request.headers.get("content-length")
+  if (contentLength) {
+    const size = Number.parseInt(contentLength, 10)
+    if (size > maxBodySize) {
+      return err(
+        new Error(
+          `Request body too large: ${size} bytes (max: ${maxBodySize} bytes)`,
+        ),
+      )
+    }
+  }
+
   const contentType = request.headers.get("content-type") ?? ""
 
   try {

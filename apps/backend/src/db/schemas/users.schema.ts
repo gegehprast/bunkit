@@ -1,9 +1,3 @@
-/**
- * Users Schema
- *
- * Database schema for users table
- */
-
 import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 import { primaryId, timestamps } from "./_helpers"
 

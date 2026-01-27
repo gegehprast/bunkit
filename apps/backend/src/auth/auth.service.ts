@@ -1,9 +1,3 @@
-/**
- * Authentication Service
- *
- * Handles JWT token generation, verification, and password hashing using jose and Bun's native APIs
- */
-
 import { err, ok, type Result } from "@bunkit/result"
 import { type JWTPayload as JoseJWTPayload, jwtVerify, SignJWT } from "jose"
 import { config } from "@/config"

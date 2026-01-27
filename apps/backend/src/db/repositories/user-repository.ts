@@ -1,10 +1,3 @@
-/**
- * User Repository
- *
- * Database operations for the users table
- * All operations return Result<T, DatabaseError> for type-safe error handling
- */
-
 import type { Result } from "@bunkit/result"
 import { eq, sql } from "drizzle-orm"
 import type { DatabaseError } from "@/core/errors"

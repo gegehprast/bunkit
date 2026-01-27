@@ -230,6 +230,60 @@ describe("HTTP Request Handling", () => {
       expect(data.name).toBe("John")
       expect(data.email).toBe("john@example.com")
     })
+
+    test("should reject body exceeding size limit", async () => {
+      createRoute("POST", "/api/upload")
+        .body(z.object({ data: z.string() }))
+        .handler(({ body, res }) => {
+          return res.ok({ received: body.data.length })
+        })
+
+      // Set max body size to 100 bytes
+      server = createServer({ port: 3298, maxRequestBodySize: 100 })
+      await server.start()
+
+      // Send a body larger than 100 bytes
+      const largeData = "x".repeat(200)
+      const response = await fetch("http://localhost:3298/api/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": JSON.stringify({
+            data: largeData,
+          }).length.toString(),
+        },
+        body: JSON.stringify({ data: largeData }),
+      })
+      const data = await json(response)
+
+      expect(response.status).toBe(400)
+      expect(data.code).toBe("BAD_REQUEST")
+      expect(data.details).toContain("too large")
+    })
+
+    test("should accept body within size limit", async () => {
+      createRoute("POST", "/api/upload")
+        .body(z.object({ data: z.string() }))
+        .handler(({ body, res }) => {
+          return res.ok({ received: body.data.length })
+        })
+
+      // Set max body size to 1KB
+      server = createServer({ port: 3299, maxRequestBodySize: 1024 })
+      await server.start()
+
+      // Send a small body
+      const smallData = "hello"
+      const response = await fetch("http://localhost:3299/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: smallData }),
+      })
+      const data = await json(response)
+
+      expect(response.status).toBe(200)
+      expect(data.received).toBe(5)
+    })
   })
 
   describe("Response helpers", () => {

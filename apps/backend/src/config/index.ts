@@ -6,9 +6,6 @@ const DEFAULT_JWT_SECRET =
 const DEFAULT_JWT_REFRESH_SECRET =
   "your-super-secret-refresh-key-min-32-chars-please-change-this-in-production"
 
-/**
- * Environment configuration schema with validation
- */
 const configSchema = z.object({
   // Application
   APP_NAME: z.string().default("Bunkit"),

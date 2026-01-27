@@ -1,9 +1,3 @@
-/**
- * Database Schema Helpers
- *
- * Reusable column definitions for common patterns
- */
-
 import {
   type PgColumn,
   type PgTimestampConfig,
