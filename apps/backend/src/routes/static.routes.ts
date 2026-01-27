@@ -21,13 +21,6 @@ createRoute("GET", "/public/:path*")
       return res.forbidden("Access denied")
     }
 
-    const file = Bun.file(filePath)
-    const exists = await file.exists()
-
-    if (!exists) {
-      return res.notFound("File not found")
-    }
-
-    // Return file as Response
-    return new Response(file)
+    // Use built-in file helper (handles existence check and content-type)
+    return res.file(filePath)
   })
