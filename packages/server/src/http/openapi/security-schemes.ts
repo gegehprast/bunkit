@@ -2,7 +2,6 @@
  * OpenAPI 3.1 Security Scheme Templates
  * Provides common authentication/authorization schemes
  */
-
 export interface SecuritySchemeObject {
   type: "http" | "apiKey" | "oauth2" | "openIdConnect"
   scheme?: string

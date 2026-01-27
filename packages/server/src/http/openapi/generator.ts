@@ -30,7 +30,7 @@ const OPENAPI_SPEC_VERSION = "3.1.0"
 
 /**
  * Generate OpenAPI specification from registered routes
- * @param info - API info and configuration
+ * @param options - OpenAPI document options
  * @param localRegistry - Optional local route registry (uses global if not provided)
  */
 export function generateOpenApiSpec(

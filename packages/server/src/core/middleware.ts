@@ -57,8 +57,11 @@ export function createMiddlewareArgs(
     body,
     ctx,
     res,
+
+    // This `next` will never be called
+    // and will be replaced by `executeMiddlewareChain`
     next: async () => {
       throw new Error("next() not implemented")
-    }, // Will be replaced by executeMiddlewareChain
+    },
   }
 }

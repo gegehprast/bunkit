@@ -1,12 +1,4 @@
 /**
- * WebSocket Authentication Utilities
- *
- * Provides helper functions for extracting authentication tokens from
- * WebSocket upgrade requests, supporting both Bearer token (header) and
- * query parameter authentication patterns.
- */
-
-/**
  * Options for token extraction
  */
 export interface TokenExtractionOptions {

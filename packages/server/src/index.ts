@@ -13,7 +13,7 @@ export type {
 
 // HTTP Routes
 export { createRoute } from "./http/route-builder"
-export type { RouteContext, RouteHandler } from "./http/types/context"
+export type { RouteHandlerProps, RouteHandler } from "./http/types/context"
 export type {
   ExtractParams,
   HttpMethod,

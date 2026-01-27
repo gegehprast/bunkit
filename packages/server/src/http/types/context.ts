@@ -1,9 +1,9 @@
 import type { ResponseHelpers } from "./response"
 
 /**
- * Context passed to route handlers
+ * Props passed to route handlers
  */
-export interface RouteContext<
+export interface RouteHandlerProps<
   TParams = Record<string, string>,
   TQuery = unknown,
   TBody = unknown,
@@ -26,5 +26,5 @@ export type RouteHandler<
   TParams = Record<string, string>,
   TResponse = unknown,
 > = (
-  context: RouteContext<TParams, TQuery, TBody, TResponse>,
+  props: RouteHandlerProps<TParams, TQuery, TBody, TResponse>,
 ) => Promise<Response> | Response

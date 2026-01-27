@@ -170,6 +170,9 @@ export async function handleRequest(
   return handlerFn()
 }
 
+/**
+ * Add CORS headers to response if enabled
+ */
 function createResponseWithCors(
   serverOptions: ServerOptions,
   request: Request,

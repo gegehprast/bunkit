@@ -46,7 +46,6 @@ function addCookiesToResponse(response: Response, cookies: Cookie[]): Response {
   })
 }
 
-// JSON responses
 export function ok<T>(data: T, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
@@ -78,7 +77,6 @@ export function noContent(): Response {
   return new Response(null, { status: 204 })
 }
 
-// Error responses
 export function badRequest(
   message: string,
   code: string = ErrorCode.BAD_REQUEST,
@@ -151,7 +149,6 @@ export function internalError(
   })
 }
 
-// Other content types
 export function text(content: string, status = 200): Response {
   return new Response(content, {
     status,
@@ -227,7 +224,6 @@ export function createResponseHelpers(): ResponseHelpers {
   }
 
   return {
-    // Cookie management
     setCookie(
       nameOrCookie: string | Cookie,
       value?: string,
@@ -244,13 +240,11 @@ export function createResponseHelpers(): ResponseHelpers {
       return this
     },
 
-    // JSON responses
     ok: (data, status) => withCookies(ok(data, status)),
     created: (data, location) => withCookies(created(data, location)),
     accepted: (data) => withCookies(accepted(data)),
     noContent: () => withCookies(noContent()),
 
-    // Error responses
     badRequest: (message, code, details) =>
       withCookies(badRequest(message, code, details)),
     unauthorized: (message, code, details) =>
@@ -264,7 +258,6 @@ export function createResponseHelpers(): ResponseHelpers {
     internalError: (message, code, details) =>
       withCookies(internalError(message, code, details)),
 
-    // Other content types
     text: (content, status) => withCookies(text(content, status)),
     html: (content, status) => withCookies(html(content, status)),
     file: async (path, contentType) =>

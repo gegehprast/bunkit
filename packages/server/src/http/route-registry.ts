@@ -1,8 +1,8 @@
 import type { HttpMethod, MatchedRoute, RouteDefinition } from "./types/route"
 
 /**
- * Route registry - stores registered routes and provides matching logic
- * Can be used as a global singleton or as a per-server instance
+ * Route registry - stores registered routes and provides matching logic.
+ * Can be used as a global singleton or as a per-server instance.
  */
 export class RouteRegistry {
   private routes: RouteDefinition[] = []

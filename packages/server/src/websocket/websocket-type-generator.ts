@@ -5,6 +5,7 @@ import {
   type WebSocketRouteRegistry,
   webSocketRouteRegistry,
 } from "./websocket-registry"
+
 /**
  * Options for generating WebSocket types
  */
@@ -12,6 +13,7 @@ export interface GenerateWebSocketTypesOptions {
   /** Only generate for specific routes (optional) */
   routes?: string[]
 }
+
 /**
  * Options for exporting WebSocket types
  */
@@ -53,7 +55,8 @@ function getZodTypeName(schema: z.ZodType): string {
 }
 
 /**
- * Convert a Zod schema to TypeScript type string
+ * Convert a Zod schema to TypeScript type string.
+ * FIXME: Doesn't cover all Zod types.
  */
 function zodSchemaToTypeString(schema: z.ZodType, indent = 2): string {
   const typeDef = schema.def as unknown as Record<string, unknown>

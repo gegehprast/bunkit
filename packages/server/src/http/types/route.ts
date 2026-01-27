@@ -1,7 +1,7 @@
 import type { MakeRequired } from "node_modules/zod/v4/core/util"
 import type { z } from "zod"
 import type { MiddlewareFn } from "../../types/middleware"
-import type { RouteContext } from "./context"
+import type { RouteHandlerProps } from "./context"
 
 /**
  * Extract path parameters from a route path string
@@ -83,7 +83,7 @@ export interface RouteDefinition {
   middlewares?: MiddlewareFn[]
   security?: Array<Record<string, string[]>>
   handler: (
-    context: RouteContext<Record<string, string>, unknown, unknown, unknown>,
+    props: RouteHandlerProps<Record<string, string>, unknown, unknown, unknown>,
   ) => Promise<Response> | Response
 }
 

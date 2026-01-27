@@ -15,9 +15,10 @@ import {
   WebSocketRouteRegistry,
   webSocketRouteRegistry,
 } from "./websocket-registry"
+
 /**
- * WebSocket route builder with fluent API and type-safe generics
- * Automatically extracts path parameters and enforces handler type safety
+ * WebSocket route builder with fluent API and type-safe generics.
+ * Automatically extracts path parameters and enforces handler type safety.
  */
 export class WebSocketRouteBuilder<
   TPath extends string,
@@ -167,8 +168,9 @@ export class WebSocketRouteBuilder<
  *
  * @param path - WebSocket route path with optional parameters (e.g., "/chat/:roomId")
  * @param server - Optional server instance to register the route to.
- *                 If provided, the route is registered to the server's local registry.
- *                 If not provided, the route is registered to the global registry.
+ *
+ * If `server` is provided, the route is registered to the server's local registry.
+ * If not provided, the route is registered to the global registry.
  *
  * @example
  * ```typescript

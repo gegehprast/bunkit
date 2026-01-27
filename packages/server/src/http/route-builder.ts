@@ -153,7 +153,7 @@ export class RouteBuilder<
 
   /**
    * Add standard error responses by status code.
-   * Uses predefined error response schemas from CommonErrorResponses.
+   * Uses predefined error response schemas from `CommonErrorResponses`.
    * Bunkit will automatically add some common error responses (400, 401, 500)
    * depending on the route configuration, so you probably don't need to add them manually.
    * @example .errors([400, 401, 422])
@@ -204,11 +204,10 @@ export class RouteBuilder<
 
   /**
    * Define the route handler. This is the final step in the route builder chain.
-   * The handler function receives typed context with request and response types inferred
-   * from the route definition (path params, query, body, response).
+   * The handler function receives typed props inferred from the route definition (ctx, path params, query, body, response).
    *
    * @example
-   * .handler(async ({ ctx, query, res }) => {
+   * .handler(async ({ ctx, req, res, query, params, body }) => {
    *   const items = await getItems(query)
    *   return res.ok(items)
    * })
@@ -249,11 +248,12 @@ export class RouteBuilder<
 /**
  * Create a new route builder
  *
- * @param method - HTTP method (GET, POST, PUT, PATCH, DELETE)
- * @param path - Route path with optional parameters (e.g., "/users/:id")
- * @param server - Optional server instance to register the route to.
- *                 If provided, the route is registered to the server's local registry.
- *                 If not provided, the route is registered to the global registry.
+ * @param method HTTP method (GET, POST, PUT, PATCH, DELETE)
+ * @param path Route path with optional parameters (e.g., "/users/:id")
+ * @param server Optional server instance to register the route to.
+ *
+ * If `server` is provided, the route is registered to the server's local registry.
+ * If not provided, the route is registered to the global registry.
  */
 export function createRoute<TPath extends string>(
   method: HttpMethod,
