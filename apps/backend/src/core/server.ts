@@ -21,6 +21,14 @@ export const server = createServer({
         description: "Development server",
       },
       {
+        url: `http://0.0.0.0:${config.PORT}`,
+        description: "Development server",
+      },
+      {
+        url: `http://127.0.0.1:${config.PORT}`,
+        description: "Development server",
+      },
+      {
         url: config.APP_URL,
         description: "Production server",
       },
