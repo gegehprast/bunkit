@@ -44,7 +44,7 @@ createRoute("GET", "/docs")
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${config.APP_NAME} API Documentation</title>
-  <link rel="icon" type="image/x-icon" href="/public/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css" />
   <style>
     body {
