@@ -6,23 +6,64 @@ import type { HttpMethod, MatchedRoute, RouteDefinition } from "./types/route"
  */
 export class RouteRegistry {
   private routes: RouteDefinition[] = []
+  private sortedRoutesMemo: Map<HttpMethod, RouteDefinition[]> = new Map()
 
   /**
    * Register a new route
    */
   public register(route: RouteDefinition): void {
     this.routes.push(route)
+    this.sortedRoutesMemo.clear()
+  }
+
+  /**
+   * Calculate route specificity score (higher = more specific)
+   * - Static segments: 3 points each
+   * - Parameter segments: 2 points each
+   * - Wildcard segments: 1 point
+   */
+  private calculateSpecificity(path: string): number {
+    const parts = path.split("/").filter(Boolean)
+    let score = 0
+
+    for (const part of parts) {
+      if (part.startsWith(":") && part.endsWith("*")) {
+        // Wildcard parameter
+        score += 1
+      } else if (part.startsWith(":")) {
+        // Regular parameter
+        score += 2
+      } else {
+        // Static segment
+        score += 3
+      }
+    }
+
+    return score
   }
 
   /**
    * Find a matching route for the given method and path
+   * Routes are checked in order of specificity (most specific first)
    */
   public match(method: HttpMethod, path: string): MatchedRoute | null {
-    for (const route of this.routes) {
-      if (route.method !== method) {
-        continue
-      }
+    // Get or create sorted routes for this method
+    let methodRoutes = this.sortedRoutesMemo.get(method)
 
+    if (!methodRoutes) {
+      // Sort routes by specificity (descending) and cache
+      methodRoutes = this.routes
+        .filter((route) => route.method === method)
+        .sort((a, b) => {
+          const scoreA = this.calculateSpecificity(a.path)
+          const scoreB = this.calculateSpecificity(b.path)
+          return scoreB - scoreA // Higher score first
+        })
+
+      this.sortedRoutesMemo.set(method, methodRoutes)
+    }
+
+    for (const route of methodRoutes) {
       const params = this.matchPath(route.path, path)
       if (params !== null) {
         return { definition: route, params }
@@ -112,6 +153,7 @@ export class RouteRegistry {
    */
   public clear(): void {
     this.routes = []
+    this.sortedRoutesMemo.clear()
   }
 }
 

@@ -5,7 +5,7 @@ import { createRoute } from "@bunkit/server"
  * Static file serving
  * Supports nested paths like /public/images/logo.png
  */
-createRoute("GET", "/public/:path*")
+createRoute("GET", "/:path*")
   .openapi({
     operationId: "getStaticFile",
     summary: "Get static file",
