@@ -32,6 +32,7 @@ export class RouteBuilder<
   private _errorResponses?: ErrorResponseConfig
   private _middlewares: MiddlewareFn[] = []
   private _security?: Array<Record<string, string[]>>
+  private _excludeFromDocs = false
 
   public constructor(
     private readonly method: HttpMethod,
@@ -76,6 +77,23 @@ export class RouteBuilder<
     }
 
     this._security = requirements
+    return this
+  }
+
+  /**
+   * Exclude this route from OpenAPI documentation.
+   *
+   * @example
+   * ```typescript
+   * createRoute("GET", "/internal/debug")
+   *   .excludeFromDocs()
+   *   .handler(({ res }) => res.ok({ debug: true }))
+   * ```
+   */
+  public excludeFromDocs(
+    exclude = true,
+  ): RouteBuilder<TPath, TQuery, TBody, TParams, TResponse> {
+    this._excludeFromDocs = exclude
     return this
   }
 
@@ -223,6 +241,7 @@ export class RouteBuilder<
       errorResponses: this._errorResponses,
       middlewares: this._middlewares,
       security: this._security,
+      excludeFromDocs: this._excludeFromDocs,
       handler: fn as unknown as RouteDefinition["handler"],
     }
 

@@ -82,6 +82,7 @@ export interface RouteDefinition {
   errorResponses?: ErrorResponseConfig
   middlewares?: MiddlewareFn[]
   security?: Array<Record<string, string[]>>
+  excludeFromDocs?: boolean
   handler: (
     props: RouteHandlerProps<Record<string, string>, unknown, unknown, unknown>,
   ) => Promise<Response> | Response

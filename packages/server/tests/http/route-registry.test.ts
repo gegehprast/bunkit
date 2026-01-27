@@ -166,7 +166,7 @@ describe("RouteRegistry", () => {
       expect(match?.definition.path).toBe("/")
     })
 
-    test("should match first registered route when multiple match", () => {
+    test("should match most specific route when multiple match", () => {
       registry.register({
         method: "GET",
         path: "/api/:type",
@@ -178,11 +178,11 @@ describe("RouteRegistry", () => {
         handler: mockHandler,
       })
 
-      // Should match the first one (/:type) since it was registered first
+      // Should match the static route (/api/users) since it's more specific
       const match = registry.match("GET", "/api/users")
       expect(match).not.toBeNull()
-      expect(match?.definition.path).toBe("/api/:type")
-      expect(match?.params.type).toBe("users")
+      expect(match?.definition.path).toBe("/api/users")
+      expect(match?.params).toEqual({})
     })
 
     test("should handle URL-encoded parameters", () => {

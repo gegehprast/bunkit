@@ -39,7 +39,9 @@ export function generateOpenApiSpec(
 ): Result<OpenApiSpec, Error> {
   // Use local registry if provided, otherwise fall back to global
   const registry = localRegistry ?? routeRegistry
-  const routes = registry.getAll()
+  const allRoutes = registry.getAll()
+  // Filter out routes excluded from documentation
+  const routes = allRoutes.filter((route) => !route.excludeFromDocs)
   const paths: Record<string, Record<string, unknown>> = {}
 
   // Group routes by path
