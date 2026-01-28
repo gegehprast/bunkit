@@ -7,6 +7,12 @@ import { logger } from "@/core/logger"
  */
 export function loggingMiddleware(): MiddlewareFn {
   return async ({ req, next }: MiddlewareArgs) => {
+    // Skip logging for WebSocket upgrade requests
+    const upgradeHeader = req.headers.get("upgrade")
+    if (upgradeHeader?.toLowerCase() === "websocket") {
+      return await next()
+    }
+
     const startTime = performance.now()
     const method = req.method
     const url = new URL(req.url)
