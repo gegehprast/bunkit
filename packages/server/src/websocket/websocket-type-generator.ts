@@ -175,14 +175,23 @@ function zodSchemaToTypeString(schema: z.ZodType, indent = 2): string {
         .join(" | ")
     }
     case "enum":
-    case "ZodEnum": {
-      const values = (typeDef.values as string[]) || []
-      if (values.length === 0) return "never"
-      return values.map((v) => `"${v}"`).join(" | ")
-    }
+    case "ZodEnum":
     case "nativeEnum":
     case "ZodNativeEnum": {
-      return "unknown"
+      // For ZodEnum, values can be in entries (object) or values (array)
+      const entries = typeDef.entries as Record<string, string> | undefined
+      const valuesArray = typeDef.values as string[]
+
+      let values: string[] = []
+      if (entries && typeof entries === "object") {
+        // Extract values from entries object
+        values = Object.values(entries)
+      } else if (valuesArray && Array.isArray(valuesArray)) {
+        values = valuesArray
+      }
+
+      if (values.length === 0) return "never"
+      return values.map((v) => `"${v}"`).join(" | ")
     }
     case "tuple":
     case "ZodTuple": {
