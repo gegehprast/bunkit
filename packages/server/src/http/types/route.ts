@@ -10,17 +10,22 @@ import type { RouteHandlerProps } from "./context"
  * Examples:
  * - "/users/:userId/posts/:postId" -> { userId: string, postId: string }
  * - "/public/:path*" -> { path: string } (captures remaining path segments)
+ * - "/:dynamic/:wild*" -> { dynamic: string, wild: string }
  */
 export type ExtractParams<T extends string> =
-  // Wildcard param with more path after (invalid, but handle gracefully)
-  T extends `${infer _Start}:${infer Param}*/${infer _Rest}`
-    ? { [K in Param]: string }
-    : // Wildcard param at end (e.g., :path*)
-      T extends `${infer _Start}:${infer Param}*`
+  // Regular param with more path (process non-wildcard params first)
+  T extends `${infer _Start}:${infer Param}/${infer Rest}`
+    ? Rest extends `${infer _}:${infer _}*${infer _}`
+      ? // Next segment contains wildcard, extract this param and continue
+        { [K in Param]: string } & ExtractParams<`/${Rest}`>
+      : // Next segment is regular, extract this param and continue
+        { [K in Param]: string } & ExtractParams<`/${Rest}`>
+    : // Wildcard param with more path after (invalid, but handle gracefully)
+      T extends `${infer _Start}:${infer Param}*/${infer _Rest}`
       ? { [K in Param]: string }
-      : // Regular param with more path
-        T extends `${infer _Start}:${infer Param}/${infer Rest}`
-        ? { [K in Param]: string } & ExtractParams<`/${Rest}`>
+      : // Wildcard param at end (e.g., :path*)
+        T extends `${infer _Start}:${infer Param}*`
+        ? { [K in Param]: string }
         : // Regular param at end
           T extends `${infer _Start}:${infer Param}`
           ? { [K in Param]: string }

@@ -376,6 +376,32 @@ describe("RouteBuilder", () => {
       const routes = routeRegistry.getAll()
       expect(routes.length).toBe(1)
     })
+
+    test("should type check wildcard path parameters", () => {
+      // Test single wildcard
+      createRoute("GET", "/public/:path*").handler(({ params, res }) => {
+        const path: string = params.path
+        return res.ok({ path })
+      })
+
+      // Test dynamic + wildcard
+      createRoute("GET", "/repos/:owner/:rest*").handler(({ params, res }) => {
+        const owner: string = params.owner
+        const rest: string = params.rest
+        return res.ok({ owner, rest })
+      })
+
+      // Test multiple dynamic + wildcard
+      createRoute("GET", "/:a/:b/:wild*").handler(({ params, res }) => {
+        const a: string = params.a
+        const b: string = params.b
+        const wild: string = params.wild
+        return res.ok({ a, b, wild })
+      })
+
+      const routes = routeRegistry.getAll()
+      expect(routes.length).toBe(3)
+    })
   })
 
   describe("handler return type validation", () => {
