@@ -471,5 +471,55 @@ describe("OpenAPI Generator", () => {
       expect(specValue.paths["/api/tasks/{id}"]).toBeDefined()
       expect(specValue.paths["/api/tasks/{id}"]?.get).toBeDefined()
     })
+
+    test("should handle wildcard path parameters", async () => {
+      // Test single wildcard
+      createRoute("GET", "/files/:path*")
+        .openapi({ operationId: "getFile", tags: ["Files"] })
+        .handler(({ params, res }) => {
+          return res.ok({ path: params.path })
+        })
+
+      // Test dynamic + wildcard
+      createRoute("GET", "/repos/:owner/:rest*")
+        .openapi({ operationId: "getRepoPath", tags: ["Repos"] })
+        .handler(({ params, res }) => {
+          return res.ok({ owner: params.owner, rest: params.rest })
+        })
+
+      server = createServer()
+      const spec = await server.http.getOpenApiSpec()
+
+      expect(spec.isOk()).toBe(true)
+      const specValue = spec.unwrap()
+
+      // Check wildcard paths are converted correctly
+      expect(specValue.paths["/files/{path}*"]).toBeDefined()
+      expect(specValue.paths["/repos/{owner}/{rest}*"]).toBeDefined()
+
+      // Check parameters don't include * in their names
+      const fileOperation = specValue.paths["/files/{path}*"]?.get as Record<
+        string,
+        unknown
+      >
+      const fileParams = fileOperation?.parameters as Array<{
+        name: string
+        in: string
+      }>
+      expect(fileParams).toBeDefined()
+      expect(fileParams?.length).toBe(1)
+      expect(fileParams?.[0]?.name).toBe("path") // Should be "path", not "path*"
+
+      const repoOperation = specValue.paths["/repos/{owner}/{rest}*"]
+        ?.get as Record<string, unknown>
+      const repoParams = repoOperation?.parameters as Array<{
+        name: string
+        in: string
+      }>
+      expect(repoParams).toBeDefined()
+      expect(repoParams?.length).toBe(2)
+      expect(repoParams?.[0]?.name).toBe("owner")
+      expect(repoParams?.[1]?.name).toBe("rest") // Should be "rest", not "rest*"
+    })
   })
 })

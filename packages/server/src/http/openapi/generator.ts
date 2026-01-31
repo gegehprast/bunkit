@@ -62,7 +62,11 @@ export function generateOpenApiSpec(
     }
 
     // Convert Express-style :param to OpenAPI {param} format
-    const openApiPath = path.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, "{$1}")
+    // Also handle wildcard params :param* -> {param}*
+    const openApiPath = path.replace(
+      /:([a-zA-Z_][a-zA-Z0-9_]*)(\*?)/g,
+      "{$1}$2",
+    )
     paths[openApiPath] = pathItem
   }
 
@@ -231,6 +235,8 @@ function getCommonErrorResponse(status: number) {
 /**
  * Extract parameter names from a path
  * Example: "/users/:userId/posts/:postId" -> ["userId", "postId"]
+ * Example: "/files/:path*" -> ["path"]
+ * Example: "/:dynamic/:wild*" -> ["dynamic", "wild"]
  */
 function extractPathParams(path: string): string[] {
   const params: string[] = []
@@ -238,7 +244,9 @@ function extractPathParams(path: string): string[] {
 
   for (const part of parts) {
     if (part.startsWith(":")) {
-      params.push(part.slice(1))
+      // Remove : prefix and * suffix (for wildcard params)
+      const paramName = part.slice(1).replace(/\*$/, "")
+      params.push(paramName)
     }
   }
 
