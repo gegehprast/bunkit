@@ -493,12 +493,12 @@ describe("OpenAPI Generator", () => {
       expect(spec.isOk()).toBe(true)
       const specValue = spec.unwrap()
 
-      // Check wildcard paths are converted correctly
-      expect(specValue.paths["/files/{path}*"]).toBeDefined()
-      expect(specValue.paths["/repos/{owner}/{rest}*"]).toBeDefined()
+      // Check wildcard paths are converted correctly (without *)
+      expect(specValue.paths["/files/{path}"]).toBeDefined()
+      expect(specValue.paths["/repos/{owner}/{rest}"]).toBeDefined()
 
       // Check parameters don't include * in their names
-      const fileOperation = specValue.paths["/files/{path}*"]?.get as Record<
+      const fileOperation = specValue.paths["/files/{path}"]?.get as Record<
         string,
         unknown
       >
@@ -510,7 +510,7 @@ describe("OpenAPI Generator", () => {
       expect(fileParams?.length).toBe(1)
       expect(fileParams?.[0]?.name).toBe("path") // Should be "path", not "path*"
 
-      const repoOperation = specValue.paths["/repos/{owner}/{rest}*"]
+      const repoOperation = specValue.paths["/repos/{owner}/{rest}"]
         ?.get as Record<string, unknown>
       const repoParams = repoOperation?.parameters as Array<{
         name: string

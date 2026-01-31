@@ -62,11 +62,8 @@ export function generateOpenApiSpec(
     }
 
     // Convert Express-style :param to OpenAPI {param} format
-    // Also handle wildcard params :param* -> {param}*
-    const openApiPath = path.replace(
-      /:([a-zA-Z_][a-zA-Z0-9_]*)(\*?)/g,
-      "{$1}$2",
-    )
+    // Also handle wildcard params :param* -> {param} (remove the *)
+    const openApiPath = path.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)\*?/g, "{$1}")
     paths[openApiPath] = pathItem
   }
 
