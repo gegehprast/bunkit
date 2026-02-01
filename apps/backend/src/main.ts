@@ -4,7 +4,6 @@ import { logger } from "@/core/logger"
 import { shutdownManager } from "@/core/shutdown-manager"
 import { server } from "./core/server"
 import { closeDatabase, initDatabase } from "./db/client"
-import { loadRoutes } from "./routes"
 
 // Clear z.globalRegistry to avoid duplicate schema IDs on hot reload
 // There must be a better way to handle this.
@@ -19,8 +18,7 @@ async function main() {
     logLevel: config.LOG_LEVEL,
   })
 
-  // Import routes to register them with the route registry
-  await loadRoutes()
+  await import("@/routes")
 
   try {
     // Setup graceful shutdown handlers

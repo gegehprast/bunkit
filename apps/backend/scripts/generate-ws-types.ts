@@ -3,7 +3,6 @@
 import path from "node:path"
 import { parseArgs } from "node:util"
 import { server } from "@/core/server"
-import { loadRoutes } from "@/routes"
 
 /**
  * Parse command line arguments
@@ -73,7 +72,7 @@ async function main() {
     console.info("🚀 Starting WebSocket types generation...")
 
     // Load routes
-    await loadRoutes()
+    await import("@/routes")
 
     // Generate WebSocket types
     let outputPath = args.output as string

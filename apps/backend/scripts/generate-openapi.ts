@@ -3,7 +3,6 @@
 import path from "node:path"
 import { parseArgs } from "node:util"
 import { server } from "@/core/server"
-import { loadRoutes } from "@/routes"
 
 /**
  * Parse command line arguments
@@ -104,7 +103,7 @@ async function main() {
     console.info("🚀 Starting OpenAPI specification generation...")
 
     // Load routes
-    await loadRoutes()
+    await import("@/routes")
 
     // Initialize server
     const startResult = await server.start()

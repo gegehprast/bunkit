@@ -5,7 +5,6 @@ import { type AppError, toAppError } from "@/core/errors"
 import { logger } from "@/core/logger"
 import { server } from "@/core/server"
 import { closeDatabase, initDatabase } from "@/db/client"
-import { loadRoutes } from "@/routes"
 
 export interface TestServer {
   start: () => Promise<Result<void, AppError>>
@@ -29,7 +28,7 @@ export async function createTestServer(): Promise<TestServer> {
         z.globalRegistry.clear()
 
         // Load routes
-        await loadRoutes()
+        await import("@/routes")
 
         // Initialize database (will skip if already initialized)
         const initDbResult = await initDatabase()

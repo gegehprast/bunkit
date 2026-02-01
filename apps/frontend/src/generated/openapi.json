@@ -9,6 +9,18 @@
     {
       "url": "http://localhost:3001",
       "description": "Development server"
+    },
+    {
+      "url": "http://0.0.0.0:3001",
+      "description": "Development server"
+    },
+    {
+      "url": "http://127.0.0.1:3001",
+      "description": "Development server"
+    },
+    {
+      "url": "https://bunkit.dev",
+      "description": "Production server"
     }
   ],
   "paths": {
@@ -19,43 +31,6 @@
         "description": "Welcome page for the API",
         "tags": [
           "General"
-        ],
-        "responses": {
-          "500": {
-            "description": "Internal Server Error - Unexpected server error",
-            "content": {
-              "application/json": {
-                "example": {
-                  "message": "Internal server error",
-                  "code": "INTERNAL_ERROR",
-                  "details": "Stack trace or error details for debugging"
-                },
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/public/{filename}": {
-      "get": {
-        "operationId": "getStaticFile",
-        "summary": "Get static file",
-        "description": "Serves static files from the public directory",
-        "tags": [
-          "Static"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "filename",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
         ],
         "responses": {
           "500": {
@@ -855,170 +830,6 @@
           }
         }
       }
-    },
-    "/api/todos/{id}/comments": {
-      "get": {
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "500": {
-            "description": "Internal Server Error - Unexpected server error",
-            "content": {
-              "application/json": {
-                "example": {
-                  "message": "Internal server error",
-                  "code": "INTERNAL_ERROR",
-                  "details": "Stack trace or error details for debugging"
-                },
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/todos/{id}/comments/{userid}": {
-      "get": {
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "userid",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "500": {
-            "description": "Internal Server Error - Unexpected server error",
-            "content": {
-              "application/json": {
-                "example": {
-                  "message": "Internal server error",
-                  "code": "INTERNAL_ERROR",
-                  "details": "Stack trace or error details for debugging"
-                },
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/todos/{id}/comments/{userid}/{teamId}": {
-      "get": {
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "userid",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "teamId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "500": {
-            "description": "Internal Server Error - Unexpected server error",
-            "content": {
-              "application/json": {
-                "example": {
-                  "message": "Internal server error",
-                  "code": "INTERNAL_ERROR",
-                  "details": "Stack trace or error details for debugging"
-                },
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/todos/{id}/{userid}/{teamId}": {
-      "get": {
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "userid",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "teamId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "500": {
-            "description": "Internal Server Error - Unexpected server error",
-            "content": {
-              "application/json": {
-                "example": {
-                  "message": "Internal server error",
-                  "code": "INTERNAL_ERROR",
-                  "details": "Stack trace or error details for debugging"
-                },
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -1131,7 +942,7 @@
           },
           "timestamp": {
             "type": "string",
-            "example": "2026-01-17T17:29:02.351Z"
+            "example": "2026-02-01T14:07:42.545Z"
           },
           "uptime": {
             "type": "number",
@@ -1254,11 +1065,11 @@
           },
           "createdAt": {
             "type": "string",
-            "example": "2026-01-17T17:29:02.378Z"
+            "example": "2026-02-01T14:07:42.551Z"
           },
           "updatedAt": {
             "type": "string",
-            "example": "2026-01-17T17:29:02.378Z"
+            "example": "2026-02-01T14:07:42.551Z"
           }
         },
         "required": [
@@ -1470,6 +1281,12 @@
         "type": "http",
         "scheme": "basic",
         "description": "HTTP Basic authentication"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "access_token",
+        "description": "HTTP-only cookie authentication"
       }
     }
   }
