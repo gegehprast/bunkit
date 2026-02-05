@@ -112,18 +112,22 @@ export class Server implements IServer {
         hostname: this.host,
         development: this.development,
         fetch: async (request: Request, bunServer): Promise<Response> => {
+          const _request = request.clone() as Request
+
           // Check for WebSocket upgrade first, passing local WS registry
           const wsResponse = await handleWebSocketUpgrade(
-            request,
+            _request,
             bunServer,
             this.localWsRouteRegistry,
           )
+          // Upgraded
           if (wsResponse !== undefined) {
             return wsResponse
           }
+          
           // Handle as regular HTTP request, passing local registry if available
           return handleRequest(
-            request,
+            _request,
             this.middlewares,
             this.options,
             this.localRouteRegistry,
