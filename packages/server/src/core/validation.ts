@@ -68,9 +68,10 @@ export function parseQueryParams(url: URL): Record<string, string | string[]> {
  * @param maxBodySize - Maximum body size in bytes (default: 10MB)
  */
 export async function parseBody(
-  request: Request,
+  _request: Request,
   maxBodySize = 10 * 1024 * 1024, // 10MB default
 ): Promise<Result<unknown, Error>> {
+  const request = _request.clone()
   // Check Content-Length header to enforce size limit before parsing
   const contentLength = request.headers.get("content-length")
   if (contentLength) {
