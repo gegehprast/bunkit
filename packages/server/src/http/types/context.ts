@@ -2,13 +2,14 @@ import type { ResponseHelpers } from "./response"
 
 /**
  * Base context interface that can be extended via declaration merging.
+ * Note: all properties must be optional!
  *
  * @example
  * // In your app, extend the Context interface:
  * declare module "@bunkit/server" {
  *   interface Context {
- *     userId: string
- *     userEmail: string
+ *     userId?: string
+ *     userEmail?: string
  *   }
  * }
  *
