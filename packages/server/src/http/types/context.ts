@@ -1,6 +1,23 @@
 import type { ResponseHelpers } from "./response"
 
 /**
+ * Base context interface that can be extended via declaration merging.
+ *
+ * @example
+ * // In your app, extend the Context interface:
+ * declare module "@bunkit/server" {
+ *   interface Context {
+ *     userId: string
+ *     userEmail: string
+ *   }
+ * }
+ *
+ * // Now your handlers will have type-safe access to ctx.userId
+ */
+// biome-ignore lint/suspicious/noEmptyInterface: Empty interface is intentional for declaration merging
+export interface Context {}
+
+/**
  * Props passed to route handlers
  */
 export interface RouteHandlerProps<
@@ -14,7 +31,7 @@ export interface RouteHandlerProps<
   params: TParams
   query: TQuery
   body: TBody
-  ctx: Record<string, unknown>
+  ctx: Context
 }
 
 /**

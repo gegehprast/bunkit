@@ -82,7 +82,8 @@ createRoute("GET", "/api/todos")
   .response(z.array(TodoSchema))
   .handler(async ({ ctx, query, res }) => {
     const todoRepo = getTodoRepository()
-    const userId = ctx.userId as string
+    // biome-ignore lint/style/noNonNullAssertion: authMiddleware ensures this is set
+    const userId = ctx.userId!
 
     const todosResult = await todoRepo.findByUserId(userId, {
       completed:
@@ -128,7 +129,8 @@ createRoute("POST", "/api/todos")
   .response(TodoSchema)
   .handler(async ({ ctx, body, res }) => {
     const todoRepo = getTodoRepository()
-    const userId = ctx.userId as string
+    // biome-ignore lint/style/noNonNullAssertion: authMiddleware ensures this is set
+    const userId = ctx.userId!
 
     const createResult = await todoRepo.create({
       userId,
@@ -168,7 +170,8 @@ createRoute("GET", "/api/todos/:id")
   .response(TodoSchema)
   .handler(async ({ ctx, params, res }) => {
     const todoRepo = getTodoRepository()
-    const userId = ctx.userId as string
+    // biome-ignore lint/style/noNonNullAssertion: authMiddleware ensures this is set
+    const userId = ctx.userId!
 
     const todoResult = await todoRepo.findById(params.id)
 
@@ -214,7 +217,8 @@ createRoute("PUT", "/api/todos/:id")
   .response(TodoSchema)
   .handler(async ({ ctx, params, body, res }) => {
     const todoRepo = getTodoRepository()
-    const userId = ctx.userId as string
+    // biome-ignore lint/style/noNonNullAssertion: authMiddleware ensures this is set
+    const userId = ctx.userId!
 
     // First check if todo exists and belongs to user
     const existingResult = await todoRepo.findById(params.id)
@@ -269,7 +273,8 @@ createRoute("DELETE", "/api/todos/:id")
   .response(z.object({ message: z.string() }))
   .handler(async ({ ctx, params, res }) => {
     const todoRepo = getTodoRepository()
-    const userId = ctx.userId as string
+    // biome-ignore lint/style/noNonNullAssertion: authMiddleware ensures this is set
+    const userId = ctx.userId!
 
     // First check if todo exists and belongs to user
     const existingResult = await todoRepo.findById(params.id)

@@ -1,3 +1,4 @@
+import type { Context } from "../http/types/context"
 import type { ResponseHelpers } from "../http/types/response"
 import type { MiddlewareArgs, MiddlewareFn } from "../types/middleware"
 
@@ -47,7 +48,7 @@ export function createMiddlewareArgs(
   params: Record<string, string>,
   query: unknown,
   body: unknown,
-  ctx: Record<string, unknown>,
+  ctx: Context,
   res: ResponseHelpers,
 ): MiddlewareArgs {
   return {

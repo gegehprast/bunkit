@@ -1,4 +1,5 @@
 import z from "zod"
+import "@/types"
 import { config } from "@/config"
 import { logger } from "@/core/logger"
 import { shutdownManager } from "@/core/shutdown-manager"

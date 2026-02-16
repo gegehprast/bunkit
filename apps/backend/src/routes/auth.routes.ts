@@ -216,8 +216,8 @@ createRoute("GET", "/auth/me")
   .handler(async ({ ctx, res }) => {
     const userRepo = getUserRepository()
 
-    // Get user ID from context (set by auth middleware)
-    const userId = ctx.userId as string
+    // biome-ignore lint/style/noNonNullAssertion: authMiddleware ensures this is set
+    const userId = ctx.userId!
 
     const userResult = await userRepo.findById(userId)
     if (userResult.isErr()) {

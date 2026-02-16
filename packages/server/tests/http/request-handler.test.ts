@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test"
 import { z } from "zod"
+import "../test-types"
 import { routeRegistry } from "../../src/http/route-registry"
-import { createRoute, createServer } from "../../src/index"
+import { createRoute, createServer, type MiddlewareFn } from "../../src/index"
 import type { Server } from "../../src/types/server"
 
 // Helper to parse JSON response with type assertion
@@ -478,13 +479,7 @@ describe("HTTP Request Handling", () => {
     })
 
     test("should pass context through middleware chain", async () => {
-      const contextMiddleware = async ({
-        ctx,
-        next,
-      }: {
-        ctx: Record<string, unknown>
-        next: () => Promise<Response>
-      }) => {
+      const contextMiddleware: MiddlewareFn = async ({ ctx, next }) => {
         ctx.userId = "user-123"
         ctx.role = "admin"
         return next()

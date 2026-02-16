@@ -1,3 +1,4 @@
+import type { Context } from "../http/types/context"
 import type { ResponseHelpers } from "../http/types/response"
 
 /**
@@ -8,7 +9,7 @@ export interface MiddlewareArgs {
   params: Record<string, string>
   query: unknown
   body: unknown
-  ctx: Record<string, unknown>
+  ctx: Context
   res: ResponseHelpers
   next: () => Promise<Response>
 }

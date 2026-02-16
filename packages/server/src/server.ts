@@ -122,7 +122,7 @@ export class Server implements IServer {
           if (wsResponse !== undefined) {
             return wsResponse
           }
-          
+
           // Handle as regular HTTP request, passing local registry if available
           return handleRequest(
             request,

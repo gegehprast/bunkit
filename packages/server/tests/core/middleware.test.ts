@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test"
-import { createRoute } from "../../src"
+import "../test-types"
+import { createRoute, type MiddlewareFn } from "../../src"
 import { routeRegistry } from "../../src/http/route-registry"
 
 describe("Middleware", () => {
@@ -59,13 +60,7 @@ describe("Middleware", () => {
   test("should pass context through middleware chain", () => {
     routeRegistry.clear()
 
-    const contextMiddleware = async ({
-      ctx,
-      next,
-    }: {
-      ctx: Record<string, unknown>
-      next: () => Promise<Response>
-    }) => {
+    const contextMiddleware: MiddlewareFn = async ({ ctx, next }) => {
       ctx.user = { id: "123", name: "John" }
       ctx.timestamp = Date.now()
       return next()
@@ -128,17 +123,7 @@ describe("Middleware", () => {
   test("should support authentication middleware pattern", () => {
     routeRegistry.clear()
 
-    const authMiddleware = async ({
-      req,
-      ctx,
-      next,
-      res,
-    }: {
-      req: Request
-      ctx: Record<string, unknown>
-      next: () => Promise<Response>
-      res: { unauthorized: (message: string, code: string) => Response }
-    }) => {
+    const authMiddleware: MiddlewareFn = async ({ req, ctx, next, res }) => {
       const authHeader = req.headers.get("authorization")
       if (!authHeader) {
         return res.unauthorized("Missing authorization header", "UNAUTHORIZED")

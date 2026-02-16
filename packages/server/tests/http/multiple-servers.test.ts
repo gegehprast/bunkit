@@ -1,7 +1,8 @@
 import { afterAll, beforeEach, describe, expect, test } from "bun:test"
 import { z } from "zod"
+import "../test-types"
 import { routeRegistry } from "../../src/http/route-registry"
-import { createRoute, createServer } from "../../src/index"
+import { createRoute, createServer, type MiddlewareFn } from "../../src/index"
 import type { Server } from "../../src/types/server"
 
 // Helper to parse JSON response with type assertion
@@ -197,13 +198,7 @@ describe("Multiple Servers", () => {
       const server = createServer({ port: 3308 })
       servers.push(server)
 
-      const authMiddleware = async ({
-        ctx,
-        next,
-      }: {
-        ctx: Record<string, unknown>
-        next: () => Promise<Response>
-      }) => {
+      const authMiddleware: MiddlewareFn = async ({ ctx, next }) => {
         ctx.authenticated = true
         return next()
       }

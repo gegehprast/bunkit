@@ -14,6 +14,7 @@ import {
   notFound,
 } from "./response-helpers"
 import { type RouteRegistry, routeRegistry } from "./route-registry"
+import type { Context } from "./types/context"
 import type { HttpMethod } from "./types/route"
 
 /**
@@ -114,7 +115,7 @@ export async function handleRequest(
   const res = createResponseHelpers()
 
   // Create context object
-  const ctx: Record<string, unknown> = {}
+  const ctx: Context = {}
 
   // Combine global and route middlewares
   const allMiddlewares = [
