@@ -74,10 +74,10 @@ if (result.isOk()) {
 - ✅ All database operations MUST return `Result<T, E>`
 - ✅ Use explicit error types from `@/core/errors`
 - ❌ Never use generic `Error` class
-- ❌ Never throw exceptions in business logic
+- ❌ Never throw on internal stuff
 
 ## Class Access Modifiers (MANDATORY)
-**Always use explicit access modifiers in classes, even block for public:**
+**Always use explicit access modifiers in classes, even for public:**
 
 ```typescripttypescript
 // ✅ CORRECT: Explicit access modifiers
@@ -105,26 +105,6 @@ Check the root `package.json` for available scripts. Always run scripts from the
 
 ### Writing Tests
 
-**Test structure:**
-
-```typescript
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
-
-describe('Feature Name', () => {
-  beforeAll(async () => {
-    // Setup (runs once)
-  })
-  
-  afterAll(async () => {
-    // Cleanup (runs once)
-  })
-
-  test('should do something', () => {
-    expect(true).toBe(true)
-  })
-})
-```
-
 **Test Organization:**
 - Unit tests are in `apps/backend/tests/` mirroring the src structure
 - Integration tests are in `apps/backend/tests/integration/`
@@ -139,7 +119,7 @@ describe('Feature Name', () => {
 
 ### Running Tests
 
-**IMPORTANT:** Tests must be run from the each app or package directory:
+**IMPORTANT:** Tests must be run from each app or package directory:
 
 ```bash
 # From project root
