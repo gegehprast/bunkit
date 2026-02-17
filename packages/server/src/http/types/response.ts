@@ -30,6 +30,36 @@ export interface ErrorResponse {
 }
 
 /**
+ * Registry of all application routes for type-safe internal redirects.
+ * This interface is auto-generated or manually extended via declaration merging.
+ *
+ * @example Auto-generated (recommended):
+ * // Run: bun run generate-route-types
+ * // This creates a routes.d.ts file with all registered routes
+ *
+ * @example Manual declaration merging:
+ * declare module "@bunkit/server" {
+ *   interface RegisteredRoutes {
+ *     "/": Record<string, never>
+ *     "/users/:id": { id: string }
+ *   }
+ * }
+ */
+// biome-ignore lint/suspicious/noEmptyInterface: Empty interface is intentional for declaration merging
+export interface RegisteredRoutes {}
+
+/**
+ * Helper type to build route paths with parameters
+ */
+export type BuildRoutePath<TPath extends keyof RegisteredRoutes> =
+  RegisteredRoutes[TPath] extends Record<string, never>
+    ? TPath // No parameters required
+    : {
+        path: TPath
+        params: RegisteredRoutes[TPath]
+      }
+
+/**
  * Response helper methods available in handlers
  * @template TResponse - The expected response data type from the route schema
  */
@@ -104,9 +134,25 @@ export interface ResponseHelpers<TResponse = unknown> {
    */
   stream(readable: ReadableStream, contentType?: string): Response
   /**
-   * Redirect response
+   * Redirect to an external URL
    */
   redirect(url: string, status?: number): Response
+  /**
+   * Redirect to an internal route with type safety.
+   * Routes must be registered in the RegisteredRoutes interface.
+   *
+   * @example
+   * // For routes without parameters
+   * res.redirectTo("/")
+   * res.redirectTo("/users")
+   *
+   * // For routes with parameters
+   * res.redirectTo({ path: "/users/:id", params: { id: "123" } })
+   */
+  redirectTo<TPath extends keyof RegisteredRoutes>(
+    route: BuildRoutePath<TPath>,
+    status?: number,
+  ): Response
 
   /**
    * Custom response

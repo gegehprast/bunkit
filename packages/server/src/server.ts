@@ -3,6 +3,12 @@ import { createCorsMiddleware } from "./core/cors"
 import { generateOpenApiSpec } from "./http/openapi/generator"
 import { handleRequest } from "./http/request-handler"
 import { type RouteRegistry, routeRegistry } from "./http/route-registry"
+import {
+  type ExportRouteTypesOptions,
+  exportRouteTypes,
+  type GenerateRouteTypesOptions,
+  generateRouteTypes,
+} from "./http/route-type-generator"
 import type { MiddlewareFn } from "./types/middleware"
 import {
   type Server as IServer,
@@ -238,6 +244,22 @@ export class Server implements IServer {
           error instanceof Error ? error : new Error("Failed to get routes"),
         )
       }
+    },
+
+    getRouteTypes: async (
+      options: GenerateRouteTypesOptions = {},
+    ): Promise<Result<string, Error>> => {
+      // Get routes from local registry if available, otherwise global
+      const registry = this.localRouteRegistry ?? routeRegistry
+      return generateRouteTypes(registry, options)
+    },
+
+    exportRouteTypes: async (
+      options: ExportRouteTypesOptions,
+    ): Promise<Result<void, Error>> => {
+      // Get routes from local registry if available, otherwise global
+      const registry = this.localRouteRegistry ?? routeRegistry
+      return exportRouteTypes(registry, options)
     },
   }
 

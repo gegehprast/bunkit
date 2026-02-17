@@ -5,12 +5,14 @@
     "type": "module",
     "private": true,
     "scripts": {
-        "dev": "bun --env-file=.env.local --hot src/main.ts",
+        "dev": "concurrently \"bun --env-file=.env.local --hot src/main.ts\" \"bun run route-types:watch\"",
         "start": "bun --env-file=.env src/main.ts",
         "typecheck": "tsc --noEmit",
         "db:generate": "drizzle-kit generate",
         "db:migrate": "bun run ./scripts/migrate.ts",
         "db:studio": "drizzle-kit studio",
+        "route-types:generate": "LOG_LEVEL=error bun run ./scripts/generate-route-types.ts",
+        "route-types:watch": "LOG_LEVEL=error bun --watch ./scripts/generate-route-types.ts",
         "openapi-types:generate": "LOG_LEVEL=error bun run ./scripts/generate-openapi.ts --types",
         "ws-types:generate": "LOG_LEVEL=error bun run ./scripts/generate-ws-types.ts",
         "openapi-types:generate:to-frontend": "LOG_LEVEL=error bun run ./scripts/generate-openapi.ts --types --output=../../apps/frontend/src/generated",
@@ -27,7 +29,8 @@
     "devDependencies": {
         "@types/bun": "catalog:",
         "drizzle-kit": "catalog:",
-        "postgres": "catalog:"
+        "postgres": "catalog:",
+        "concurrently": "catalog:"
     },
     "peerDependencies": {
         "typescript": "^5"

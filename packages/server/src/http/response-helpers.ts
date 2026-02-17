@@ -1,10 +1,30 @@
 import { ErrorCode } from "../core/standard-errors"
 import type {
+  BuildRoutePath,
   Cookie,
   CookieOptions,
   ErrorResponse,
+  RegisteredRoutes,
   ResponseHelpers,
 } from "./types/response"
+
+/**
+ * Build a URL from a route path and its parameters
+ */
+function buildRouteUrl(path: string, params?: Record<string, string>): string {
+  if (!params) {
+    return path
+  }
+
+  let url = path
+  for (const [key, value] of Object.entries(params)) {
+    url = url.replace(`:${key}`, encodeURIComponent(value))
+    // Handle wildcard params
+    url = url.replace(`:${key}*`, encodeURIComponent(value))
+  }
+
+  return url
+}
 
 /**
  * Serializes a cookie into a Set-Cookie header value
@@ -204,6 +224,29 @@ export function redirect(url: string, status = 302): Response {
   })
 }
 
+/**
+ * Redirect to an internal route with type safety
+ */
+function redirectTo<TPath extends keyof RegisteredRoutes>(
+  route: BuildRoutePath<TPath>,
+  status = 302,
+): Response {
+  let url: string
+
+  if (typeof route === "string") {
+    // Simple route without parameters
+    url = route
+  } else {
+    // Route with parameters
+    url = buildRouteUrl(
+      route.path as string,
+      route.params as Record<string, string>,
+    )
+  }
+
+  return redirect(url, status)
+}
+
 export function custom(
   body: string | null,
   options: ResponseInit & { status?: number },
@@ -265,6 +308,7 @@ export function createResponseHelpers(): ResponseHelpers {
     stream: (readable, contentType) =>
       withCookies(stream(readable, contentType)),
     redirect: (url, status) => withCookies(redirect(url, status)),
+    redirectTo: (route, status) => withCookies(redirectTo(route, status)),
     custom: (body, options) => withCookies(custom(body, options)),
   }
 }

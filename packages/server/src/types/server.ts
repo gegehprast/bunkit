@@ -1,6 +1,10 @@
 import type { Result } from "@bunkit/result"
 import type { GenerateOpenApiSpecOptions } from "../http/openapi/generator"
 import type { RouteRegistry } from "../http/route-registry"
+import type {
+  ExportRouteTypesOptions,
+  GenerateRouteTypesOptions,
+} from "../http/route-type-generator"
 import type { HttpMethod } from "../http/types/route"
 import type { CorsOptions } from "../types/cors"
 import type { MiddlewareFn } from "../types/middleware"
@@ -150,6 +154,18 @@ interface ServerHttpMethods {
    * Get all registered HTTP routes for inspection
    */
   getRoutes(): Result<RouteInfo[], Error>
+  /**
+   * Get route types for type-safe internal redirects
+   */
+  getRouteTypes(
+    options?: GenerateRouteTypesOptions,
+  ): Promise<Result<string, Error>>
+  /**
+   * Export route types to a file for type-safe internal redirects
+   */
+  exportRouteTypes(
+    options: ExportRouteTypesOptions,
+  ): Promise<Result<void, Error>>
 }
 
 /**

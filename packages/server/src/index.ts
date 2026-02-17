@@ -13,6 +13,7 @@ export type {
 
 // HTTP Routes
 export { createRoute } from "./http/route-builder"
+export { routeRegistry } from "./http/route-registry"
 export type {
   Context,
   RouteHandlerProps,
@@ -72,6 +73,8 @@ export type {
   CookieOptions,
   ErrorResponse,
   ResponseHelpers,
+  RegisteredRoutes,
+  BuildRoutePath,
 } from "./http/types/response"
 export {
   ErrorCode,
@@ -86,6 +89,14 @@ export {
   CommonErrorResponses,
 } from "./core/standard-errors"
 export { ValidationError } from "./core/validation"
+
+// HTTP Route Type Generation
+export {
+  type GenerateRouteTypesOptions,
+  type ExportRouteTypesOptions,
+  generateRouteTypes,
+  exportRouteTypes,
+} from "./http/route-type-generator"
 
 // OpenAPI
 export { SecuritySchemes } from "./http/openapi/security-schemes"

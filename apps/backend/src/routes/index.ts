@@ -8,3 +8,6 @@ import "@/routes/todos.routes"
 
 // WebSocket routes
 import "@/routes/chat.websocket"
+
+// Redirect route
+import "@/routes/redirect.routes"
