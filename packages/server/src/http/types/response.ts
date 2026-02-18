@@ -60,10 +60,10 @@ export type BuildRoutePath<TPath extends keyof RegisteredRoutes> =
       }
 
 /**
- * Response helper methods available in handlers
+ * Response builder interface with type-safe methods for constructing HTTP responses in route handlers.
  * @template TResponse - The expected response data type from the route schema
  */
-export interface ResponseHelpers<TResponse = unknown> {
+export interface ResponseBuilder<TResponse = unknown> {
   /**
    * Set a cookie in the response. This may throw an Error.
    * @throws Error if name is string and value is missing
@@ -152,6 +152,50 @@ export interface ResponseHelpers<TResponse = unknown> {
   redirectTo<TPath extends keyof RegisteredRoutes>(
     route: BuildRoutePath<TPath>,
     status?: number,
+  ): Response
+
+  /**
+   * Custom response status. Chainable.
+   */
+  status(status: number): ResponseBuilder<TResponse>
+
+  /**
+   * Custom response header. Chainable.
+   */
+  header(name: string, value: string): ResponseBuilder<TResponse>
+
+  /**
+   * Custom response headers. Chainable.
+   */
+  headers(headers: Record<string, string>): ResponseBuilder<TResponse>
+
+  /**
+   * Custom response cookie. Chainable.
+   */
+  cookie(
+    name: string,
+    value: string,
+    options?: CookieOptions,
+  ): ResponseBuilder<TResponse>
+  /**
+   * Custom response cookie. Chainable.
+   */
+  cookie(cookie: Cookie): ResponseBuilder<TResponse>
+
+  /**
+   * Send a JSON response with the given body and status code.
+   */
+  json(body: unknown, status?: number): Response
+  /**
+   * Send a JSON response with the given body and status code.
+   */
+  json<T>(body: T, status?: number): Response
+  /**
+   * Send a JSON response with the given body and status code.
+   */
+  json<T>(
+    body: T,
+    options: { status?: number; headers?: Record<string, string> },
   ): Response
 
   /**

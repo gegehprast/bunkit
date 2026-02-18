@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test"
-import { createResponseHelpers } from "../../src/http/response-helpers"
+import { createResponseBuilder } from "../../src/http/response-builder"
 
 describe("Response Cookie Support", () => {
   test("should set a single cookie", () => {
-    const res = createResponseHelpers()
+    const res = createResponseBuilder()
     const response = res
       .setCookie("session", "abc123")
       .ok({ message: "Success" })
@@ -14,7 +14,7 @@ describe("Response Cookie Support", () => {
   })
 
   test("should set multiple cookies", () => {
-    const res = createResponseHelpers()
+    const res = createResponseBuilder()
     const response = res
       .setCookie("session", "abc123")
       .setCookie("user", "john")
@@ -27,7 +27,7 @@ describe("Response Cookie Support", () => {
   })
 
   test("should set cookies with options", () => {
-    const res = createResponseHelpers()
+    const res = createResponseBuilder()
     const response = res
       .setCookie("session", "abc123", {
         httpOnly: true,
@@ -49,7 +49,7 @@ describe("Response Cookie Support", () => {
   })
 
   test("should set cookie with object syntax", () => {
-    const res = createResponseHelpers()
+    const res = createResponseBuilder()
     const response = res
       .setCookie({
         name: "token",
@@ -69,7 +69,7 @@ describe("Response Cookie Support", () => {
   })
 
   test("should set cookies with different response types", () => {
-    const res = createResponseHelpers()
+    const res = createResponseBuilder()
 
     // Test with created()
     const createdResponse = res
@@ -80,7 +80,7 @@ describe("Response Cookie Support", () => {
     expect(createdResponse.headers.getSetCookie()).toHaveLength(1)
 
     // Test with redirect()
-    const res2 = createResponseHelpers()
+    const res2 = createResponseBuilder()
     const redirectResponse = res2
       .setCookie("redirect", "true")
       .redirect("/dashboard")
@@ -89,7 +89,7 @@ describe("Response Cookie Support", () => {
     expect(redirectResponse.headers.getSetCookie()).toHaveLength(1)
 
     // Test with error responses
-    const res3 = createResponseHelpers()
+    const res3 = createResponseBuilder()
     const errorResponse = res3
       .setCookie("error", "logged")
       .badRequest("Invalid input")
@@ -99,7 +99,7 @@ describe("Response Cookie Support", () => {
   })
 
   test("should encode cookie name and value", () => {
-    const res = createResponseHelpers()
+    const res = createResponseBuilder()
     const response = res
       .setCookie("my cookie", "value with spaces")
       .ok({ message: "Success" })
@@ -109,7 +109,7 @@ describe("Response Cookie Support", () => {
   })
 
   test("should set cookie with expires date", () => {
-    const res = createResponseHelpers()
+    const res = createResponseBuilder()
     const expires = new Date("2026-12-31T23:59:59Z")
     const response = res
       .setCookie("session", "abc123", { expires })
@@ -121,7 +121,7 @@ describe("Response Cookie Support", () => {
   })
 
   test("should throw error when value is missing for string name", () => {
-    const res = createResponseHelpers()
+    const res = createResponseBuilder()
     expect(() => {
       // @ts-expect-error - testing runtime error
       res.setCookie("session")
@@ -129,7 +129,7 @@ describe("Response Cookie Support", () => {
   })
 
   test("should work with all cookie options", () => {
-    const res = createResponseHelpers()
+    const res = createResponseBuilder()
     const expires = new Date("2026-12-31T23:59:59Z")
     const response = res
       .setCookie("full", "cookie", {

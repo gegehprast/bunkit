@@ -1,4 +1,4 @@
-import type { ResponseHelpers } from "./response"
+import type { ResponseBuilder } from "./response"
 
 /**
  * Base context interface that can be extended via declaration merging.
@@ -28,7 +28,7 @@ export interface RouteHandlerProps<
   TResponse = unknown,
 > {
   req: Request
-  res: ResponseHelpers<TResponse>
+  res: ResponseBuilder<TResponse>
   params: TParams
   query: TQuery
   body: TBody

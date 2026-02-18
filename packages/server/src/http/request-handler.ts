@@ -9,10 +9,10 @@ import type { MiddlewareFn } from "../types/middleware"
 import type { ServerOptions } from "../types/server"
 import {
   badRequest,
-  createResponseHelpers,
+  createResponseBuilder,
   internalError,
   notFound,
-} from "./response-helpers"
+} from "./response-builder"
 import { type RouteRegistry, routeRegistry } from "./route-registry"
 import type { Context } from "./types/context"
 import type { HttpMethod } from "./types/route"
@@ -112,7 +112,7 @@ export async function handleRequest(
   }
 
   // Create response helpers
-  const res = createResponseHelpers()
+  const res = createResponseBuilder()
 
   // Create context object
   const ctx: Context = {}

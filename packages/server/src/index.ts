@@ -72,7 +72,7 @@ export type {
   Cookie,
   CookieOptions,
   ErrorResponse,
-  ResponseHelpers,
+  ResponseBuilder,
   RegisteredRoutes,
   BuildRoutePath,
 } from "./http/types/response"
