@@ -1,3 +1,4 @@
+import type { Server as BunServer } from "bun"
 import type { Context } from "../http/types/context"
 import type { ResponseBuilder } from "../http/types/response"
 
@@ -11,6 +12,7 @@ export interface MiddlewareArgs {
   body: unknown
   ctx: Context
   res: ResponseBuilder
+  bunServer: BunServer<unknown>
   next: () => Promise<Response>
 }
 

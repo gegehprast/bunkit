@@ -1,3 +1,4 @@
+import type { Server as BunServer } from "bun"
 import { addCorsHeaders, createPreflightResponse } from "../core/cors"
 import {
   createMiddlewareArgs,
@@ -28,6 +29,7 @@ export async function handleRequest(
   request: Request,
   globalMiddlewares: MiddlewareFn[],
   serverOptions: ServerOptions,
+  bunServer: BunServer<unknown>,
   localRegistry?: RouteRegistry,
 ): Promise<Response> {
   const url = new URL(request.url)
@@ -133,6 +135,7 @@ export async function handleRequest(
         query,
         body,
         ctx,
+        bunServer,
       })
       return response
     } catch (error) {
@@ -157,6 +160,7 @@ export async function handleRequest(
       body,
       ctx,
       res,
+      bunServer,
     )
 
     const response = await executeMiddlewareChain(

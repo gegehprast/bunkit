@@ -1,3 +1,4 @@
+import type { Server as BunServer } from "bun"
 import type { ResponseBuilder } from "./response"
 
 /**
@@ -33,6 +34,7 @@ export interface RouteHandlerProps<
   query: TQuery
   body: TBody
   ctx: Context
+  bunServer: BunServer<unknown>
 }
 
 /**

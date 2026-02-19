@@ -1,3 +1,4 @@
+import type { Server as BunServer } from "bun"
 import type { Context } from "../http/types/context"
 import type { ResponseBuilder } from "../http/types/response"
 import type { MiddlewareArgs, MiddlewareFn } from "../types/middleware"
@@ -50,6 +51,7 @@ export function createMiddlewareArgs(
   body: unknown,
   ctx: Context,
   res: ResponseBuilder,
+  bunServer: BunServer<unknown>,
 ): MiddlewareArgs {
   return {
     req,
@@ -58,6 +60,7 @@ export function createMiddlewareArgs(
     body,
     ctx,
     res,
+    bunServer,
 
     // This `next` will never be called
     // and will be replaced by `executeMiddlewareChain`

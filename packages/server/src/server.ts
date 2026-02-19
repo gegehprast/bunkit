@@ -1,7 +1,9 @@
 import { err, ok, type Result } from "@bunkit/result"
 import { createCorsMiddleware } from "./core/cors"
+import { createMiddlewareArgs, executeMiddlewareChain } from "./core/middleware"
 import { generateOpenApiSpec } from "./http/openapi/generator"
 import { handleRequest } from "./http/request-handler"
+import { createResponseBuilder } from "./http/response-builder"
 import { type RouteRegistry, routeRegistry } from "./http/route-registry"
 import {
   type ExportRouteTypesOptions,
@@ -118,15 +120,43 @@ export class Server implements IServer {
         hostname: this.host,
         development: this.development,
         fetch: async (request: Request, bunServer): Promise<Response> => {
-          // Check for WebSocket upgrade first, passing local WS registry
-          const wsResponse = await handleWebSocketUpgrade(
-            request,
-            bunServer,
-            this.localWsRouteRegistry,
-          )
-          // Upgraded
-          if (wsResponse !== undefined) {
-            return wsResponse
+          const isWsUpgrade =
+            request.headers.get("upgrade")?.toLowerCase() === "websocket"
+
+          if (isWsUpgrade) {
+            // Run global middlewares for WebSocket upgrade requests so that
+            // things like IP whitelisting, auth guards, etc. are enforced
+            // before the connection is upgraded.
+            const wsUpgradeHandler = async (): Promise<Response> => {
+              const wsResponse = await handleWebSocketUpgrade(
+                request,
+                bunServer,
+                this.localWsRouteRegistry,
+              )
+              // undefined means upgrade succeeded – Bun ignores whatever
+              // fetch returns at this point, so any Response is fine.
+              return wsResponse ?? new Response(null, { status: 101 })
+            }
+
+            if (this.middlewares.length > 0) {
+              const res = createResponseBuilder()
+              const middlewareArgs = createMiddlewareArgs(
+                request,
+                {},
+                {},
+                undefined,
+                {},
+                res,
+                bunServer,
+              )
+              return executeMiddlewareChain(
+                this.middlewares,
+                middlewareArgs,
+                wsUpgradeHandler,
+              )
+            }
+
+            return wsUpgradeHandler()
           }
 
           // Handle as regular HTTP request, passing local registry if available
@@ -134,6 +164,7 @@ export class Server implements IServer {
             request,
             this.middlewares,
             this.options,
+            bunServer,
             this.localRouteRegistry,
           )
         },
