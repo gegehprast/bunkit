@@ -19,6 +19,7 @@ import {
   type ServerOptions,
   ServerStartError,
   ServerStopError,
+  type WebSocketOptions,
   type WebSocketRouteInfo,
 } from "./types/server"
 import type { WebSocketData } from "./websocket/types/websocket"
@@ -43,12 +44,7 @@ export class Server implements IServer {
   private readonly port: number
   private readonly host: string
   private readonly development: boolean
-  private readonly wsConfig: {
-    maxPayloadLength: number
-    idleTimeout: number
-    perMessageDeflate: boolean
-    backpressureLimit: number
-  }
+  private readonly wsConfig: Required<WebSocketOptions>
   private readonly middlewares: MiddlewareFn[]
   private readonly options: ServerOptions
 
@@ -75,7 +71,7 @@ export class Server implements IServer {
     this.wsConfig = {
       maxPayloadLength: websocket.maxPayloadLength ?? 16 * 1024 * 1024, // 16MB
       idleTimeout: websocket.idleTimeout ?? 120, // 2 minutes
-      perMessageDeflate: websocket.compression ?? true,
+      perMessageDeflate: websocket.perMessageDeflate ?? true,
       backpressureLimit: websocket.backpressureLimit ?? 16 * 1024 * 1024, // 16MB
     }
 

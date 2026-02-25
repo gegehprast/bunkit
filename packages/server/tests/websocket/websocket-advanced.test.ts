@@ -93,7 +93,7 @@ describe("WebSocket Advanced Features", () => {
       const server = createServer({
         port: 0,
         websocket: {
-          compression: false,
+          perMessageDeflate: false,
         },
       })
 
@@ -104,7 +104,7 @@ describe("WebSocket Advanced Features", () => {
       const server = createServer({
         port: 0,
         websocket: {
-          compression: true,
+          perMessageDeflate: true,
           maxPayloadLength: 1024 * 1024, // 1MB
           idleTimeout: 60, // 1 minute
           backpressureLimit: 512 * 1024, // 512KB

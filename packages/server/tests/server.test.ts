@@ -37,7 +37,7 @@ describe("Server", () => {
       websocket: {
         maxPayloadLength: 1024 * 1024,
         idleTimeout: 60,
-        compression: true,
+        perMessageDeflate: true,
       },
     })
     expect(server).toBeDefined()
