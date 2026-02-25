@@ -59,7 +59,7 @@ export class WebSocketRouteBuilder<
   /**
    * Add authentication to this WebSocket route.
    * Auth is checked during the upgrade request.
-   * 
+   *
    * The returned user data from the auth function will be available in the connection context (`ctx.user`).
    */
   public authenticate<TNewUser>(
