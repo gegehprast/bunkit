@@ -2,7 +2,7 @@
 
 The backend API server for BunKit, built with [Bun](https://bun.sh) and the custom [`@bunkit/server`](../../packages/server) framework.
 
-> 📖 For general project setup and monorepo structure, see the [main README](../../README.md).
+> For general project setup and monorepo structure, see the [main README](../../README.md).
 
 ## Quick Start
 
@@ -86,7 +86,7 @@ apps/backend/
 
 ## Environment Configuration
 
-All configuration is managed through environment variables with validation via Zod schemas.
+All configuration is managed through environment variables with validation via Zod schemas. Please see `.env.example` or `src/config/index.ts` for up to date variables.
 
 ### Required Variables
 
@@ -111,23 +111,6 @@ CORS_ORIGIN=http://localhost:5173  # Allowed origins (comma-separated)
 # Logging
 LOG_LEVEL=info                  # none|error|warn|info|debug|trace
 ```
-
-### Optional Variables
-
-```bash
-# Application
-APP_NAME=BunKit
-MAX_REQUEST_BODY_SIZE=10485760  # 10MB in bytes
-
-# Rate Limiting
-RATE_LIMIT_WINDOW_MS=60000      # 1 minute
-RATE_LIMIT_MAX_REQUESTS=100
-
-# Shutdown
-SHUTDOWN_TIMEOUT_MS=10000       # 10 seconds
-```
-
-Configuration is validated on startup. Invalid values will prevent the server from starting.
 
 ## API Documentation
 
@@ -622,7 +605,7 @@ lsof -ti:3001 | xargs kill -9
 # Check migration status
 bun run db:studio
 
-# Reset database (⚠️ destroys data)
+# Reset database (WARNING: destroys data)
 psql $DATABASE_URL -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 bun run db:migrate
 ```
@@ -646,73 +629,6 @@ bun run typecheck
 pkill -f "bun.*main.ts"
 bun run dev
 ```
-
-## Best Practices
-
-### Security
-- ✅ Never commit `.env.local` or secrets
-- ✅ Use minimum 32-character JWT secrets
-- ✅ Enable HTTPS in production
-- ✅ Validate all user input with Zod
-- ✅ Use parameterized queries (Drizzle handles this)
-- ✅ Set appropriate CORS origins
-- ✅ Rate limit your API endpoints
-
-### Performance
-- ✅ Use database indexes on frequently queried columns
-- ✅ Implement pagination for list endpoints
-- ✅ Cache frequently accessed data
-- ✅ Use connection pooling (automatic with Drizzle)
-- ✅ Set appropriate `MAX_REQUEST_BODY_SIZE`
-- ✅ Use `LOG_LEVEL=warn` in production
-
-### Code Quality
-- ✅ Write tests for critical business logic
-- ✅ Use the Result pattern for fallible operations
-- ✅ Document complex functions with JSDoc
-- ✅ Keep route handlers thin, move logic to services
-- ✅ Use TypeScript strict mode
-- ✅ Run `bun run lint` before committing
-
-## Architecture Decisions
-
-### Why Bun?
-- Native TypeScript support (no transpilation needed)
-- Significantly faster than Node.js
-- Built-in test runner
-- Native password hashing (bcrypt)
-- Modern APIs and performance
-
-### Why Drizzle ORM?
-- Type-safe query builder
-- Lightweight with zero dependencies
-- SQL-like syntax
-- Excellent TypeScript inference
-- First-class Bun support
-
-### Why Custom Server Framework?
-- Full type safety from request to response
-- Automatic OpenAPI generation
-- WebSocket and HTTP on single port
-- Result pattern integration
-- Tailored for Bun runtime
-
-### Repository Pattern
-- Separates data access from business logic
-- Makes testing easier (can mock repositories)
-- Provides consistent data access interface
-- Enables caching layer if needed
-
-## Contributing
-
-When adding new features to the template:
-
-1. Follow existing patterns (repositories, route structure)
-2. Add comprehensive tests
-3. Update OpenAPI documentation with `.openapi()` metadata
-4. Generate types: `bun run openapi:generate`
-5. Update this README if adding new concepts
-6. Ensure backward compatibility
 
 ## Additional Resources
 
