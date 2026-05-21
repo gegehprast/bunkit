@@ -1,8 +1,8 @@
-import type { MakeRequired } from "node_modules/zod/v4/core/util"
 import type { z } from "zod"
 import { CommonErrorResponses } from "../core/standard-errors"
 import type { MiddlewareFn } from "../types/middleware"
 import type { Server } from "../types/server"
+import type { MakeRequired } from "../types/utils"
 import { RouteRegistry, routeRegistry } from "./route-registry"
 import type { RouteHandler } from "./types/context"
 import type {

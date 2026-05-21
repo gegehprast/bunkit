@@ -1,6 +1,6 @@
 # BunKit
 
-A production-ready monorepo template for building HTTP APIs and WebSocket backends with Bun, TypeScript, and PostgreSQL.
+A production-ready starter monorepo template for building HTTP APIs and WebSocket backends with Bun, TypeScript, and PostgreSQL.
 
 ## Overview
 
