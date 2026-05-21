@@ -84,5 +84,8 @@
         "drizzle-orm",
         "openapi",
         "websockets"
-    ]
+    ],
+    "engines": {
+        "bun": ">=1.3.3"
+    }
 }

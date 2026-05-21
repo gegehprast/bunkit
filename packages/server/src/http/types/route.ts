@@ -1,6 +1,6 @@
-import type { MakeRequired } from "node_modules/zod/v4/core/util"
 import type { z } from "zod"
 import type { MiddlewareFn } from "../../types/middleware"
+import type { MakeRequired } from "../../types/utils"
 import type { RouteHandlerProps } from "./context"
 
 /**
