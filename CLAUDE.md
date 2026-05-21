@@ -52,23 +52,6 @@ function findUser(id: string): User {
 }
 ```
 
-### Chain Operations with Result
-
-**Use `.map()` and `.andThen()` for composing operations:**
-
-```typescript
-// ✅ CORRECT: Chain operations safely
-const result = findUser('123')
-  .map(user => user.email)
-  .andThen(email => sendEmail(email))
-  
-if (result.isOk()) {
-  console.log('Email sent!')
-} else {
-  console.error('Failed:', result.error)
-}
-```
-
 **Non-negotiable rules:**
 - ✅ All service methods MUST return `Result<T, E>`
 - ✅ All database operations MUST return `Result<T, E>`
@@ -95,6 +78,18 @@ class UserService {
   }
 }
 ```
+
+## Directory Navigation (MANDATORY)
+**DO NOT use relative path when `cd`ing into directories:**
+
+```bash
+# ✅ CORRECT: Absolute paths from project root
+cd /home/user/projects/bunkit/apps/backend
+# ❌ WRONG: Relative paths
+cd apps/backend
+```
+
+Some system may have program such as zoxide installed that allows you to quickly navigate to frequently used directories without needing to type the full path. Using `cd` with relative paths can lead to unintended directory changes and confusion, especially in a monorepo structure. Always use absolute paths to ensure you are in the correct directory.
 
 ## Scripts (MANDATORY)
 **Most scripts can be run via `bun run <script>` from the root directory:**

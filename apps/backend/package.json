@@ -1,11 +1,12 @@
 {
     "name": "@apps/backend",
-    "version": "0.1.0",
+    "version": "0.0.1",
     "module": "src/main.ts",
     "type": "module",
     "private": true,
     "scripts": {
-        "dev": "concurrently \"bun --env-file=.env.local --hot src/main.ts\" \"bun run route-types:watch\"",
+        "dev": "bun run --parallel run:dev route-types:watch",
+        "run:dev": "bun --env-file=.env.local --hot src/main.ts",
         "start": "bun --env-file=.env src/main.ts",
         "typecheck": "tsc --noEmit",
         "db:generate": "drizzle-kit generate",
@@ -27,8 +28,8 @@
     },
     "devDependencies": {
         "@types/bun": "catalog:",
-        "drizzle-kit": "catalog:",
-        "concurrently": "catalog:"
+        "better-sqlite3": "^12.9.0",
+        "drizzle-kit": "catalog:"
     },
     "peerDependencies": {
         "typescript": "^5"

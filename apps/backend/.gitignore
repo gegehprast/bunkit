@@ -29,3 +29,14 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# SQLite database file
+*.db
+*.sqlite
+*.db-shm
+*.db-wal
+*.sqlite-shm
+*.sqlite-wal
+
+# Frontend built folder
+webui

@@ -1,69 +1,42 @@
-import {
-  type PgColumn,
-  type PgTimestampConfig,
-  timestamp,
-  uuid,
-} from "drizzle-orm/pg-core"
+import type { AnySQLiteColumn } from "drizzle-orm/sqlite-core"
+import { integer, text } from "drizzle-orm/sqlite-core"
 
 /**
- * Primary key UUID column with automatic random generation
- *
- * @example
- * ```ts
- * export const myTable = pgTable("my_table", {
- *   id: primaryId(),
- *   // ... other columns
- * })
- * ```
+ * Primary key UUID column — generated via crypto.randomUUID()
  */
 export function primaryId() {
-  return uuid("id").defaultRandom().primaryKey()
+  return text("id")
+    .$defaultFn(() => crypto.randomUUID())
+    .primaryKey()
 }
 
 /**
- * Timestamp columns for tracking creation and updates
+ * Timestamp columns stored as Unix milliseconds (integer)
  *
- * Automatically sets createdAt and updatedAt with proper defaults
- *
- * @example
- * ```ts
- * export const myTable = pgTable("my_table", {
- *   id: primaryId(),
- *   // ... other columns
- *   ...timestamps({ withTimezone: true }),
- * })
- * ```
+ * Using `mode: "timestamp_ms"` lets Drizzle map them to/from Date objects
+ * automatically while SQLite stores them as integers.
  */
-export function timestamps(config?: PgTimestampConfig<"date">) {
+export function timestamps() {
   return {
-    createdAt: timestamp("created_at", config).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", config).notNull().defaultNow(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .notNull()
+      .$defaultFn(() => new Date()),
   }
 }
 
 /**
- * Foreign key UUID column that references another table
- *
- * @param columnName - The column name in the database
- * @param reference - Function returning the referenced table column
- * @param options - Optional configuration for the foreign key
- *
- * @example
- * ```ts
- * export const todos = pgTable("todos", {
- *   id: primaryId(),
- *   userId: foreignId("user_id", () => users.id, { onDelete: "cascade" }),
- *   // ... other columns
- * })
- * ```
+ * Foreign key UUID column (text) referencing another table's id column
  */
 export function foreignId(
   columnName: string,
-  reference: () => PgColumn,
+  reference: () => AnySQLiteColumn,
   options?: {
     onDelete?: "cascade" | "set null" | "restrict" | "no action"
     onUpdate?: "cascade" | "set null" | "restrict" | "no action"
   },
 ) {
-  return uuid(columnName).references(reference, options)
+  return text(columnName).references(reference, options)
 }
