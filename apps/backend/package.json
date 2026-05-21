@@ -23,13 +23,11 @@
         "@bunkit/server": "workspace:*",
         "drizzle-orm": "catalog:",
         "zod": "catalog:",
-        "zod-openapi": "catalog:",
-        "jose": "catalog:"
+        "zod-openapi": "catalog:"
     },
     "devDependencies": {
         "@types/bun": "catalog:",
         "drizzle-kit": "catalog:",
-        "postgres": "catalog:",
         "concurrently": "catalog:"
     },
     "peerDependencies": {
