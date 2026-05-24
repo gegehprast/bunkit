@@ -14,6 +14,7 @@ export const apiKeys = sqliteTable("api_keys", {
   keyHash: text("key_hash").notNull().unique(),
   keyPrefix: text("key_prefix").notNull(),
   createdBy: text("created_by"),
+  isAdmin: integer("is_admin", { mode: "boolean" }).notNull().default(false),
   expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
   lastUsedAt: integer("last_used_at", { mode: "timestamp_ms" }),
   enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),

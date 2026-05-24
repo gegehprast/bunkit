@@ -1,15 +1,10 @@
 import { z } from "zod"
 import packageJson from "../../package.json"
 
-const DEFAULT_JWT_SECRET =
-  "your-super-secret-jwt-key-min-32-chars-please-change-this-in-production"
-const DEFAULT_JWT_REFRESH_SECRET =
-  "your-super-secret-refresh-key-min-32-chars-please-change-this-in-production"
-
 const configSchema = z.object({
   // Application
-  APP_NAME: z.string().default("Bunkit"),
-  APP_URL: z.string().default("https://bunkit.dev"),
+  APP_NAME: z.string().default("hookitup"),
+  APP_URL: z.string().default("http://localhost:3001"),
   VERSION: z.string(),
 
   // Server
@@ -17,30 +12,34 @@ const configSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
   PORT: z.coerce.number().default(3001),
-  HOST: z.string().default("0.0.0.0"),
+  HOST: z.string().default("localhost"),
 
   // HTTP Server
   HTTP_MAX_REQUEST_BODY_SIZE: z.coerce.number().default(10485760), // 10MB in bytes
 
   // CORS
-  CORS_ORIGIN: z
-    .string()
-    .default(
-      "http://localhost:3000,http://localhost:5173,http://localhost:4173,http://localhost:8080",
-    ),
+  CORS_ORIGIN: z.string().default(
+    `
+      http://localhost:3000,
+      http://localhost:3001,
+      http://localhost:5173,
+      http://localhost:4173,
+      http://localhost:8080,
+      http://127.0.0.1:3000,
+      http://127.0.0.1:3001,
+      http://127.0.0.1:5173,
+      http://127.0.0.1:4173,
+      http://127.0.0.1:8080
+      `,
+  ),
 
   // Database
-  DATABASE_URL: z.string().default("postgresql://localhost:5432/bunkit_test"),
+  DATABASE_PATH: z.string().default("./data/gateway.db"),
+  MIGRATIONS_DIR: z.string().default("./drizzle"),
 
-  // JWT
-  JWT_SECRET: z.string().min(32).default(DEFAULT_JWT_SECRET),
-  JWT_EXPIRES_IN: z.string().default("7d"),
-  JWT_REFRESH_SECRET: z.string().min(32).default(DEFAULT_JWT_REFRESH_SECRET),
-  JWT_REFRESH_EXPIRES_IN: z.string().default("30d"),
-
-  // Rate Limiting
-  RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000), // 1 minute
-  RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
+  // Static files
+  PUBLIC_DIR: z.string().default("./public"),
+  FRONTEND_DIR: z.string().default("./webui"),
 
   // Logging
   LOG_LEVEL: z
@@ -64,18 +63,6 @@ function parseConfig(): Config {
       VERSION: packageJson.version,
     })
 
-    // On production, ensure JWT secrets are not default values
-    if (parsed.NODE_ENV === "production") {
-      if (
-        parsed.JWT_SECRET === DEFAULT_JWT_SECRET ||
-        parsed.JWT_REFRESH_SECRET === DEFAULT_JWT_REFRESH_SECRET
-      ) {
-        console.error(
-          "❌ In production, JWT_SECRET and JWT_REFRESH_SECRET must be set to secure values.",
-        )
-        process.exit(1)
-      }
-    }
     return parsed
   } catch (error) {
     if (error instanceof z.ZodError) {
