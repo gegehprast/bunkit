@@ -46,7 +46,7 @@ export class WebSocketClient<
 > {
   private ws: WebSocket | null = null
   private url: string = ""
-  private token: string = ""
+  private token?: string
   private connectionStatus: ConnectionStatus = "disconnected"
   private reconnectAttempts: number = 0
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null
@@ -71,7 +71,7 @@ export class WebSocketClient<
   /**
    * Connect to WebSocket server
    */
-  public connect(url: string, token: string): void {
+  public connect(url: string, token?: string): void {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.log("Already connected")
       return
@@ -82,8 +82,7 @@ export class WebSocketClient<
     this.setConnectionStatus("connecting")
 
     try {
-      // Add token as query parameter for authentication
-      const wsUrl = `${url}?token=${encodeURIComponent(token)}`
+      const wsUrl = token ? `${url}?token=${encodeURIComponent(token)}` : url
       this.ws = new WebSocket(wsUrl)
 
       this.ws.onopen = this.handleOpen.bind(this)

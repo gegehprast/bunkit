@@ -5,13 +5,15 @@ import { logger } from "@/core/logger"
 import { shutdownManager } from "@/core/shutdown-manager"
 import { server } from "./core/server"
 import { closeDatabase, initDatabase } from "./db/client"
+import { runMigrations } from "./db/migrate"
+import { deliveryWorker } from "./gateway/delivery-worker"
 
 // Clear z.globalRegistry to avoid duplicate schema IDs on hot reload
 // There must be a better way to handle this.
 z.globalRegistry.clear()
 
 async function main() {
-  logger.info("🚀 Starting BunKit Backend...")
+  logger.info("🚀 Starting hookitup...")
   logger.debug("Environment configuration", {
     nodeEnv: config.NODE_ENV,
     port: config.PORT,
@@ -28,6 +30,9 @@ async function main() {
 
     // Register cleanup handlers
     shutdownManager.onShutdown("main-cleanup", async () => {
+      logger.info("Stopping delivery worker...")
+      deliveryWorker.stop()
+
       logger.info("Stopping server...")
       const stopServerResult = await server.stop()
       if (stopServerResult.isErr()) {
@@ -49,6 +54,12 @@ async function main() {
       throw initDbResult.error
     }
 
+    // Apply pending migrations on startup
+    const migrateResult = runMigrations(logger)
+    if (migrateResult.isErr()) {
+      throw migrateResult.error
+    }
+
     // Start the server
     const serverStartResult = await server.start()
     if (serverStartResult.isErr()) {
@@ -56,6 +67,9 @@ async function main() {
     }
 
     logger.info(`✅ App ready at http://${config.HOST}:${config.PORT}`)
+
+    // Start background delivery worker
+    deliveryWorker.start()
   } catch (error) {
     logger.error("Failed to start application", { error })
     await shutdownManager.shutdown("ERROR")

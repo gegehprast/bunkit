@@ -8,6 +8,7 @@
         "dev": "bun run --parallel run:dev route-types:watch",
         "run:dev": "bun --env-file=.env.local --hot src/main.ts",
         "start": "bun --env-file=.env src/main.ts",
+        "compile": "bun build --compile --target=bun --outfile ../../dist/hookitup src/main.ts",
         "typecheck": "tsc --noEmit",
         "db:generate": "drizzle-kit generate",
         "db:migrate": "bun run ./scripts/migrate.ts",

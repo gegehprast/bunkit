@@ -8,9 +8,9 @@ export const server = createServer({
   maxRequestBodySize: config.HTTP_MAX_REQUEST_BODY_SIZE,
   globalMiddlewares: [loggingMiddleware()],
   openapi: {
-    title: "BunKit API",
+    title: "hookitup API",
     version: "1.0.0",
-    description: "Production-ready HTTP API built with BunKit",
+    description: "Webhook Gateway & Filter API",
     securitySchemes: {
       bearerAuth: SecuritySchemes.bearerAuth(),
       basicAuth: SecuritySchemes.basicAuth(), // Example only, not used

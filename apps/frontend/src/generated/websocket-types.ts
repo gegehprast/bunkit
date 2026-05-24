@@ -29,57 +29,26 @@
  */
 
 /**
- * WebSocket route: /ws/chat
+ * WebSocket route: /ws/events
  */
-export namespace WsChatWebSocket {
+export namespace WsEventsWebSocket {
   export type ClientMessage =
-    | { type: "join"; data: {
-    roomId: string
-  } }
-    | { type: "leave"; data: {
-    roomId: string
-  } }
-    | { type: "message"; data: {
-    roomId: string
-    message: string
-  } }
-    | { type: "typing"; data: {
-    roomId: string
-    isTyping: boolean
+    | { type: "ping"; data: {
+    type: "ping"
   } }
 
   export type ServerMessage = {
-  type: "room_joined"
-  timestamp: number
-  roomId: string
-  userId: string
-  userEmail: string
+  type: "event"
+  data: {
+    id: string
+    endpointId: string
+    method: string
+    sourceIp: string | null
+    signingScheme: string
+    signatureVerified: boolean
+    receivedAt: string
+  }
 } | {
-  type: "room_left"
-  timestamp: number
-  roomId: string
-  userId: string
-  userEmail: string
-} | {
-  type: "message"
-  message: string
-  timestamp: number
-  roomId: string
-  userId: string
-  userEmail: string
-} | {
-  type: "typing"
-  isTyping: boolean
-  roomId: string
-  userId: string
-  userEmail: string
-} | {
-  type: "user_count"
-  roomId: string
-  count: number
-} | {
-  type: "error"
-  message: string
-  code?: string | undefined
+  type: "pong"
 }
 }

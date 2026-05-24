@@ -88,6 +88,21 @@ export const ERROR_CODES = {
   WS_HANDLER_NOT_FOUND: "WS_HANDLER_NOT_FOUND",
   WS_RATE_LIMIT_EXCEEDED: "WS_RATE_LIMIT_EXCEEDED",
 
+  // API Key authentication
+  API_KEY_REQUIRED: "API_KEY_REQUIRED",
+  API_KEY_INVALID: "API_KEY_INVALID",
+  API_KEY_EXPIRED: "API_KEY_EXPIRED",
+  API_KEY_DISABLED: "API_KEY_DISABLED",
+
+  // Webhook gateway
+  ENDPOINT_NOT_FOUND: "ENDPOINT_NOT_FOUND",
+  ENDPOINT_DISABLED: "ENDPOINT_DISABLED",
+  SIGNATURE_MISSING: "SIGNATURE_MISSING",
+  SIGNATURE_INVALID: "SIGNATURE_INVALID",
+  FILTER_ERROR: "FILTER_ERROR",
+  DELIVERY_FAILED: "DELIVERY_FAILED",
+  DLQ_ERROR: "DLQ_ERROR",
+
   // Testing
   TEST_ERROR: "TEST_ERROR",
 } as const
@@ -118,4 +133,38 @@ export const CONTENT_TYPES = {
   XML: "application/xml",
   FORM: "application/x-www-form-urlencoded",
   MULTIPART: "multipart/form-data",
+} as const
+
+/**
+ * Delivery worker defaults
+ */
+export const DELIVERY_DEFAULTS = {
+  /** Maximum number of delivery attempts before moving to DLQ */
+  MAX_RETRIES: 3,
+  /** Base backoff interval in seconds (multiplied by attempt number) */
+  RETRY_BACKOFF_SECONDS: 60,
+  /** How often the delivery worker polls for pending attempts (ms) */
+  WORKER_POLL_INTERVAL_MS: 2000,
+  /** HTTP timeout for outbound delivery requests (ms) */
+  DELIVERY_TIMEOUT_MS: 10000,
+  /** Maximum delivery response body stored (bytes) */
+  MAX_RESPONSE_BODY_BYTES: 4096,
+} as const
+
+/**
+ * Webhook-specific request headers
+ */
+export const WEBHOOK_HEADERS = {
+  /** Inbound signature header names per scheme */
+  GITHUB_SIGNATURE: "x-hub-signature-256",
+  STRIPE_SIGNATURE: "stripe-signature",
+  SVIX_SIGNATURE: "svix-signature",
+  SVIX_TIMESTAMP: "svix-timestamp",
+  SVIX_MSG_ID: "svix-id",
+  /** Generic HMAC header used when no vendor scheme is specified */
+  GENERIC_SIGNATURE: "x-webhook-signature",
+  /** Hookitup-generated event ID forwarded to delivery targets */
+  HOOKITUP_EVENT_ID: "x-hookitup-event-id",
+  /** Hookitup outbound signature header */
+  HOOKITUP_SIGNATURE: "x-hookitup-signature",
 } as const

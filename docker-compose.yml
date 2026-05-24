@@ -1,0 +1,29 @@
+# Docker Compose is kept for development convenience only.
+# The production deployment is a single Bun binary — no containers needed.
+#
+# This file runs only the backend (SQLite is embedded, no DB service required).
+
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: hookitup
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      HOST: 0.0.0.0
+      DATABASE_PATH: /data/gateway.db
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "3001:3001"
+    volumes:
+      - gateway_data:/data
+    restart: unless-stopped
+
+volumes:
+  gateway_data:
+
+    driver: local

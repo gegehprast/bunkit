@@ -183,6 +183,125 @@ export class WsHandlerNotFoundError extends AppError {
   }
 }
 
+// ---------------------------------------------------------------------------
+// API Key errors
+// ---------------------------------------------------------------------------
+
+/**
+ * Missing API key (401)
+ */
+export class ApiKeyRequiredError extends AppError {
+  public constructor(message = "API key required") {
+    super(message, ERROR_CODES.API_KEY_REQUIRED, 401)
+  }
+}
+
+/**
+ * API key not found or hash mismatch (401)
+ */
+export class ApiKeyInvalidError extends AppError {
+  public constructor(message = "Invalid API key") {
+    super(message, ERROR_CODES.API_KEY_INVALID, 401)
+  }
+}
+
+/**
+ * API key has passed its expiry date (401)
+ */
+export class ApiKeyExpiredError extends AppError {
+  public constructor(message = "API key has expired") {
+    super(message, ERROR_CODES.API_KEY_EXPIRED, 401)
+  }
+}
+
+/**
+ * API key exists but is administratively disabled (401)
+ */
+export class ApiKeyDisabledError extends AppError {
+  public constructor(message = "API key is disabled") {
+    super(message, ERROR_CODES.API_KEY_DISABLED, 401)
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Webhook gateway errors
+// ---------------------------------------------------------------------------
+
+/**
+ * Inbound webhook endpoint not found by slug (404)
+ */
+export class EndpointNotFoundError extends AppError {
+  public constructor(slug: string) {
+    super(
+      `Webhook endpoint '${slug}' not found`,
+      ERROR_CODES.ENDPOINT_NOT_FOUND,
+      404,
+    )
+  }
+}
+
+/**
+ * Inbound webhook endpoint is disabled (403)
+ */
+export class EndpointDisabledError extends AppError {
+  public constructor(slug: string) {
+    super(
+      `Webhook endpoint '${slug}' is disabled`,
+      ERROR_CODES.ENDPOINT_DISABLED,
+      403,
+    )
+  }
+}
+
+/**
+ * Webhook signature header is absent when verification is required (400)
+ */
+export class SignatureMissingError extends AppError {
+  public constructor(headerName: string) {
+    super(
+      `Missing required signature header: ${headerName}`,
+      ERROR_CODES.SIGNATURE_MISSING,
+      400,
+    )
+  }
+}
+
+/**
+ * Webhook signature header is present but verification failed (400)
+ */
+export class SignatureInvalidError extends AppError {
+  public constructor(message = "Webhook signature verification failed") {
+    super(message, ERROR_CODES.SIGNATURE_INVALID, 400)
+  }
+}
+
+/**
+ * Filter rule evaluation encountered an unexpected error (500)
+ */
+export class FilterError extends AppError {
+  public constructor(message: string, details?: unknown) {
+    super(message, ERROR_CODES.FILTER_ERROR, 500, details)
+  }
+}
+
+/**
+ * Delivery attempt to a target failed (502)
+ */
+export class DeliveryFailedError extends AppError {
+  public constructor(message: string, details?: unknown) {
+    super(message, ERROR_CODES.DELIVERY_FAILED, 502, details)
+  }
+}
+
+/**
+ * DLQ operation failed (500)
+ */
+export class DlqError extends AppError {
+  public constructor(message: string, details?: unknown) {
+    super(message, ERROR_CODES.DLQ_ERROR, 500, details)
+  }
+}
+
 /**
  * Type guard to check if error is an AppError
  */

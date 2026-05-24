@@ -4,6 +4,7 @@
     "type": "module",
     "private": true,
     "scripts": {
+        "build": "bun run scripts/build.ts",
         "check": "bunx --bun biome check --write",
         "format": "bunx --bun biome format --write",
         "lint": "bun run scripts/lint.ts",
@@ -52,8 +53,7 @@
             "axios": "^1.13.2",
             "ky": "^1.14.1",
             "openapi-typescript": "^7.10.1",
-            "openapi-fetch": "^0.15.0",
-            "concurrently": "^9.2.1"
+            "openapi-fetch": "^0.15.0"
         },
         "catalogs": {
             "testing": {

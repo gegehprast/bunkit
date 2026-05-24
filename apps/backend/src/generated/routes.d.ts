@@ -7,17 +7,37 @@ declare module "@bunkit/server" {
   interface RegisteredRoutes {
     "/": Record<string, never>
     "/:path*": { path: string }
+    "/api": Record<string, never>
+    "/api/auth/login": Record<string, never>
+    "/api/auth/logout": Record<string, never>
+    "/api/auth/me": Record<string, never>
+    "/api/dlq": Record<string, never>
+    "/api/dlq/replay": Record<string, never>
+    "/api/docs": Record<string, never>
+    "/api/endpoints": Record<string, never>
+    "/api/endpoints/:endpointId/rules": { endpointId: string }
+    "/api/endpoints/:endpointId/rules/:ruleId": { endpointId: string; ruleId: string }
+    "/api/endpoints/:endpointId/rules/:ruleId/conditions": { endpointId: string; ruleId: string }
+    "/api/endpoints/:endpointId/rules/:ruleId/conditions/:conditionId": { endpointId: string; ruleId: string; conditionId: string }
+    "/api/endpoints/:endpointId/send-test": { endpointId: string }
+    "/api/endpoints/:endpointId/targets": { endpointId: string }
+    "/api/endpoints/:endpointId/targets/:id": { endpointId: string; id: string }
+    "/api/endpoints/:endpointId/targets/test": { endpointId: string }
+    "/api/endpoints/:endpointId/targets/test/:receiverId": { endpointId: string; receiverId: string }
+    "/api/endpoints/:endpointId/targets/test/:receiverId/requests": { endpointId: string; receiverId: string }
+    "/api/endpoints/:id": { id: string }
+    "/api/events": Record<string, never>
+    "/api/events/:id": { id: string }
+    "/api/events/:id/attempts": { id: string }
+    "/api/events/:id/replay": { id: string }
     "/api/health": Record<string, never>
-    "/api/redirect-external": Record<string, never>
-    "/api/redirect-internal": Record<string, never>
-    "/api/redirect-to-todo": Record<string, never>
-    "/api/todos": Record<string, never>
-    "/api/todos/:id": { id: string }
-    "/auth/login": Record<string, never>
-    "/auth/me": Record<string, never>
-    "/auth/register": Record<string, never>
-    "/docs": Record<string, never>
-    "/openapi.json": Record<string, never>
+    "/api/keys": Record<string, never>
+    "/api/keys/:id": { id: string }
+    "/api/openapi.json": Record<string, never>
+    "/api/setup": Record<string, never>
+    "/api/setup/status": Record<string, never>
+    "/hooks/:slug": { slug: string }
+    "/hooks/test/:token": { token: string }
     "/openapi/refresh": Record<string, never>
   }
 }

@@ -8,7 +8,7 @@ let spec: OpenApiSpec | null = null
 /**
  * GET /openapi.json - Returns the OpenAPI specification
  */
-createRoute("GET", "/openapi.json")
+createRoute("GET", "/api/openapi.json")
   .openapi({
     operationId: "getOpenApiSpec",
     summary: "Get OpenAPI specification",
@@ -29,7 +29,7 @@ createRoute("GET", "/openapi.json")
 /**
  * GET /docs - Swagger UI documentation page
  */
-createRoute("GET", "/docs")
+createRoute("GET", "/api/docs")
   .openapi({
     operationId: "getApiDocs",
     summary: "API documentation",
@@ -60,7 +60,7 @@ createRoute("GET", "/docs")
   <script>
     window.onload = function() {
       window.ui = SwaggerUIBundle({
-        url: '/openapi.json',
+        url: '/api/openapi.json',
         dom_id: '#swagger-ui',
         deepLinking: true,
         presets: [

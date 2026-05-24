@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/": {
+    "/api": {
         parameters: {
             query?: never;
             header?: never;
@@ -44,7 +44,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/openapi.json": {
+    "/api/openapi.json": {
         parameters: {
             query?: never;
             header?: never;
@@ -64,7 +64,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/docs": {
+    "/api/docs": {
         parameters: {
             query?: never;
             header?: never;
@@ -104,7 +104,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/register": {
+    "/hooks/{slug}": {
         parameters: {
             query?: never;
             header?: never;
@@ -112,19 +112,101 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put?: never;
         /**
-         * Register new user
-         * @description Create a new user account with email and password
+         * Receive inbound webhook
+         * @description Accepts an inbound webhook, verifies its signature, evaluates filter rules, persists the event, and enqueues delivery to all enabled targets.
          */
-        post: operations["register"];
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 200 response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["WebhookReceived"];
+                    };
+                };
+                /** @description Internal Server Error - Unexpected server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "message": "Internal server error",
+                         *       "code": "INTERNAL_ERROR",
+                         *       "details": "Stack trace or error details for debugging"
+                         *     }
+                         */
+                        "application/json": components["schemas"]["InternalServerErrorResponse"];
+                    };
+                };
+            };
+        };
+        /**
+         * Receive inbound webhook
+         * @description Accepts an inbound webhook, verifies its signature, evaluates filter rules, persists the event, and enqueues delivery to all enabled targets.
+         */
+        post: operations["receiveWebhook"];
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Receive inbound webhook
+         * @description Accepts an inbound webhook, verifies its signature, evaluates filter rules, persists the event, and enqueues delivery to all enabled targets.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description 200 response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["WebhookReceived"];
+                    };
+                };
+                /** @description Internal Server Error - Unexpected server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "message": "Internal server error",
+                         *       "code": "INTERNAL_ERROR",
+                         *       "details": "Stack trace or error details for debugging"
+                         *     }
+                         */
+                        "application/json": components["schemas"]["InternalServerErrorResponse"];
+                    };
+                };
+            };
+        };
         trace?: never;
     };
-    "/auth/login": {
+    "/api/auth/login": {
         parameters: {
             query?: never;
             header?: never;
@@ -133,10 +215,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Login user
-         * @description Authenticate user with email and password
-         */
+        /** Validate an API key and set an auth cookie */
         post: operations["login"];
         delete?: never;
         options?: never;
@@ -144,18 +223,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/me": {
+    "/api/auth/logout": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get current user
-         * @description Get the authenticated user's profile (requires Bearer token)
-         */
-        get: operations["getCurrentUser"];
+        get?: never;
+        put?: never;
+        /** Clear the auth cookie */
+        post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Return current authenticated key info */
+        get: operations["getMe"];
         put?: never;
         post?: never;
         delete?: never;
@@ -164,53 +257,396 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/todos": {
+    "/api/setup/status": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * List todos
-         * @description Lists all todo items for the authenticated user (requires Bearer token)
-         */
-        get: operations["listTodos"];
+        /** Check whether initial setup is required */
+        get: operations["getSetupStatus"];
         put?: never;
-        /**
-         * Create a new todo
-         * @description Creates a new todo for the authenticated user (requires Bearer token)
-         */
-        post: operations["createTodo"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/todos/{id}": {
+    "/api/setup": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get a todo by ID
-         * @description Retrieves a specific todo item by its ID (requires Bearer token)
-         */
-        get: operations["getTodo"];
-        /**
-         * Update a todo
-         * @description Updates a todo item by its ID (requires Bearer token)
-         */
-        put: operations["updateTodo"];
+        get?: never;
+        put?: never;
+        /** Create the first API key (only works when no keys exist) */
+        post: operations["runSetup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List API keys */
+        get: operations["listApiKeys"];
+        put?: never;
+        /** Create an API key */
+        post: operations["createApiKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/keys/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
         post?: never;
+        /** Delete an API key */
+        delete: operations["deleteApiKey"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/endpoints": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List endpoints */
+        get: operations["listEndpoints"];
+        put?: never;
+        /** Create endpoint */
+        post: operations["createEndpoint"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/endpoints/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get endpoint */
+        get: operations["getEndpoint"];
+        put?: never;
+        post?: never;
+        /** Delete endpoint */
+        delete: operations["deleteEndpoint"];
+        options?: never;
+        head?: never;
+        /** Update endpoint */
+        patch: operations["updateEndpoint"];
+        trace?: never;
+    };
+    "/api/endpoints/{endpointId}/targets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List delivery targets */
+        get: operations["listTargets"];
+        put?: never;
+        /** Create delivery target */
+        post: operations["createTarget"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/endpoints/{endpointId}/targets/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get delivery target */
+        get: operations["getTarget"];
+        put?: never;
+        post?: never;
+        /** Delete delivery target */
+        delete: operations["deleteTarget"];
+        options?: never;
+        head?: never;
+        /** Update delivery target */
+        patch: operations["updateTarget"];
+        trace?: never;
+    };
+    "/api/endpoints/{endpointId}/targets/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List test delivery targets */
+        get: operations["listTestReceivers"];
+        put?: never;
         /**
-         * Delete a todo
-         * @description Deletes a todo item by its ID (requires Bearer token)
+         * Create test delivery target
+         * @description Creates a delivery target that points to a built-in capture endpoint on this server. Use it to inspect exactly what the gateway sends to your service.
          */
-        delete: operations["deleteTodo"];
+        post: operations["createTestReceiver"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/endpoints/{endpointId}/targets/test/{receiverId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete test delivery target */
+        delete: operations["deleteTestReceiver"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/endpoints/{endpointId}/targets/test/{receiverId}/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List captured requests for a test delivery target */
+        get: operations["listTestReceiverRequests"];
+        put?: never;
+        post?: never;
+        /** Clear captured requests for a test delivery target */
+        delete: operations["clearTestReceiverRequests"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/endpoints/{endpointId}/send-test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a test webhook to an endpoint
+         * @description Fires a synthetic inbound request through the full gateway pipeline (filter rules → event persist → delivery enqueue) without requiring a valid signature. Useful for testing filter rules and delivery targets from the dashboard.
+         */
+        post: operations["sendTestWebhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/endpoints/{endpointId}/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List filter rules */
+        get: operations["listRules"];
+        put?: never;
+        /** Create filter rule */
+        post: operations["createRule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/endpoints/{endpointId}/rules/{ruleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get filter rule */
+        get: operations["getRule"];
+        put?: never;
+        post?: never;
+        /** Delete filter rule */
+        delete: operations["deleteRule"];
+        options?: never;
+        head?: never;
+        /** Update filter rule */
+        patch: operations["updateRule"];
+        trace?: never;
+    };
+    "/api/endpoints/{endpointId}/rules/{ruleId}/conditions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List rule conditions */
+        get: operations["listConditions"];
+        put?: never;
+        /** Add condition to rule */
+        post: operations["createCondition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/endpoints/{endpointId}/rules/{ruleId}/conditions/{conditionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete condition */
+        delete: operations["deleteCondition"];
+        options?: never;
+        head?: never;
+        /** Update condition */
+        patch: operations["updateCondition"];
+        trace?: never;
+    };
+    "/api/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List webhook events */
+        get: operations["listEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get webhook event */
+        get: operations["getEvent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events/{id}/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replay webhook event */
+        post: operations["replayEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events/{id}/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List delivery attempts for event */
+        get: operations["listEventAttempts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/dlq": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List dead-letter queue entries */
+        get: operations["listDlq"];
+        put?: never;
+        post?: never;
+        /** Discard DLQ entries */
+        delete: operations["discardDlq"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/dlq/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replay DLQ entries */
+        post: operations["replayDlq"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -221,59 +657,6 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
-         * Register Request
-         * @description User registration data
-         */
-        RegisterBody: {
-            /**
-             * Format: email
-             * @example john@doe.com
-             */
-            email: string;
-            /**
-             * @description User password (min 12 characters, must include uppercase, lowercase, number, and special character)
-             * @example qwer1234
-             */
-            password: string & (unknown & unknown);
-            /** @example John Doe */
-            name?: string;
-        };
-        /**
-         * Login Request
-         * @description User login credentials
-         */
-        LoginBody: {
-            /**
-             * Format: email
-             * @example john@doe.com
-             */
-            email: string;
-            /** @example qwer1234 */
-            password: string;
-        };
-        /**
-         * Create Todo Body
-         * @description Schema for creating a new todo item
-         */
-        CreateTodoBody: {
-            /** @example Buy groceries */
-            title: string;
-            /** @example Milk, Bread, Eggs */
-            description?: string;
-        };
-        /**
-         * Update Todo Body
-         * @description Schema for updating a todo item
-         */
-        UpdateTodoBody: {
-            /** @example Buy groceries */
-            title?: string;
-            /** @example Milk, Bread, Eggs */
-            description?: string;
-            /** @example false */
-            completed?: boolean;
-        };
-        /**
          * Health Check Response
          * @description Health check response indicating service status
          */
@@ -283,51 +666,237 @@ export interface components {
              * @constant
              */
             status: "ok";
-            /** @example 2026-02-01T14:07:42.545Z */
+            /** @example 2026-05-24T06:49:15.060Z */
             timestamp: string;
             /** @example 123.456 */
             uptime: number;
         };
-        /**
-         * Auth Response
-         * @description Authentication response with user data and JWT token
-         */
-        AuthResponse: {
-            user: {
-                id: string;
-                email: string;
-                name: string | null;
-            };
-            token: string;
+        WebhookReceived: {
+            /** Format: uuid */
+            eventId: string;
+            queued: boolean;
         };
-        /**
-         * User Response
-         * @description User profile data
-         */
-        UserResponse: {
+        AuthMe: {
+            /** Format: uuid */
             id: string;
-            email: string;
-            name: string | null;
+            name: string;
+            keyPrefix: string;
+            isAdmin: boolean;
+        };
+        SetupStatus: {
+            needsSetup: boolean;
+        };
+        SetupResponse: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            keyPrefix: string;
+            key: string;
+        };
+        ApiKey: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            keyPrefix: string;
+            createdBy: string | null;
+            isAdmin: boolean;
+            expiresAt: string | null;
+            lastUsedAt: string | null;
+            enabled: boolean;
+            /** Format: date-time */
             createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
-        /**
-         * Todo Item
-         * @description Schema representing a todo item
-         */
-        Todo: {
-            /** @example 1 */
+        CreateApiKeyResponse: {
+            /** Format: uuid */
             id: string;
-            /** @example user-123 */
-            userId: string;
-            /** @example Buy groceries */
-            title: string;
-            /** @example Milk, Bread, Eggs */
+            name: string;
+            keyPrefix: string;
+            createdBy: string | null;
+            isAdmin: boolean;
+            expiresAt: string | null;
+            lastUsedAt: string | null;
+            enabled: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            key: string;
+        };
+        WebhookEndpoint: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            slug: string;
             description: string | null;
-            /** @example false */
-            completed: boolean;
-            /** @example 2026-02-01T14:07:42.551Z */
+            /** @enum {string} */
+            signingScheme: "none" | "hmac_sha256" | "hmac_sha1" | "stripe" | "github" | "svix" | "custom";
+            signingSecret: string | null;
+            customSignatureHeader: string | null;
+            customSignatureEncoding: ("hex" | "base64" | "hex_prefixed") | null;
+            enabled: boolean;
+            /** Format: date-time */
             createdAt: string;
-            /** @example 2026-02-01T14:07:42.551Z */
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DeliveryTarget: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            endpointId: string;
+            name: string;
+            /** Format: uri */
+            url: string;
+            maxRetries: number;
+            retryBackoffSeconds: number;
+            throttleRps: number | null;
+            /** @enum {string} */
+            outboundSigningScheme: "none" | "hmac_sha256" | "hmac_sha1";
+            outboundSigningSecret: string | null;
+            headers: {
+                [key: string]: string;
+            } | null;
+            enabled: boolean;
+            isTest: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        TestReceiver: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            endpointId: string;
+            /** Format: uuid */
+            targetId: string;
+            token: string;
+            name: string;
+            url: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        TestReceiverRequest: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            receiverId: string;
+            method: string;
+            headers: {
+                [key: string]: string;
+            };
+            body: string;
+            /** Format: date-time */
+            receivedAt: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SendTestResult: {
+            /** Format: uuid */
+            eventId: string;
+            /** Format: uuid */
+            endpointId: string;
+            method: string;
+            matchedRuleId: string | null;
+            signatureValid: boolean | null;
+            dropped: boolean;
+            /** Format: date-time */
+            receivedAt: string;
+        };
+        FilterRuleWithConditions: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            endpointId: string;
+            name: string;
+            /** @enum {string} */
+            logicOperator: "AND" | "OR";
+            priority: number;
+            dropOnMatch: boolean;
+            enabled: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            conditions: components["schemas"]["FilterCondition"][];
+        };
+        FilterCondition: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            ruleId: string;
+            /** @enum {string} */
+            field: "header" | "body" | "query" | "method" | "source_ip";
+            fieldKey: string | null;
+            /** @enum {string} */
+            operator: "eq" | "neq" | "contains" | "not_contains" | "starts_with" | "ends_with" | "regex" | "exists" | "not_exists";
+            value: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        FilterRule: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            endpointId: string;
+            name: string;
+            /** @enum {string} */
+            logicOperator: "AND" | "OR";
+            priority: number;
+            dropOnMatch: boolean;
+            enabled: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        WebhookEvent: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            endpointId: string;
+            method: string;
+            headers: {
+                [key: string]: string;
+            };
+            body: string;
+            sourceIp: string | null;
+            matchedRuleId: string | null;
+            signatureValid: boolean | null;
+            /** Format: date-time */
+            receivedAt: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        DeliveryAttempt: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            eventId: string;
+            /** Format: uuid */
+            targetId: string;
+            status: string;
+            attemptNumber: number;
+            nextRetryAt: string | null;
+            responseStatus: number | null;
+            responseBody: string | null;
+            responseLatencyMs: number | null;
+            errorMessage: string | null;
+            isReplay: boolean;
+            originalAttemptId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
             updatedAt: string;
         };
         /** @description Bad Request Error Response */
@@ -344,24 +913,6 @@ export interface components {
                 message: string;
             }[];
         };
-        /** @description Unauthorized Error Response */
-        UnauthorizedErrorResponse: {
-            /** @description Error message */
-            message: string;
-            /** @constant */
-            code: "UNAUTHORIZED";
-            /** @description Additional error details */
-            details?: unknown;
-        };
-        /** @description Conflict Error Response */
-        ConflictErrorResponse: {
-            /** @description Error message */
-            message: string;
-            /** @constant */
-            code: "CONFLICT";
-            /** @description Conflict details */
-            details?: string | Record<string, never>;
-        };
         /** @description Internal Server Error Response */
         InternalServerErrorResponse: {
             /** @description Error message */
@@ -376,6 +927,15 @@ export interface components {
             message: string;
             /** @description Error code */
             code: string;
+            /** @description Additional error details */
+            details?: unknown;
+        };
+        /** @description Unauthorized Error Response */
+        UnauthorizedErrorResponse: {
+            /** @description Error message */
+            message: string;
+            /** @constant */
+            code: "UNAUTHORIZED";
             /** @description Additional error details */
             details?: unknown;
         };
@@ -396,6 +956,15 @@ export interface components {
             code: "NOT_FOUND";
             /** @description Additional error details */
             details?: unknown;
+        };
+        /** @description Conflict Error Response */
+        ConflictErrorResponse: {
+            /** @description Error message */
+            message: string;
+            /** @constant */
+            code: "CONFLICT";
+            /** @description Conflict details */
+            details?: string | Record<string, never>;
         };
     };
     responses: never;
@@ -561,18 +1130,16 @@ export interface operations {
             };
         };
     };
-    register: {
+    receiveWebhook: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                slug: string;
+            };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterBody"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description 200 response */
             200: {
@@ -580,46 +1147,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuthResponse"];
-                };
-            };
-            /** @description Bad Request - Invalid input or validation failed */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "message": "Validation failed",
-                     *       "code": "BAD_REQUEST",
-                     *       "details": [
-                     *         {
-                     *           "path": [
-                     *             "email"
-                     *           ],
-                     *           "message": "Invalid email format"
-                     *         }
-                     *       ]
-                     *     }
-                     */
-                    "application/json": components["schemas"]["BadRequestErrorResponse"];
-                };
-            };
-            /** @description Conflict - Resource already exists or state conflict */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "message": "Resource already exists",
-                     *       "code": "CONFLICT",
-                     *       "details": "A user with this email already exists"
-                     *     }
-                     */
-                    "application/json": components["schemas"]["ConflictErrorResponse"];
+                    "application/json": components["schemas"]["WebhookReceived"];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -649,7 +1177,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["LoginBody"];
+                "application/json": {
+                    key: string;
+                };
             };
         };
         responses: {
@@ -659,7 +1189,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuthResponse"];
+                    "application/json": components["schemas"]["AuthMe"];
                 };
             };
             /** @description Bad Request - Invalid input or validation failed */
@@ -685,15 +1215,6 @@ export interface operations {
                     "application/json": components["schemas"]["BadRequestErrorResponse"];
                 };
             };
-            /** @description Invalid credentials */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
-                };
-            };
             /** @description Internal Server Error - Unexpected server error */
             500: {
                 headers: {
@@ -712,7 +1233,7 @@ export interface operations {
             };
         };
     };
-    getCurrentUser: {
+    logout: {
         parameters: {
             query?: never;
             header?: never;
@@ -727,22 +1248,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponse"];
-                };
-            };
-            /** @description Unauthorized - Invalid or missing token hahah */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "message": "Authentication required",
-                     *       "code": "UNAUTHORIZED"
-                     *     }
-                     */
-                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
+                    "application/json": {
+                        ok: boolean;
+                    };
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -763,14 +1271,9 @@ export interface operations {
             };
         };
     };
-    listTodos: {
+    getMe: {
         parameters: {
-            query?: {
-                /** @description Filter todos by completion status */
-                completed?: string;
-                /** @description Maximum number of todos to return */
-                limit?: string;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -783,45 +1286,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Todo"][];
-                };
-            };
-            /** @description Bad Request - Invalid input or validation failed */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "message": "Validation failed",
-                     *       "code": "BAD_REQUEST",
-                     *       "details": [
-                     *         {
-                     *           "path": [
-                     *             "email"
-                     *           ],
-                     *           "message": "Invalid email format"
-                     *         }
-                     *       ]
-                     *     }
-                     */
-                    "application/json": components["schemas"]["BadRequestErrorResponse"];
-                };
-            };
-            /** @description Unauthorized - Authentication required or failed */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "message": "Authentication required",
-                     *       "code": "UNAUTHORIZED"
-                     *     }
-                     */
-                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
+                    "application/json": components["schemas"]["AuthMe"];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -842,7 +1307,43 @@ export interface operations {
             };
         };
     };
-    createTodo: {
+    getSetupStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SetupStatus"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    runSetup: {
         parameters: {
             query?: never;
             header?: never;
@@ -851,7 +1352,10 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateTodoBody"];
+                "application/json": {
+                    /** @default Admin */
+                    name?: string;
+                };
             };
         };
         responses: {
@@ -861,7 +1365,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Todo"];
+                    "application/json": components["schemas"]["SetupResponse"];
                 };
             };
             /** @description Bad Request - Invalid input or validation failed */
@@ -887,19 +1391,40 @@ export interface operations {
                     "application/json": components["schemas"]["BadRequestErrorResponse"];
                 };
             };
-            /** @description Unauthorized - Authentication required or failed */
-            401: {
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     /**
                      * @example {
-                     *       "message": "Authentication required",
-                     *       "code": "UNAUTHORIZED"
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    listApiKeys: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKey"][];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -920,7 +1445,220 @@ export interface operations {
             };
         };
     };
-    getTodo: {
+    createApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    /** @default false */
+                    isAdmin?: boolean;
+                    createdBy?: string;
+                    /** Format: date-time */
+                    expiresAt?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateApiKeyResponse"];
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteApiKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    listEndpoints: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookEndpoint"][];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    createEndpoint: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    slug: string;
+                    description?: string;
+                    /**
+                     * @default none
+                     * @enum {string}
+                     */
+                    signingScheme?: "none" | "hmac_sha256" | "hmac_sha1" | "stripe" | "github" | "svix" | "custom";
+                    signingSecret?: string;
+                    customSignatureHeader?: string;
+                    /** @enum {string} */
+                    customSignatureEncoding?: "hex" | "base64" | "hex_prefixed";
+                    /** @default true */
+                    enabled?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookEndpoint"];
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    getEndpoint: {
         parameters: {
             query?: never;
             header?: never;
@@ -937,22 +1675,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Todo"];
-                };
-            };
-            /** @description Unauthorized - Authentication required or failed */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    /**
-                     * @example {
-                     *       "message": "Authentication required",
-                     *       "code": "UNAUTHORIZED"
-                     *     }
-                     */
-                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
+                    "application/json": components["schemas"]["WebhookEndpoint"];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -973,7 +1696,36 @@ export interface operations {
             };
         };
     };
-    updateTodo: {
+    deleteEndpoint: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    updateEndpoint: {
         parameters: {
             query?: never;
             header?: never;
@@ -984,7 +1736,22 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateTodoBody"];
+                "application/json": {
+                    name?: string;
+                    slug?: string;
+                    description?: string;
+                    /**
+                     * @default none
+                     * @enum {string}
+                     */
+                    signingScheme?: "none" | "hmac_sha256" | "hmac_sha1" | "stripe" | "github" | "svix" | "custom";
+                    signingSecret?: string;
+                    customSignatureHeader?: string;
+                    /** @enum {string} */
+                    customSignatureEncoding?: "hex" | "base64" | "hex_prefixed";
+                    /** @default true */
+                    enabled?: boolean;
+                };
             };
         };
         responses: {
@@ -994,7 +1761,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Todo"];
+                    "application/json": components["schemas"]["WebhookEndpoint"];
                 };
             };
             /** @description Bad Request - Invalid input or validation failed */
@@ -1020,19 +1787,42 @@ export interface operations {
                     "application/json": components["schemas"]["BadRequestErrorResponse"];
                 };
             };
-            /** @description Unauthorized - Authentication required or failed */
-            401: {
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     /**
                      * @example {
-                     *       "message": "Authentication required",
-                     *       "code": "UNAUTHORIZED"
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    listTargets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryTarget"][];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */
@@ -1053,7 +1843,1087 @@ export interface operations {
             };
         };
     };
-    deleteTodo: {
+    createTarget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    /** Format: uri */
+                    url: string;
+                    /** @default 3 */
+                    maxRetries?: number;
+                    /** @default 60 */
+                    retryBackoffSeconds?: number;
+                    throttleRps?: number;
+                    /**
+                     * @default none
+                     * @enum {string}
+                     */
+                    outboundSigningScheme?: "none" | "hmac_sha256" | "hmac_sha1";
+                    outboundSigningSecret?: string;
+                    headers?: {
+                        [key: string]: string;
+                    };
+                    /** @default true */
+                    enabled?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryTarget"];
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    getTarget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryTarget"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteTarget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    updateTarget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name?: string;
+                    /** Format: uri */
+                    url?: string;
+                    /** @default 3 */
+                    maxRetries?: number;
+                    /** @default 60 */
+                    retryBackoffSeconds?: number;
+                    throttleRps?: number;
+                    /**
+                     * @default none
+                     * @enum {string}
+                     */
+                    outboundSigningScheme?: "none" | "hmac_sha256" | "hmac_sha1";
+                    outboundSigningSecret?: string;
+                    headers?: {
+                        [key: string]: string;
+                    };
+                    /** @default true */
+                    enabled?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryTarget"];
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    listTestReceivers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestReceiver"][];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    createTestReceiver: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestReceiver"];
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteTestReceiver: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                receiverId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    listTestReceiverRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                receiverId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestReceiverRequest"][];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    clearTestReceiverRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                receiverId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    sendTestWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @default {} */
+                    body?: string;
+                    headers?: {
+                        [key: string]: string;
+                    };
+                    /**
+                     * @default POST
+                     * @enum {string}
+                     */
+                    method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+                };
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SendTestResult"];
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    listRules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilterRuleWithConditions"][];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    createRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name: string;
+                    /**
+                     * @default AND
+                     * @enum {string}
+                     */
+                    logicOperator?: "AND" | "OR";
+                    /** @default 0 */
+                    priority?: number;
+                    /** @default false */
+                    dropOnMatch?: boolean;
+                    /** @default true */
+                    enabled?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilterRule"];
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    getRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                ruleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilterRuleWithConditions"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                ruleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    updateRule: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                ruleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    name?: string;
+                    /**
+                     * @default AND
+                     * @enum {string}
+                     */
+                    logicOperator?: "AND" | "OR";
+                    /** @default 0 */
+                    priority?: number;
+                    /** @default false */
+                    dropOnMatch?: boolean;
+                    /** @default true */
+                    enabled?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilterRule"];
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    listConditions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                ruleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilterCondition"][];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    createCondition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                ruleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    field: "header" | "body" | "query" | "method" | "source_ip";
+                    fieldKey?: string;
+                    /** @enum {string} */
+                    operator: "eq" | "neq" | "contains" | "not_contains" | "starts_with" | "ends_with" | "regex" | "exists" | "not_exists";
+                    value?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilterCondition"];
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    deleteCondition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                ruleId: string;
+                conditionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    updateCondition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                endpointId: string;
+                ruleId: string;
+                conditionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    field?: "header" | "body" | "query" | "method" | "source_ip";
+                    fieldKey?: string;
+                    /** @enum {string} */
+                    operator?: "eq" | "neq" | "contains" | "not_contains" | "starts_with" | "ends_with" | "regex" | "exists" | "not_exists";
+                    value?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FilterCondition"];
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    listEvents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        events: components["schemas"]["WebhookEvent"][];
+                        total: number;
+                        limit: number;
+                        offset: number;
+                    };
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    getEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookEvent"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    replayEvent: {
         parameters: {
             query?: never;
             header?: never;
@@ -1071,23 +2941,221 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        message: string;
+                        queued: boolean;
+                        attemptCount: number;
                     };
                 };
             };
-            /** @description Unauthorized - Authentication required or failed */
-            401: {
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     /**
                      * @example {
-                     *       "message": "Authentication required",
-                     *       "code": "UNAUTHORIZED"
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
                      *     }
                      */
-                    "application/json": components["schemas"]["UnauthorizedErrorResponse"];
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    listEventAttempts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown[];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    listDlq: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        attempts: components["schemas"]["DeliveryAttempt"][];
+                        total: number;
+                    };
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    discardDlq: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        discarded: number;
+                    };
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
+                };
+            };
+            /** @description Internal Server Error - Unexpected server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Internal server error",
+                     *       "code": "INTERNAL_ERROR",
+                     *       "details": "Stack trace or error details for debugging"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["InternalServerErrorResponse"];
+                };
+            };
+        };
+    };
+    replayDlq: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description 200 response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        replayed: number;
+                        errors: number;
+                    };
+                };
+            };
+            /** @description Bad Request - Invalid input or validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "message": "Validation failed",
+                     *       "code": "BAD_REQUEST",
+                     *       "details": [
+                     *         {
+                     *           "path": [
+                     *             "email"
+                     *           ],
+                     *           "message": "Invalid email format"
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["BadRequestErrorResponse"];
                 };
             };
             /** @description Internal Server Error - Unexpected server error */

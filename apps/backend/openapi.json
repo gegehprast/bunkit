@@ -1,9 +1,9 @@
 {
     "openapi": "3.1.0",
     "info": {
-        "title": "BunKit API",
+        "title": "hookitup API",
         "version": "0.0.1",
-        "description": "API documentation for BunKit - A modern HTTP and WebSocket backend built with Bun",
+        "description": "API documentation for hookitup - Webhook Gateway & Filter",
         "contact": {
             "name": "API Support"
         },

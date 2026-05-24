@@ -3,7 +3,7 @@ import { createRoute } from "@bunkit/server"
 /**
  * Home route
  */
-createRoute("GET", "/")
+createRoute("GET", "/api")
   .openapi({
     operationId: "home",
     summary: "Home page",
@@ -17,7 +17,7 @@ createRoute("GET", "/")
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BunKit API</title>
+  <title>hookitup API</title>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -41,11 +41,11 @@ createRoute("GET", "/")
   </style>
 </head>
 <body>
-  <h1>🚀 BunKit API</h1>
-  <p>Production-ready HTTP API built with BunKit</p>
+  <h1>🪝 hookitup</h1>
+  <p>Webhook Gateway & Filter</p>
   <div class="links">
-    <a href="/docs">API Documentation</a>
-    <a href="/openapi.json">OpenAPI Spec</a>
+    <a href="/api/docs">API Documentation</a>
+    <a href="/api/openapi.json">OpenAPI Spec</a>
     <a href="/api/health">Health Check</a>
   </div>
 </body>
