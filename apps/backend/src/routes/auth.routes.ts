@@ -1,5 +1,4 @@
-import { createRoute } from "@bunkit/server"
-import { UnauthorizedErrorResponseSchema } from "node_modules/@bunkit/server/src/core/standard-errors"
+import { createRoute, UnauthorizedErrorResponseSchema } from "@bunkit/server"
 import { z } from "zod"
 import {
   generateToken,
