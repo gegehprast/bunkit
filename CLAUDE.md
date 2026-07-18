@@ -2,6 +2,14 @@
 
 BunKit is a project that aims to be a production-ready monorepo template for building HTTP APIs and WebSocket backends with Bun, TypeScript, and PostgreSQL.
 
+## Project Layout
+
+- `apps/backend` — HTTP/WebSocket API (`src/`), tests in `tests/` (see Testing below)
+- `apps/frontend` — reference React 19 + Vite + TailwindCSS frontend (example only; safe to replace or delete)
+- `packages/server` (`@bunkit/server`) — the type-safe HTTP/WebSocket framework built on `Bun.serve`
+- `packages/result` (`@bunkit/result`) — the `Result<T, E>` implementation used everywhere
+- Workspace uses Bun's `catalog:` feature in the root `package.json` for shared dependency versions
+
 ## Bun Runtime (MANDATORY)
 
 **You MUST use Bun, not Node.js:**
@@ -17,12 +25,12 @@ BunKit is a project that aims to be a production-ready monorepo template for bui
 
 **Always prefer Bun's native APIs over npm packages:**
 
-- ✅ `bun:sqlite` for SQLite — Never use `better-sqlite3`
-- ✅ `Bun.redis` for Redis — Never use `ioredis`
 - ✅ `Bun.file` for file handling — Never use `fs` or `fs-extra`
-- ✅ `Bun.serve` for HTTP server — Never use `express`, `koa`, or `fastify`
-- ✅ `Bun.webSocket` for WebSockets — Never use `ws` or `socket.io`
+- ✅ HTTP and WebSocket routes go through [`@bunkit/server`](packages/server) (built on `Bun.serve`) — never add `express`, `koa`, `fastify`, `ws`, or `socket.io`
+- ✅ If SQLite is ever needed, use `bun:sqlite` — never `better-sqlite3`
 - And so on...
+
+Note: this project's database is PostgreSQL via Drizzle ORM (`postgres` package), not SQLite — the `bun:sqlite` guidance only applies if a use case for embedded/local SQLite comes up.
 
 ## Type Safety (MANDATORY)
 - **Avoid `any` at all cost**
@@ -79,7 +87,7 @@ if (result.isOk()) {
 ## Class Access Modifiers (MANDATORY)
 **Always use explicit access modifiers in classes, even for public:**
 
-```typescripttypescript
+```typescript
 // ✅ CORRECT: Explicit access modifiers
 class UserService {
   public constructor(private userRepository: UserRepository) {}
@@ -97,17 +105,15 @@ class UserService {
 ```
 
 ## Scripts (MANDATORY)
-**Most scripts can be run via `bun run <script>` from the root directory:**
-
-Check the root `package.json` for available scripts. Always run scripts from the root as much as possible.
+**Always run scripts via `bun run <script>` from the root directory** — do not `cd` into an app/package first. Check the root `package.json` for the full list (e.g. `backend:dev`, `backend:test`, `backend:typecheck`, `backend:db:migrate`, `frontend:dev`, `result:test`, `server:test`).
 
 ## Testing (MANDATORY)
 
 ### Writing Tests
 
-**Test Organization:**
-- Unit tests are in `apps/backend/tests/` mirroring the src structure
-- Integration tests are in `apps/backend/tests/integration/`
+**Test Organization (mirrors `apps/backend/src`):**
+- `apps/backend/tests/` — unit tests, organized by domain (`core/`, `db/`, `auth/`, `middlewares/`)
+- `apps/backend/tests/integration/` — integration tests, including HTTP route and WebSocket tests (`integration/routes/`)
 - Database tests use the test database configured in `.env.test`
 - All tests use the Result pattern for error handling
 
@@ -119,10 +125,12 @@ Check the root `package.json` for available scripts. Always run scripts from the
 
 ### Running Tests
 
-**IMPORTANT:** Tests must be run from each app or package directory:
+Preferred: run `bun test` from the project root — it runs across all workspaces (backend, frontend, `packages/result`, `packages/server`) in one go, no `cd` needed.
 
 ```bash
-# From project root
-cd apps/backend
-bun test
+bun test                # all workspaces
+bun test apps/backend   # scope to one workspace/path
+bun test -t "some name" # filter by test name
 ```
+
+The root scripts (`bun run backend:test`, `bun run frontend:test`, `bun run result:test`, `bun run server:test`) are equivalent but scoped to a single workspace.
