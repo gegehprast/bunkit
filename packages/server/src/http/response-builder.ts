@@ -183,12 +183,58 @@ export function html(content: string, status = 200): Response {
   })
 }
 
+/**
+ * Parses a single-range `Range` header value (`bytes=start-end`,
+ * `bytes=start-`, or the suffix form `bytes=-N`) against a known file
+ * size. Returns `null` if the header is absent/malformed/unsatisfiable —
+ * callers should respond `416` in that case (except a missing header,
+ * which just means "serve the whole file").
+ */
+function parseRange(
+  rangeHeader: string | null | undefined,
+  size: number,
+): { start: number; end: number } | null | undefined {
+  if (!rangeHeader) {
+    return undefined
+  }
+
+  const match = /^bytes=(\d*)-(\d*)$/.exec(rangeHeader.trim())
+  if (!match || (match[1] === "" && match[2] === "")) {
+    return null
+  }
+
+  let start: number
+  let end: number
+  if (match[1] === "") {
+    // Suffix range, e.g. "bytes=-500" — last 500 bytes of the file
+    const suffixLength = Number(match[2])
+    start = Math.max(size - suffixLength, 0)
+    end = size - 1
+  } else {
+    start = Number(match[1])
+    end = match[2] === "" ? size - 1 : Math.min(Number(match[2]), size - 1)
+  }
+
+  if (
+    Number.isNaN(start) ||
+    Number.isNaN(end) ||
+    start < 0 ||
+    start > end ||
+    start >= size
+  ) {
+    return null
+  }
+
+  return { start, end }
+}
+
 export async function file(
   path: string,
   contentType?: string,
+  request?: Request,
 ): Promise<Response> {
-  const file = Bun.file(path)
-  const exists = await file.exists()
+  const bunFile = Bun.file(path)
+  const exists = await bunFile.exists()
 
   if (!exists) {
     return new Response(
@@ -200,12 +246,33 @@ export async function file(
     )
   }
 
-  const headers: Record<string, string> = {}
+  const size = bunFile.size
+  const headers: Record<string, string> = { "Accept-Ranges": "bytes" }
   if (contentType) {
     headers["Content-Type"] = contentType
   }
 
-  return new Response(file, { headers })
+  const range = parseRange(request?.headers.get("range"), size)
+
+  if (range === null) {
+    return new Response(null, {
+      status: 416,
+      headers: { "Content-Range": `bytes */${size}` },
+    })
+  }
+
+  if (range === undefined) {
+    return new Response(bunFile, { headers })
+  }
+
+  return new Response(bunFile.slice(range.start, range.end + 1), {
+    status: 206,
+    headers: {
+      ...headers,
+      "Content-Range": `bytes ${range.start}-${range.end}/${size}`,
+      "Content-Length": String(range.end - range.start + 1),
+    },
+  })
 }
 
 export function stream(
@@ -263,6 +330,8 @@ class ResponseBuilderImpl implements ResponseBuilder {
   private readonly _cookies: Cookie[] = []
   private _customStatus: number | undefined
   private _customHeaders: Record<string, string> = {}
+
+  public constructor(private readonly request?: Request) {}
 
   private applyModifiers(response: Response): Response {
     let result = response
@@ -447,7 +516,7 @@ class ResponseBuilderImpl implements ResponseBuilder {
   }
 
   public async file(path: string, contentType?: string): Promise<Response> {
-    return this.applyModifiers(await file(path, contentType))
+    return this.applyModifiers(await file(path, contentType, this.request))
   }
 
   public stream(readable: ReadableStream, contentType?: string): Response {
@@ -475,7 +544,12 @@ class ResponseBuilderImpl implements ResponseBuilder {
 
 /**
  * Creates a new ResponseBuilder instance for use in route handlers.
+ *
+ * `request` is threaded through internally so `.file()` can honor an
+ * incoming `Range` header (see `file()`'s Range/206 support) — the public
+ * `.file(path, contentType)` call signature in route handlers is
+ * unaffected, this is plumbing only.
  */
-export function createResponseBuilder(): ResponseBuilder {
-  return new ResponseBuilderImpl()
+export function createResponseBuilder(request?: Request): ResponseBuilder {
+  return new ResponseBuilderImpl(request)
 }

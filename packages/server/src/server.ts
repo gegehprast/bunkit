@@ -135,7 +135,7 @@ export class Server implements IServer {
             }
 
             if (this.middlewares.length > 0) {
-              const res = createResponseBuilder()
+              const res = createResponseBuilder(request)
               const middlewareArgs = createMiddlewareArgs(
                 request,
                 {},

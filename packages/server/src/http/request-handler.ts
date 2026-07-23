@@ -114,7 +114,7 @@ export async function handleRequest(
   }
 
   // Create response helpers
-  const res = createResponseBuilder()
+  const res = createResponseBuilder(request)
 
   // Create context object
   const ctx: Context = {}
