@@ -37,6 +37,9 @@ import {
   generateWebSocketTypes,
 } from "./websocket/websocket-type-generator"
 
+// Bun.serve's own documented default for maxRequestBodySize
+const BUN_DEFAULT_MAX_REQUEST_BODY_SIZE = 128 * 1024 * 1024
+
 /**
  * HTTP server with optional WebSocket support
  */
@@ -115,6 +118,17 @@ export class Server implements IServer {
         port: this.port,
         hostname: this.host,
         development: this.development,
+        // Only ever RAISE Bun's own native transport-level cap above its
+        // built-in 128MB default, never lower it — `options.maxRequestBodySize`
+        // is also enforced separately (and first, for normal-sized bodies)
+        // by request-handler.ts's own friendlier "too large" 400 response.
+        // If Bun's native cap were set to match a small app-level limit, Bun
+        // would reject the request itself with a raw 413 before that nicer
+        // error ever gets a chance to run.
+        maxRequestBodySize: Math.max(
+          this.options.maxRequestBodySize ?? BUN_DEFAULT_MAX_REQUEST_BODY_SIZE,
+          BUN_DEFAULT_MAX_REQUEST_BODY_SIZE,
+        ),
         fetch: async (request: Request, bunServer): Promise<Response> => {
           const isWsUpgrade =
             request.headers.get("upgrade")?.toLowerCase() === "websocket"
