@@ -87,10 +87,27 @@ export async function parseBody(
 
   const contentType = request.headers.get("content-type") ?? ""
 
+  // Bodiless requests (GET/HEAD/OPTIONS, or an explicit empty body) never
+  // fail parsing just because a client sent a JSON content-type.
+  if (
+    request.method === "GET" ||
+    request.method === "HEAD" ||
+    request.method === "OPTIONS" ||
+    contentLength === "0"
+  ) {
+    return ok({})
+  }
+
   try {
+    // Multipart is left for the handler to read via req.formData().
+    if (contentType.includes("multipart/form-data")) {
+      return ok({})
+    }
+
     if (contentType.includes("application/json")) {
-      const data = await request.json()
-      return ok(data)
+      const text = await request.text()
+      if (text.trim() === "") return ok({})
+      return ok(JSON.parse(text))
     }
 
     if (contentType.includes("application/x-www-form-urlencoded")) {

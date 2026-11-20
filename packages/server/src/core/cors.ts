@@ -9,6 +9,14 @@ export function createCorsMiddleware(options: CorsOptions): MiddlewareFn {
     const { req } = context
     const origin = req.headers.get("origin")
 
+    // Same-origin requests aren't cross-origin: never block them. Browsers
+    // send an Origin header for e.g. <script type="module" crossorigin>, so
+    // without this an app served from an address missing in the allow-list
+    // (a LAN or VPN IP) can't load its own assets.
+    if (origin && isSameOrigin(origin, req)) {
+      return context.next()
+    }
+
     // Check if origin is allowed
     if (origin && !isOriginAllowed(origin, options.origin)) {
       return new Response("CORS: Origin not allowed", { status: 403 })
@@ -28,6 +36,19 @@ export function createCorsMiddleware(options: CorsOptions): MiddlewareFn {
     }
 
     return response
+  }
+}
+
+/**
+ * True when the Origin header points at the host the request was sent to.
+ * Uses the Host header so it also holds behind proxies that preserve it.
+ */
+export function isSameOrigin(origin: string, req: Request): boolean {
+  try {
+    const host = req.headers.get("host") ?? new URL(req.url).host
+    return new URL(origin).host === host
+  } catch {
+    return false
   }
 }
 

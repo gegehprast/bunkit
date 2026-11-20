@@ -141,6 +141,29 @@ describe("CORS", () => {
   })
 
   describe("Origin validation", () => {
+    test("same-origin requests are never blocked", async () => {
+      createRoute("GET", "/assets/app.js").handler(({ res }) => res.text("ok"))
+
+      server = createServer({
+        port: 3419,
+        cors: { origin: "http://allowed.com" },
+      })
+      await server.start()
+
+      // e.g. <script type="module" crossorigin> served from a VPN/LAN address
+      // that isn't in the allow-list.
+      const sameOrigin = await fetch("http://127.0.0.1:3419/assets/app.js", {
+        headers: { Origin: "http://127.0.0.1:3419" },
+      })
+      expect(sameOrigin.status).toBe(200)
+      expect(sameOrigin.headers.get("access-control-allow-origin")).toBeNull()
+
+      const crossOrigin = await fetch("http://127.0.0.1:3419/assets/app.js", {
+        headers: { Origin: "http://forbidden.com" },
+      })
+      expect(crossOrigin.status).toBe(403)
+    })
+
     test("should allow all origins with wildcard", async () => {
       createRoute("GET", "/api/data").handler(({ res }) =>
         res.ok({ data: "test" }),
